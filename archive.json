@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-12T01:01:14.817234+00:00",
+  "timestamp": "2025-01-14T00:53:30.980523+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -811,7 +811,7 @@
       "labels": [],
       "body": "- The main change here is to have each log entry contain the time it was created. This provides a stronger authentication of time compared to just signing it into the tree head and prevents certain classes of attacks.\r\n- Introduces the concept of a \"maximum lifetime\" for log entries. Essentially, if a log entry is too old, users will be able to see that and guide their search away from old portions of the tree, allowing them to be pruned.\r\n- Introduces the concept of a \"reasonable monitoring window\". This is the opposite of the \"maximum lifetime\" idea -- it allows users to tell when certain log entries have been added so recently that other users likely haven't had time to vet their contents. When users see that information has been added within the reasonable monitoring window, they maintain extra state about it to prevent/detect potential attacks. Similarly, when information is older than the reasonable monitoring window, it is taken more at face value.",
       "createdAt": "2024-12-18T23:02:49Z",
-      "updatedAt": "2025-01-02T11:03:15Z",
+      "updatedAt": "2025-01-13T12:29:22Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "a610396bea5711d8c2975d2c4f41402c6a249d88",
@@ -859,6 +859,278 @@
               "body": "Unix epoch?",
               "createdAt": "2025-01-02T10:58:18Z",
               "updatedAt": "2025-01-02T11:03:15Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86XwGLf",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I like the changes and think they're a great addition. I have left some comments, but they are all on details.",
+          "createdAt": "2025-01-13T08:20:18Z",
+          "updatedAt": "2025-01-13T12:29:22Z",
+          "comments": [
+            {
+              "originalPosition": 217,
+              "body": "I find it unclear what \"the result\" exactly refers to here.",
+              "createdAt": "2025-01-13T08:20:18Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 251,
+              "body": "Suggestion to replace the \"The full subtrees...\" sentence:\r\n> Full subtrees are the largest subtrees with size $2^n-1$ for some $n$.\r\n\r\nAs you define it now, a full subtree has all its subtrees as full subtrees too. I guess you don't want that.",
+              "createdAt": "2025-01-13T08:24:42Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 246,
+              "body": "Unclear to me: What state does the user track overall? Here you say: \"about the last tree head they've observed.\" It might be more clear to say:\r\n> Clients retain the last tree head they've observed alongside some metadata, namely: [...]\r\n\r\nThis would make it clearer that this is all the user stores. (Additionally, I distinguished between client and user. But not sure you want that language.)",
+              "createdAt": "2025-01-13T08:28:03Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 264,
+              "body": "```suggestion\r\n  direct path in the new implicit binary search tree.\r\n```",
+              "createdAt": "2025-01-13T08:44:14Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 380,
+              "body": "I would break the paragraph before the \"However.\" I missed the last sentence when first reading the paragraph. I took the paragraph as \"example of how the binary ladder works,\" but the last sentence changes topic. That can be confusing.",
+              "createdAt": "2025-01-13T08:51:10Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 393,
+              "body": "I don't get this. Reads like \"log omits proofs of inclusion [...] where proof of inclusion was already provided.\" Does it omit it or not? Or do you mean that you don't repeat proofs? (One query could contain queries for multiple versions or something similar.)",
+              "createdAt": "2025-01-13T08:53:54Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 396,
+              "body": "I'm not sure whether this explanation adds much. It basically says \"it's fine,\" but doesn't say why. That's not a problem, but maybe saying nothing is better.",
+              "createdAt": "2025-01-13T08:54:43Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 410,
+              "body": "\"Root log entry\" w.r.t. implicit binary search tree? If so, wouldn't it be more simple to say: \"The user may encounter expired log entries when searching the implicit binary search tree\"? Captures both cases. Is it necessary to distinguish root/not-root?",
+              "createdAt": "2025-01-13T08:55:44Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 425,
+              "body": "Similarly to my comment above, it seems like one should be able to generalize the algorithm for both cases. It seems like its something along the lines of:\r\n```py\r\ndef recurse_search(node, search_target):\r\n  if node.matches(search_target):\r\n    return node\r\n  elif node.continue_right(search_target):\r\n    return recurse_search(node.right, search_target)\r\n  else:  # continue left\r\n    if node.expired:\r\n      throw ExpiredError()\r\n    else:\r\n      return recurse_search(node.left, search_target)\r\n```",
+              "createdAt": "2025-01-13T09:01:54Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 456,
+              "body": "I don't understand what \"short of\" means here. Sentence seems clear without that.",
+              "createdAt": "2025-01-13T09:09:08Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 462,
+              "body": "I think the \"largely\" is confusing here. Does it conclude the search or not? I would suggest to say something like:\r\n> Before returning the result, the client must also check some side-conditions, which are [...].",
+              "createdAt": "2025-01-13T09:12:27Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 461,
+              "body": "Seems like there's something missing here.",
+              "createdAt": "2025-01-13T09:14:09Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 472,
+              "body": "How can a binary ladder ever skip the target version?",
+              "createdAt": "2025-01-13T09:15:16Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 481,
+              "body": "```suggestion\r\nentry that contains the target label-version pair. The purpose of\r\n```",
+              "createdAt": "2025-01-13T09:16:53Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 532,
+              "body": "Why does the standard not suggest an algorithm to choose a distinguished log entry? Also, it's unclear to me whether distinguished log entries are defined per client or log and per label or globally.\r\n\r\nPS: Aha. Comes below. Maybe point out here that this will be defined next.\r\n\r\nPPS: From reading the algorithm below, I take that distinguished log entries are defined per log.",
+              "createdAt": "2025-01-13T09:27:00Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 570,
+              "body": "```suggestion\r\nThe algorithm is initially called with these parameters: the\r\n```",
+              "createdAt": "2025-01-13T09:33:44Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 573,
+              "body": "I think it would be clearer to move this before the algorithm definition above. For example, taking the difference in step 2 above and comparing that to RMW wasn't initially sensible to me. It makes sense now that I know you basically start with the difference being the log's lifetime.",
+              "createdAt": "2025-01-13T09:34:24Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 559,
+              "body": "_Technically_, \"right/left timestamp\" is undefined. You defined \"timestamp of a log entry to its left/right.\" Could be taken as right/left timestamp of the log entry's respective children.",
+              "createdAt": "2025-01-13T09:35:28Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 568,
+              "body": "I don't understand these two steps. Isn't the implicit binary search tree balanced s.t. if a node has a right child, it will also have a left child? If that is the case, doesn't this algorithm simply go to the left-most leaf?\r\n\r\nPS: Okay. I think I get it now. \"Assert\" means you basically create a list of distinguished entries. I took steps 3. and 4. as \"return recurse(...)\". It might make sense to make it explicit that this creates a list of distinguished log entries.",
+              "createdAt": "2025-01-13T09:38:09Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 560,
+              "body": "I think \"assert\" is a confusing word as I take it to mean \"check.\" (As an assert in C++.) But if you agree with my comment below, I guess this will be changed anyways.",
+              "createdAt": "2025-01-13T09:41:53Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 592,
+              "body": "I think this could be linked more clearly to the introduction of the monitoring section. Could be pointed out that this algorithm is intended to be run by non-owners to check that the server doesn't conceal what they've shown the user.",
+              "createdAt": "2025-01-13T09:53:57Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 626,
+              "body": "I would say it *is* equivalent and thus shouldn't be repeated. I think you defined this as a fixed-version search. So why re-explain it here?",
+              "createdAt": "2025-01-13T09:59:18Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 291,
+              "body": "I think it's a bit confusing to name this section \"Fixed-Version Searches\" when the \"Binary Ladder\" section below first defines the binary ladder in terms of searching for the most recent version of a label. Alternatively, you could call this section \"Version Searches\" and then provide two algorithms for fixed- and greatest-version search. I think the latter suggestion would be clearer as greatest-version search now sits between fixed-version search and monitoring. Why this split?\r\n\r\nPS: Aha. After having read Greatest-Version Search, I understand why the split. Nevertheless, I think it would make sense to rewrite the binary ladder section from the point of view of fixed-version search and make greatest-version search the exception.",
+              "createdAt": "2025-01-13T10:02:40Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 669,
+              "body": "```suggestion\r\n1. Determine if the log entry is distinguished. If so, leave\r\n```",
+              "createdAt": "2025-01-13T10:05:47Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 671,
+              "body": "```suggestion\r\n2. Compute the log entry's direct path in the implicit binary search\r\n```",
+              "createdAt": "2025-01-13T10:06:13Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 674,
+              "body": "Terminate which list?",
+              "createdAt": "2025-01-13T10:07:06Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 675,
+              "body": "Again: What list? (Skipping the rest. I'm a bit lost.)",
+              "createdAt": "2025-01-13T10:07:27Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 726,
+              "body": "Unclear: the greatest version of the label _per subsequent distinguished log entry_? I presume so, but not explicit.",
+              "createdAt": "2025-01-13T10:56:05Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 736,
+              "body": "```suggestion\r\nreceive a binary ladder for all distinguished log entries following the one\r\nthey've advertised. The Transparency Log provides whichever intermediate\r\n```",
+              "createdAt": "2025-01-13T10:57:55Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 763,
+              "body": "Doesn't this contradict what is written in Binary Ladder? There, you get the full binary ladder.",
+              "createdAt": "2025-01-13T11:32:32Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 764,
+              "body": "```suggestion\r\ngreatest version as the target in the rightmost distinguished log entry the root\r\nif there is no distinguished log entry yet.\r\n```\r\n\r\nFind this clearer as \"the search\" was ambiguous. (Prefix tree search (=binary ladder) or log tree search?)",
+              "createdAt": "2025-01-13T11:34:43Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 801,
+              "body": "Doesn't really matter, but could also be seconds. I guess client/server clocks will not be sufficiently synchronized s.t. milliseconds can ever become relevant.",
+              "createdAt": "2025-01-13T11:36:27Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1043,
+              "body": "This sounds like `|timestampes| = |prefix_proofs| + |prefix_roots|`. If so, would it be an option to reflect that in the type? The `CombinedTreeProof` could be an array of structs where each struct has timestamp, and a prefix proof or a prefix root as an or type. Don't know whether the data language permits OR-types, though.\r\n\r\nPS: Aha. Okay. Doesn't seem like that. Seems like `|timestampes| < |prefix_proofs| + |prefix_roots|`.",
+              "createdAt": "2025-01-13T11:48:57Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1052,
+              "body": "What does it mean to \"have an entry in `prefix_proofs`\"? Not quite clear to me.",
+              "createdAt": "2025-01-13T11:51:15Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1054,
+              "body": "Hm. So repeated prefix proofs are identical. But why not repeat timestamps then, too?",
+              "createdAt": "2025-01-13T11:51:56Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1087,
+              "body": "```suggestion\r\n  - Otherwise, if the log entry's right child has also surpassed its\r\n    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder in\r\n```\r\n\r\nSeems clearer to me this way as it's explicit that bullet point 3 is the else branch of bullet point 2.",
+              "createdAt": "2025-01-13T11:58:17Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1089,
+              "body": "```suggestion\r\n- If the `PrefixProof` from the first log entry containing the label-version\r\n```",
+              "createdAt": "2025-01-13T11:59:06Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1090,
+              "body": "What does \"the label-version pair\" refer to? The target? And what does \"touch\" mean? Doesn't every prefix proof \"touch\" the target as in it shows inclusion/non-inclusion?",
+              "createdAt": "2025-01-13T12:00:26Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1211,
+              "body": "I don't understand why there is a single binary ladder here. Don't we need multiple (for each node on the path in the implicit binary search tree to the leaf)? And aren't those provided in `search`?",
+              "createdAt": "2025-01-13T12:10:34Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 952,
+              "body": "I found this section quite hard to parse, and I don't think I've fully understood it. It started clicking when I arrived at line 1486. You try to define a general data format to accommodate for multiple types of proofs.\r\n\r\nWould it maybe help to first list the use cases (i.e., what is included) and then generalize that into one data structure? The use-cases don't explicitly refer to the fields in the `CombinedTreeProof` data structure anyways.",
+              "createdAt": "2025-01-13T12:17:20Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1254,
+              "body": "What does \"verify\" mean here? I think: check for equality of the hash, no? I think that's short enough s.t. it can be made explicit.",
+              "createdAt": "2025-01-13T12:19:06Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1264,
+              "body": "I think the draft must specify that clients must check that the timestamp the log shows them is sufficiently close to their submission. Otherwise, all that will ever be checked is monotonicity.",
+              "createdAt": "2025-01-13T12:21:56Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
+            },
+            {
+              "originalPosition": 1454,
+              "body": "Again, maybe worth pointing out that \"verify\" means \"check for equality.\"",
+              "createdAt": "2025-01-13T12:27:23Z",
+              "updatedAt": "2025-01-13T12:29:22Z"
             }
           ]
         }
