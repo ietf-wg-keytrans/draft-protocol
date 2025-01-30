@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-01-28T00:54:31.092805+00:00",
+  "timestamp": "2025-01-30T00:53:36.166055+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -804,24 +804,26 @@
       "id": "PR_kwDOLrnaA86FtSCc",
       "title": "Support for strong authentication of time",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/12",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "- The main change here is to have each log entry contain the time it was created. This provides a stronger authentication of time compared to just signing it into the tree head and prevents certain classes of attacks.\r\n- Introduces the concept of a \"maximum lifetime\" for log entries. Essentially, if a log entry is too old, users will be able to see that and guide their search away from old portions of the tree, allowing them to be pruned.\r\n- Introduces the concept of a \"reasonable monitoring window\". This is the opposite of the \"maximum lifetime\" idea -- it allows users to tell when certain log entries have been added so recently that other users likely haven't had time to vet their contents. When users see that information has been added within the reasonable monitoring window, they maintain extra state about it to prevent/detect potential attacks. Similarly, when information is older than the reasonable monitoring window, it is taken more at face value.",
       "createdAt": "2024-12-18T23:02:49Z",
-      "updatedAt": "2025-01-24T09:38:08Z",
+      "updatedAt": "2025-01-28T17:35:05Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "a610396bea5711d8c2975d2c4f41402c6a249d88",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/time2",
-      "headRefOid": "bc7098fe0fe0b0fd7ced616e36ce9bf8b7b90c76",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "09620ce4f334505aa421236e9c62b916c21ff6a6",
+      "closedAt": "2025-01-28T17:35:04Z",
+      "mergedAt": "2025-01-28T17:35:04Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "115d6722d02f56beaf3acefa0504b2c9dc9545de"
+      },
       "comments": [],
       "reviews": [
         {
@@ -1211,6 +1213,106 @@
               "body": "Ah, makes sense! Still think it'd be beneficial to make it explicit that the algorithm computes a list.",
               "createdAt": "2025-01-24T09:38:08Z",
               "updatedAt": "2025-01-24T09:38:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86ZmciM",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-28T03:02:53Z",
+          "updatedAt": "2025-01-28T03:02:53Z",
+          "comments": [
+            {
+              "originalPosition": 763,
+              "body": "Sorry, what is the contradiction?",
+              "createdAt": "2025-01-28T03:02:53Z",
+              "updatedAt": "2025-01-28T03:02:53Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86Zmd42",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-28T03:11:20Z",
+          "updatedAt": "2025-01-28T03:11:21Z",
+          "comments": [
+            {
+              "originalPosition": 804,
+              "body": "No, these are durations not timestamps",
+              "createdAt": "2025-01-28T03:11:20Z",
+              "updatedAt": "2025-01-28T03:11:21Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86ZmiPw",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-28T03:34:51Z",
+          "updatedAt": "2025-01-28T03:34:51Z",
+          "comments": [
+            {
+              "originalPosition": 1054,
+              "body": "The timestamps will always be the same, but repeated PrefixProofs may (will) be for different indices. So different PrefixProofs are valuable, but repeated timestamps are wasted space",
+              "createdAt": "2025-01-28T03:34:51Z",
+              "updatedAt": "2025-01-28T03:35:17Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86Zml6k",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-28T03:57:58Z",
+          "updatedAt": "2025-01-28T03:57:58Z",
+          "comments": [
+            {
+              "originalPosition": 1254,
+              "body": "Will specify this more clearly in a follow-up PR",
+              "createdAt": "2025-01-28T03:57:58Z",
+              "updatedAt": "2025-01-28T03:57:58Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86ZmmSH",
+          "commit": {
+            "abbreviatedOid": "bc7098f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-01-28T04:00:15Z",
+          "updatedAt": "2025-01-28T04:00:15Z",
+          "comments": [
+            {
+              "originalPosition": 1264,
+              "body": "Verifying that the rightmost timestamp is sufficiently recent is part of verifying \"as if it were a SearchResponse for the most recent version of `label`\"",
+              "createdAt": "2025-01-28T04:00:15Z",
+              "updatedAt": "2025-01-28T04:00:16Z"
             }
           ]
         }
