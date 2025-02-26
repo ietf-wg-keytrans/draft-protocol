@@ -462,7 +462,7 @@ implicit binary search tree. That is $i_{root} = 2^{\lfloor\log_2(n)\rfloor} -
 1$. The left subtree is the implicit binary search tree of size $i_{root}-1$,
 i.e., the implicit binary search tree for all elements with a smaller index than
 the root. The right subtree is the implicit binary search tree of size
-$n-i_{root}$, but offset with $i_{root}$. Initially, these will be all indices
+$n-i_{root}$, but offset with $i_{root}+1$. Initially, these will be all indices
 larger than the root.
 
 Users ensure that log entry timestamps are monotonic by enforcing that the
