@@ -435,9 +435,7 @@ some additional structure on the log's contents.
 
 Intuitively, the leaves of the log tree can be considered a flat array
 representation of a binary tree. This structure is similar to the log tree, but
-distinguished by the fact that not all parent nodes have two children. In this
-representation, "leaf" log entries are stored in even-numbered indices, while
-"intermediate" log entries are stored in odd-numbered indices:
+distinguished by the fact that not all parent nodes have two children.
 
 ~~~ aasvg
                              X
@@ -457,11 +455,15 @@ Index:  0  1  2  3  4  5  6  7  8  9 10 11 12 13
 ~~~
 {: title="A binary tree constructed from 14 entries in a log" }
 
-The index of the root log entry is the greatest power of two, minus one, that is
-less than the size of the log. The index of a log entry's left child is the log
-entry's index minus the greatest power of two that doesn't take the result of the computation out
-of bounds. Similarly, the index of a log entry's right child is the entry's
-index plus the greatest power of two that doesn't take the result of the computation out of bounds.
+The implicit binary search tree containing $n$ entries can be defined
+inductively. The index of the root log entry in the implicit binary search tree
+is the greatest power of two, minus one, that is less than the size of the
+implicit binary search tree. That is $i_{root} = 2^{\lfloor\log_2(n)\rfloor} -
+1$. The left subtree is the implicit binary search tree of size $i_{root}-1$,
+i.e., the implicit binary search tree for all elements with a smaller index than
+the root. The right subtree is the implicit binary search tree of size
+$n-i_{root}$, but offset with $i_{root}$. Initially, these will be all indices
+larger than the root.
 
 Users ensure that log entry timestamps are monotonic by enforcing that the
 structure of this search tree holds. That is, users check that any timestamp
