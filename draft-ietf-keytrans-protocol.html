@@ -3124,8 +3124,8 @@ the label, this version is provided in <code>SearchResponse.version</code>; othe
 field is empty.<a href="#section-11.1-6" class="pilcrow">¶</a></p>
 <p id="section-11.1-7">The <code>inclusion</code> field contains a proof of inclusion for all of the log tree
 leaves where either a search proof was provided in
-<code>CombinedTreeProof.prefix_proofs</code> or the prefix tree root hash was provided
-directly in <code>CombinedTreeProof.prefix_roots</code>. If the user advertised a
+<code>search.prefix_proofs</code> or the prefix tree root hash was provided
+directly in <code>search.prefix_roots</code>. If the user advertised a
 previously-observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
 as a proof of consistency.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
 <p id="section-11.1-8">Users verify a search response by following these steps:<a href="#section-11.1-8" class="pilcrow">¶</a></p>
