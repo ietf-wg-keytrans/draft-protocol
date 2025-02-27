@@ -1480,8 +1480,8 @@ field is empty.
 
 The `inclusion` field contains a proof of inclusion for all of the log tree
 leaves where either a search proof was provided in
-`CombinedTreeProof.prefix_proofs` or the prefix tree root hash was provided
-directly in `CombinedTreeProof.prefix_roots`. If the user advertised a
+`search.prefix_proofs` or the prefix tree root hash was provided
+directly in `search.prefix_roots`. If the user advertised a
 previously-observed tree size in `last`, the proof in `inclusion` also functions
 as a proof of consistency.
 
