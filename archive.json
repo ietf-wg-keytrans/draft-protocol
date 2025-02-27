@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-25T00:57:28.916163+00:00",
+  "timestamp": "2025-02-27T00:57:10.360999+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1317,6 +1317,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 13,
+      "id": "PR_kwDOLrnaA86MrDXD",
+      "title": "New definition of implicit binary search tree",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/13",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I find the \"that doesn't take the computation out of bounds\" definition a bit counterintuitive. I think, a recursive definition is clearer so tried that! Let me know what you think! :)\r\n\r\nAlso, I find the sentence about odd/even numbered nodes confusing. I don't think this observation is necessary anywhere, so I would save our readers' energy.",
+      "createdAt": "2025-02-26T16:20:42Z",
+      "updatedAt": "2025-02-26T16:20:43Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "115d6722d02f56beaf3acefa0504b2c9dc9545de",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "ibst",
+      "headRefOid": "e9bddcffc29fbbc99471862600ddce7e326fe4b6",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
