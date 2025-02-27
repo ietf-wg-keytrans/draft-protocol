@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 1 August 2025                                   28 January 2025
+Expires: 31 August 2025                                 27 February 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 August 2025.
+   This Internet-Draft will expire on 31 August 2025.
 
 Copyright Notice
 
@@ -1137,7 +1137,7 @@ Table of Contents
    struct {
      Configuration config;
      uint64 tree_size;
-     opaque root<Hash.Nh>;
+     opaque root[Hash.Nh];
    } TreeHeadTBS;
 
    The max_ahead and max_behind fields contain the maximum amount of
@@ -1202,7 +1202,7 @@ Table of Contents
    CommitmentValue is specified as:
 
    struct {
-     opaque opening<Nc>;
+     opaque opening[Nc];
      opaque label<0..2^8-1>;
      UpdateValue update;
    } CommitmentValue;
@@ -1238,11 +1238,11 @@ Table of Contents
 
    struct {
      uint64 timestamp;
-     opaque prefix_tree<Hash.Nh>;
+     opaque prefix_tree[Hash.Nh];
    } LogLeaf;
 
    struct {
-     opaque value<Hash.Nh>;
+     opaque value[Hash.Nh];
    } LogParent;
 
    The timestamp field contains the timestamp that the leaf was created
@@ -1275,8 +1275,8 @@ Table of Contents
    The leaf nodes of a prefix tree are serialized as:
 
    struct {
-       opaque vrf_output<VRF.Nh>;
-       opaque commitment<Hash.Nh>;
+       opaque vrf_output[VRF.Nh];
+       opaque commitment[Hash.Nh];
    } PrefixLeaf;
 
    where vrf_output is the VRF output for the label-version pair, VRF.Nh
@@ -1286,7 +1286,7 @@ Table of Contents
    The parent nodes of a prefix tree are serialized as:
 
    struct {
-     opaque value<Hash.Nh>;
+     opaque value[Hash.Nh];
    } PrefixParent;
 
    The value of a parent node is computed by hashing together the values
@@ -1314,7 +1314,7 @@ Table of Contents
    root hash from the leaf or other intermediate node values they
    already have.  Such a proof is encoded as:
 
-   opaque NodeValue<Hash.Nh>;
+   opaque NodeValue[Hash.Nh];
 
    struct {
      NodeValue elements<0..2^16-1>;
@@ -1565,8 +1565,8 @@ Table of Contents
    structure:
 
    struct {
-     opaque proof<VRF.Np>;
-     opaque commitment<Hash.Nh>;
+     opaque proof[VRF.Np];
+     opaque commitment[Hash.Nh];
    } BinaryLadderStep;
 
    struct {
@@ -1577,7 +1577,7 @@ Table of Contents
      CombinedTreeProof search;
      InclusionProof inclusion;
 
-     opaque opening<Nc>;
+     opaque opening[Nc];
      UpdateValue value;
    } SearchResponse;
 
@@ -1648,7 +1648,7 @@ Table of Contents
      CombinedTreeProof search;
      InclusionProof inclusion;
 
-     opaque opening<Nc>;
+     opaque opening[Nc];
      UpdatePrefix prefix;
    } UpdateResponse;
 
@@ -1796,9 +1796,9 @@ Table of Contents
    [I-D.ietf-keytrans-architecture]
               McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
-              architecture-02, 26 August 2024,
+              architecture-03, 25 February 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-
-              keytrans-architecture-02>.
+              keytrans-architecture-03>.
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,

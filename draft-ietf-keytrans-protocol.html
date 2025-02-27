@@ -16,12 +16,12 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.25.0" name="generator">
+<meta content="xml2rfc 3.27.0" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.25.0
-    Python 3.12.8
+  xml2rfc 3.27.0
+    Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -442,7 +442,7 @@ dl {
     margin-bottom: 0;
   }
 }
-dl > dt {
+dl:not(.dlNewline) > dt {
   float: left;
   margin-right: 2ch;
   min-width: 8ch;
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">January 2025</td>
+<td class="right">February 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 1 August 2025</td>
+<td class="center">Expires 31 August 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-01-28" class="published">28 January 2025</time>
+<time datetime="2025-02-27" class="published">27 February 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-08-01">1 August 2025</time></dd>
+<dd class="expires"><time datetime="2025-08-31">31 August 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 1 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 31 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2582,7 +2582,7 @@ struct {
 struct {
   Configuration config;
   uint64 tree_size;
-  opaque root&lt;Hash.Nh&gt;;
+  opaque root[Hash.Nh];
 } TreeHeadTBS;
 </pre><a href="#section-9.1-5" class="pilcrow">¶</a>
 </div>
@@ -2657,7 +2657,7 @@ is specified as:<a href="#section-9.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.3-4">
 <pre>
 struct {
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   opaque label&lt;0..2^8-1&gt;;
   UpdateValue update;
 } CommitmentValue;
@@ -2703,11 +2703,11 @@ prefix tree.<a href="#section-9.4-3" class="pilcrow">¶</a></p>
 <pre>
 struct {
   uint64 timestamp;
-  opaque prefix_tree&lt;Hash.Nh&gt;;
+  opaque prefix_tree[Hash.Nh];
 } LogLeaf;
 
 struct {
-  opaque value&lt;Hash.Nh&gt;;
+  opaque value[Hash.Nh];
 } LogParent;
 </pre><a href="#section-9.5-2" class="pilcrow">¶</a>
 </div>
@@ -2746,8 +2746,8 @@ nodeValue(node):
 <div class="lang-tls sourcecode" id="section-9.6-2">
 <pre>
 struct {
-    opaque vrf_output&lt;VRF.Nh&gt;;
-    opaque commitment&lt;Hash.Nh&gt;;
+    opaque vrf_output[VRF.Nh];
+    opaque commitment[Hash.Nh];
 } PrefixLeaf;
 </pre><a href="#section-9.6-2" class="pilcrow">¶</a>
 </div>
@@ -2758,7 +2758,7 @@ to the corresponding <code>UpdateValue</code> structure.<a href="#section-9.6-3"
 <div class="lang-tls sourcecode" id="section-9.6-5">
 <pre>
 struct {
-  opaque value&lt;Hash.Nh&gt;;
+  opaque value[Hash.Nh];
 } PrefixParent;
 </pre><a href="#section-9.6-5" class="pilcrow">¶</a>
 </div>
@@ -2799,7 +2799,7 @@ log tree that allows the user to compute the tree's root hash from the leaf or
 other intermediate node values they already have. Such a proof is encoded as:<a href="#section-10.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-10.1-2">
 <pre>
-opaque NodeValue&lt;Hash.Nh&gt;;
+opaque NodeValue[Hash.Nh];
 
 struct {
   NodeValue elements&lt;0..2^16-1&gt;;
@@ -3094,8 +3094,8 @@ struct {
 <div class="lang-tls-presentation sourcecode" id="section-11.1-4">
 <pre>
 struct {
-  opaque proof&lt;VRF.Np&gt;;
-  opaque commitment&lt;Hash.Nh&gt;;
+  opaque proof[VRF.Np];
+  opaque commitment[Hash.Nh];
 } BinaryLadderStep;
 
 struct {
@@ -3106,7 +3106,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   UpdateValue value;
 } SearchResponse;
 </pre><a href="#section-11.1-4" class="pilcrow">¶</a>
@@ -3185,7 +3185,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   UpdatePrefix prefix;
 } UpdateResponse;
 </pre><a href="#section-11.2-4" class="pilcrow">¶</a>
@@ -3371,7 +3371,7 @@ uint16 CipherSuite;
 <dl class="references">
 <dt id="I-D.ietf-keytrans-architecture">[I-D.ietf-keytrans-architecture]</dt>
         <dd>
-<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-02</span>, <time datetime="2024-08-26" class="refDate">26 August 2024</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-02">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-02</a>&gt;</span>. </dd>
+<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-03</span>, <time datetime="2025-02-25" class="refDate">25 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2104">[RFC2104]</dt>
         <dd>
