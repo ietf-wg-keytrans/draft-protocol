@@ -983,7 +983,7 @@ struct {
 struct {
   Configuration config;
   uint64 tree_size;
-  opaque root<Hash.Nh>;
+  opaque root[Hash.Nh];
 } TreeHeadTBS;
 ~~~
 
@@ -1052,7 +1052,7 @@ is specified as:
 
 ~~~ tls-presentation
 struct {
-  opaque opening<Nc>;
+  opaque opening[Nc];
   opaque label<0..2^8-1>;
   UpdateValue update;
 } CommitmentValue;
@@ -1091,11 +1091,11 @@ The leaf and parent nodes of a log tree are serialized as:
 ~~~ tls-presentation
 struct {
   uint64 timestamp;
-  opaque prefix_tree<Hash.Nh>;
+  opaque prefix_tree[Hash.Nh];
 } LogLeaf;
 
 struct {
-  opaque value<Hash.Nh>;
+  opaque value[Hash.Nh];
 } LogParent;
 ~~~
 
@@ -1131,8 +1131,8 @@ The leaf nodes of a prefix tree are serialized as:
 
 ~~~ tls
 struct {
-    opaque vrf_output<VRF.Nh>;
-    opaque commitment<Hash.Nh>;
+    opaque vrf_output[VRF.Nh];
+    opaque commitment[Hash.Nh];
 } PrefixLeaf;
 ~~~
 
@@ -1144,7 +1144,7 @@ The parent nodes of a prefix tree are serialized as:
 
 ~~~ tls
 struct {
-  opaque value<Hash.Nh>;
+  opaque value[Hash.Nh];
 } PrefixParent;
 ~~~
 
@@ -1176,7 +1176,7 @@ log tree that allows the user to compute the tree's root hash from the leaf or
 other intermediate node values they already have. Such a proof is encoded as:
 
 ~~~ tls-presentation
-opaque NodeValue<Hash.Nh>;
+opaque NodeValue[Hash.Nh];
 
 struct {
   NodeValue elements<0..2^16-1>;
@@ -1448,8 +1448,8 @@ In turn, the Transparency Log responds with a SearchResponse structure:
 
 ~~~ tls-presentation
 struct {
-  opaque proof<VRF.Np>;
-  opaque commitment<Hash.Nh>;
+  opaque proof[VRF.Np];
+  opaque commitment[Hash.Nh];
 } BinaryLadderStep;
 
 struct {
@@ -1460,7 +1460,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening<Nc>;
+  opaque opening[Nc];
   UpdateValue value;
 } SearchResponse;
 ~~~
@@ -1528,7 +1528,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening<Nc>;
+  opaque opening[Nc];
   UpdatePrefix prefix;
 } UpdateResponse;
 ~~~
