@@ -529,7 +529,7 @@ Table of Contents
    2^floor(log2(n)) - 1.  The left subtree is the implicit binary search
    tree of size i_root, i.e., the implicit binary search tree for all
    elements with a smaller index than the root.  The right subtree is
-   the implicit binary search tree of size n-i_root, but offset with
+   the implicit binary search tree of size n-i_root-1, but offset with
    i_root+1.  Initially, these will be all indices larger than the root.
 
    Users ensure that log entry timestamps are monotonic by enforcing
