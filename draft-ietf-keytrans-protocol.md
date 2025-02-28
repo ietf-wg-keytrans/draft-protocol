@@ -508,8 +508,8 @@ updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
 following:
 
-- Starting with the log entry that was the oldest in the tree corresponding to
-  the user-advertised size, compute its direct path in the new implicit binary
+- Starting with the rightmost log entry from the tree that was advertised by
+  the user, compute its direct path in the new implicit binary
   search tree. Provide the log entry timestamp for each element of the direct
   path that's to the right of the advertised log entry.
 - Exactly one of these log entries will lie on the new tree's frontier. From
