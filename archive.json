@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-02-27T00:57:10.360999+00:00",
+  "timestamp": "2025-03-02T01:00:43.563529+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -94,6 +94,86 @@
           "body": "Brendan and I clarified this issue in a call. My understanding of which indices are used in the prefix tree was wrong.",
           "createdAt": "2024-05-29T16:31:18Z",
           "updatedAt": "2024-05-29T16:31:18Z"
+        }
+      ]
+    },
+    {
+      "number": 15,
+      "id": "I_kwDOLrnaA86r6whh",
+      "title": "SearchRequest.last only implicitly defined",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/15",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The field [`SearchRequest.last`](https://github.com/ietf-wg-keytrans/draft-protocol/blob/main/draft-ietf-keytrans-protocol.md?plain=1#L1440) is only implicitly defined. This should be made explicit.",
+      "createdAt": "2025-02-27T11:59:53Z",
+      "updatedAt": "2025-02-27T11:59:53Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 16,
+      "id": "I_kwDOLrnaA86r6_AU",
+      "title": "Section 11.1 (Search) is inconsistent",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/16",
+      "state": "CLOSED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I'm having issues implementing [Section 11.1 (Search)](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-11.1). My problems are the following two statements.\n\n> The `search` field contains the output of updating the user's view of the tree [...].\n\n> The `inclusion` field contains a proof of inclusion for all of the log tree leaves where either a search proof was provided in `CombinedTreeProof.prefix_proofs` [...].\n\nHere are my issues.\n1. `CombinedTreeProof` is a type, but its used as a field. It is unclear which field `CombinedTreeProof.prefix_proofs` refers to. I presume, it refers to `search.prefix_proofs` (if I'm correct, this should be fixed).\n2. As per [10.3.1](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-updating-view), `search` only provides timestamps. Thus, `search.prefix_proofs` should be empty, so the specification of `inclusion` does not make sense.",
+      "createdAt": "2025-02-27T12:22:49Z",
+      "updatedAt": "2025-02-28T13:29:56Z",
+      "closedAt": "2025-02-28T13:29:56Z",
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For issue 1: Yes, `search.prefix_proofs` is what was meant\n\nFor issue 2: \"The search field contains the output of updating the user's view of the tree to match FullTreeHead.tree_head.size **followed by either a fixed-version or greatest-version search for the requested label**\"\n\nThe fixed-version or greatest-version search step is where `prefix_proofs` might have some data populated in it",
+          "createdAt": "2025-02-27T17:34:29Z",
+          "updatedAt": "2025-02-27T17:34:29Z"
+        }
+      ]
+    },
+    {
+      "number": 18,
+      "id": "I_kwDOLrnaA86sE6p6",
+      "title": "VRF.Np undefined",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/18",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "[`VRF.Np`](https://github.com/ietf-wg-keytrans/draft-protocol/blob/main/draft-ietf-keytrans-protocol.md?plain=1#L1451) is referenced in the definition of `BinaryLadderStep`, but undefined. I presume it is the byte-length of a VRF proof, but this is not mentioned.",
+      "createdAt": "2025-02-28T12:00:35Z",
+      "updatedAt": "2025-02-28T12:00:35Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 20,
+      "id": "I_kwDOLrnaA86sFoRS",
+      "title": "Greatest-Version Search - Unclear Specification",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/20",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "https://github.com/ietf-wg-keytrans/draft-protocol/blob/9bf448a1508983ae4e3ce13067044928da5c46a8/draft-ietf-keytrans-protocol.md?plain=1#L896\n\nTargeting the greatest version globally or the greatest version in that log entry?",
+      "createdAt": "2025-02-28T13:28:26Z",
+      "updatedAt": "2025-02-28T23:48:29Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Greatest version globally",
+          "createdAt": "2025-02-28T23:48:28Z",
+          "updatedAt": "2025-02-28T23:48:28Z"
         }
       ]
     }
@@ -1323,26 +1403,204 @@
       "id": "PR_kwDOLrnaA86MrDXD",
       "title": "New definition of implicit binary search tree",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/13",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "felixlinker",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "I find the \"that doesn't take the computation out of bounds\" definition a bit counterintuitive. I think, a recursive definition is clearer so tried that! Let me know what you think! :)\r\n\r\nAlso, I find the sentence about odd/even numbered nodes confusing. I don't think this observation is necessary anywhere, so I would save our readers' energy.",
       "createdAt": "2025-02-26T16:20:42Z",
-      "updatedAt": "2025-02-26T16:20:43Z",
+      "updatedAt": "2025-02-28T23:35:50Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "9bf448a1508983ae4e3ce13067044928da5c46a8",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "ibst",
+      "headRefOid": "45ce865cda5d1eb1842665fc7c08b6e457759f30",
+      "closedAt": "2025-02-28T23:35:50Z",
+      "mergedAt": "2025-02-28T23:35:50Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "fed8371f917dd1c1fc4d050e7cad7828cee23326"
+      },
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I like this definition a lot! However, we can't do latex. I tried rewriting a bit myself but it got to be invasive, so please update with your preferred fix",
+          "createdAt": "2025-02-27T19:59:48Z",
+          "updatedAt": "2025-02-27T19:59:48Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@Bren2010 Fixed! :) Glad you like it!",
+          "createdAt": "2025-02-28T09:54:05Z",
+          "updatedAt": "2025-02-28T09:54:05Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Merging since this is editorial",
+          "createdAt": "2025-02-28T23:35:48Z",
+          "updatedAt": "2025-02-28T23:35:48Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86eEaAm",
+          "commit": {
+            "abbreviatedOid": "45ce865"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-28T23:35:27Z",
+          "updatedAt": "2025-02-28T23:35:27Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 14,
+      "id": "PR_kwDOLrnaA86MyVzC",
+      "title": "Fix fixed-length vector notation",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/14",
+      "state": "MERGED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "As per [RFC 8446, Sec 3.4](https://datatracker.ietf.org/doc/html/rfc8446#section-3.4) fixed-length vectors are denoted by `[...]` not `<...>`. This PR fixes that notation.",
+      "createdAt": "2025-02-27T11:57:03Z",
+      "updatedAt": "2025-02-27T20:25:12Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "115d6722d02f56beaf3acefa0504b2c9dc9545de",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
-      "headRefName": "ibst",
-      "headRefOid": "e9bddcffc29fbbc99471862600ddce7e326fe4b6",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefName": "tls-notation",
+      "headRefOid": "5c08fb7d2bb6eff12cfb133a08647e7c58335549",
+      "closedAt": "2025-02-27T20:25:12Z",
+      "mergedAt": "2025-02-27T20:25:11Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "d4a9bb09e8dd2c8c40c3df0d2684576c9ed77f11"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86d5KFX",
+          "commit": {
+            "abbreviatedOid": "5c08fb7"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thank you!",
+          "createdAt": "2025-02-27T20:25:03Z",
+          "updatedAt": "2025-02-27T20:25:03Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 17,
+      "id": "PR_kwDOLrnaA86M1Xk5",
+      "title": "Fix field reference",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/17",
+      "state": "MERGED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Addresses #16",
+      "createdAt": "2025-02-27T17:38:05Z",
+      "updatedAt": "2025-02-27T20:40:05Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "115d6722d02f56beaf3acefa0504b2c9dc9545de",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "search-field-fix",
+      "headRefOid": "56388f1409951c7aad6607fd8132fb7030ec0afb",
+      "closedAt": "2025-02-27T20:40:05Z",
+      "mergedAt": "2025-02-27T20:40:05Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "9bf448a1508983ae4e3ce13067044928da5c46a8"
+      },
       "comments": [],
       "reviews": []
+    },
+    {
+      "number": 19,
+      "id": "PR_kwDOLrnaA86M7rk1",
+      "title": "Fix Wording in Updating the View of the Tree",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/19",
+      "state": "MERGED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The problem with the old phrasing is that the user did not advertise a log entry, they advertised a tree size. I think this should be the oldest node in the tree that corresponds to the user-advertised size.",
+      "createdAt": "2025-02-28T12:27:45Z",
+      "updatedAt": "2025-02-28T23:46:48Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "9bf448a1508983ae4e3ce13067044928da5c46a8",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "updating-view",
+      "headRefOid": "98e0d2e39ee2a78cfab6ceb45ac519d7b206b239",
+      "closedAt": "2025-02-28T23:46:48Z",
+      "mergedAt": "2025-02-28T23:46:48Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "c3a370bb0306fc52b90339185a802543cf2ddd60"
+      },
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Merging as editorial",
+          "createdAt": "2025-02-28T23:46:42Z",
+          "updatedAt": "2025-02-28T23:46:42Z"
+        }
+      ],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86eEcBu",
+          "commit": {
+            "abbreviatedOid": "a88ac1c"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-02-28T23:46:09Z",
+          "updatedAt": "2025-02-28T23:46:09Z",
+          "comments": [
+            {
+              "originalPosition": 9,
+              "body": "```suggestion\r\n- Starting with the rightmost log entry from the tree that was advertised by\r\n  the user, compute its direct path in the new implicit binary\r\n```",
+              "createdAt": "2025-02-28T23:46:09Z",
+              "updatedAt": "2025-02-28T23:46:09Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86eEcGL",
+          "commit": {
+            "abbreviatedOid": "98e0d2e"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-02-28T23:46:31Z",
+          "updatedAt": "2025-02-28T23:46:31Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
