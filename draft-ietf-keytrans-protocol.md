@@ -1293,9 +1293,9 @@ entry timestamps that the user is expected to have retained are excluded from
 `prefix_proofs` MAY contain multiple `PrefixProof` structures for the same log
 entry. Users MUST verify that all `PrefixProof` structures corresponding to the
 same log entry compute the same prefix tree root hash. There MAY be elements of
-`prefix_proofs` or `prefix_roots` that correspond to log entries whose timestamp
-is not included in `timestamps` but only if the user is expected to have
-retained the log entry's timestamp.
+`prefix_proofs` or `prefix_roots` that correspond to log entries whose timestamps
+are not included in `timestamps` if the user is expected to have
+retained the timestamps from a previous query response.
 
 Users processing a `CombinedTreeProof` MUST verify that each field contains
 exactly the expected number of entries -- no more and no less.
