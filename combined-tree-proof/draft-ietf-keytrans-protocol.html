@@ -2923,9 +2923,9 @@ entry timestamps that the user is expected to have retained are excluded from
 <p id="section-10.3-7"><code>prefix_proofs</code> <span class="bcp14">MAY</span> contain multiple <code>PrefixProof</code> structures for the same log
 entry. Users <span class="bcp14">MUST</span> verify that all <code>PrefixProof</code> structures corresponding to the
 same log entry compute the same prefix tree root hash. There <span class="bcp14">MAY</span> be elements of
-<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries whose timestamp
-is not included in <code>timestamps</code> but only if the user is expected to have
-retained the log entry's timestamp.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
+<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries whose timestamps
+are not included in <code>timestamps</code> if the user is expected to have
+retained the timestamps from a previous query response.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
 <p id="section-10.3-8">Users processing a <code>CombinedTreeProof</code> <span class="bcp14">MUST</span> verify that each field contains
 exactly the expected number of entries -- no more and no less.<a href="#section-10.3-8" class="pilcrow">¶</a></p>
 <div id="updating-view">
