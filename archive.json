@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-02T01:00:43.563529+00:00",
+  "timestamp": "2025-03-04T00:58:10.903435+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -165,7 +165,7 @@
       "labels": [],
       "body": "https://github.com/ietf-wg-keytrans/draft-protocol/blob/9bf448a1508983ae4e3ce13067044928da5c46a8/draft-ietf-keytrans-protocol.md?plain=1#L896\n\nTargeting the greatest version globally or the greatest version in that log entry?",
       "createdAt": "2025-02-28T13:28:26Z",
-      "updatedAt": "2025-02-28T23:48:29Z",
+      "updatedAt": "2025-03-03T12:14:48Z",
       "closedAt": null,
       "comments": [
         {
@@ -174,6 +174,13 @@
           "body": "Greatest version globally",
           "createdAt": "2025-02-28T23:48:28Z",
           "updatedAt": "2025-02-28T23:48:28Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Okay, thanks! Follow-up question. What does it mean to \"target the label's greatest version\"?\n\nThe [binary ladder section](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-binary-ladder) specifies two types of binary ladders. One to prove the highest version, one to prove one specific versions.\n\nSpecifically, I'm wondering about the following scenario. A client requests a label's highest version. The log provides them with a series of binary ladders as specified in [Sec. 7](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-greatest-version-searches). The first binary ladder is for a log entry where the highest version is not yet present. Will the proof be formatted like a highest version proof or a specific version proof? This is not specified. I guess it will be a proof of non-inclusion for a specific version.",
+          "createdAt": "2025-03-03T12:14:47Z",
+          "updatedAt": "2025-03-03T12:14:47Z"
         }
       ]
     }
