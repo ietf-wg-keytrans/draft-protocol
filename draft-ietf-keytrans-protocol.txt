@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 1 September 2025                               28 February 2025
+Expires: 5 September 2025                                   4 March 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 September 2025.
+   This Internet-Draft will expire on 5 September 2025.
 
 Copyright Notice
 
@@ -1423,23 +1423,19 @@ Table of Contents
    entries whose timestamp was provided in timestamps but a search proof
    was not provided in prefix_proofs.
 
-   If a log entry's timestamp is referenced multiple times, it is only
-   added to timestamps the first time.  Additionally, when a user
-   advertises a previously-observed tree size in their request, log
-   entry timestamps that the user is expected to have retained are
-   excluded from timestamps.
+   If a log entry's timestamp is referenced multiple times, its
+   timestamp MUST NOT be repeated in timestamps but MUST only be added
+   the first time.  Additionally, when a user advertises a previously-
+   observed tree size in their request, log entry timestamps that the
+   user is expected to have retained are excluded from timestamps.
 
-   The prefix_proofs array differs from the timestamps array in two
-   important ways.  First, it is possible for multiple PrefixProof
-   structures from the same log entry to appear in the prefix_proofs
-   array if the same log entry is referenced multiple times.  Users MUST
-   verify that all PrefixProof structures corresponding to the same log
-   entry compute the same prefix tree root hash.  Second, while every
-   log entry with a timestamp in timestamps will also be referenced in
-   either prefix_proofs or prefix_roots, the inverse is not true.  There
-   may be elements of prefix_proofs or prefix_roots that correspond to
-   log entries that are not in timestamps if the user is expected to
-   have retained the log entry's timestamp.
+   prefix_proofs MAY contain multiple PrefixProof structures for the
+   same log entry.  Users MUST verify that all PrefixProof structures
+   corresponding to the same log entry compute the same prefix tree root
+   hash.  There MAY be elements of prefix_proofs or prefix_roots that
+   correspond to log entries whose timestamps are not included in
+   timestamps if the user is expected to have retained the timestamps
+   from a previous query response.
 
    Users processing a CombinedTreeProof MUST verify that each field
    contains exactly the expected number of entries -- no more and no
