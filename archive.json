@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-04T00:58:10.903435+00:00",
+  "timestamp": "2025-03-06T00:58:00.078456+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -165,7 +165,7 @@
       "labels": [],
       "body": "https://github.com/ietf-wg-keytrans/draft-protocol/blob/9bf448a1508983ae4e3ce13067044928da5c46a8/draft-ietf-keytrans-protocol.md?plain=1#L896\n\nTargeting the greatest version globally or the greatest version in that log entry?",
       "createdAt": "2025-02-28T13:28:26Z",
-      "updatedAt": "2025-03-03T12:14:48Z",
+      "updatedAt": "2025-03-04T18:30:03Z",
       "closedAt": null,
       "comments": [
         {
@@ -181,6 +181,58 @@
           "body": "Okay, thanks! Follow-up question. What does it mean to \"target the label's greatest version\"?\n\nThe [binary ladder section](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-binary-ladder) specifies two types of binary ladders. One to prove the highest version, one to prove one specific versions.\n\nSpecifically, I'm wondering about the following scenario. A client requests a label's highest version. The log provides them with a series of binary ladders as specified in [Sec. 7](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-greatest-version-searches). The first binary ladder is for a log entry where the highest version is not yet present. Will the proof be formatted like a highest version proof or a specific version proof? This is not specified. I guess it will be a proof of non-inclusion for a specific version.",
           "createdAt": "2025-03-03T12:14:47Z",
           "updatedAt": "2025-03-03T12:14:47Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "There's only one type of binary ladder described. \"Targeting version 6\" means that it's the binary ladder you'd get if 6 was the greatest version that existed: 0, 1, 3, 7, 5, 6\n\nSo for a greatest version search, every binary ladder (= series of lookups in a prefix tree) will lookup the same versions in the same order, but terminate in different places as the search progresses",
+          "createdAt": "2025-03-04T18:23:55Z",
+          "updatedAt": "2025-03-04T18:23:55Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Reading that section again after a while away, I agree it's confusing and can work on some text",
+          "createdAt": "2025-03-04T18:24:23Z",
+          "updatedAt": "2025-03-04T18:24:23Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Okay! I also have some uncommitted changes locally. I will open a PR and we can discuss.\n\nBut I still don't understand how a binary ladder would be formatted if a log entry along the frontier didn't include that version yet - that could be, right?\n\nLet's say, the first log entry that is touched by the search only includes key versions up to 2. How would the binary ladder be constructed? The most efficient one would be 0, 1, 3. But the specification is not explicit here.",
+          "createdAt": "2025-03-04T18:27:33Z",
+          "updatedAt": "2025-03-04T18:27:33Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "If the version we're searching for is 6, then the binary ladder steps will always be: 0, 1, 3, 7, 5, 6. If the highest version in some log entry is 2, then you will do: proof of inclusion for 0 and 1, terminated by proof of non-inclusion for 3.",
+          "createdAt": "2025-03-04T18:30:02Z",
+          "updatedAt": "2025-03-04T18:30:02Z"
+        }
+      ]
+    },
+    {
+      "number": 22,
+      "id": "I_kwDOLrnaA86se5iB",
+      "title": "Binary Ladder for Fixed Version Search Optimization",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/22",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Two questions on the binary ladder for fixed version searches as described [here](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-5.1-4).\n\n1. Presume highest version is 7 and 6 is queried. It is stated: \"the series of lookups ends after the first proof of inclusion for a\nversion greater than or equal to the target version.\" Does this mean 6 is not proven to be included in the prefix tree? It sounds like that, but it seems odd.\n2. It is stated that proofs of inclusion can be omitted should they have been provided for log tree entries younger than the one at hand. Why is this optimization not possible for proofs of a highest version?",
+      "createdAt": "2025-03-04T10:40:50Z",
+      "updatedAt": "2025-03-04T21:01:47Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> Presume highest version is 7 and 6 is queried. It is stated: \"the series of lookups ends after the first proof of inclusion for a\nversion greater than or equal to the target version.\" Does this mean 6 is not proven to be included in the prefix tree? It sounds like that, but it seems odd.\n\nThat /can/ happen. Your binary ladder will be for version 6 will be versions: 0, 1, 3, 7, 5, 6. You can do an entire binary search through the log entries for version 6 but always terminate the binary ladder early with a proof of inclusion for version 7. The implication there though is that version 6 and 7 were created in the same epoch.\n\n> It is stated that proofs of inclusion can be omitted should they have been provided for log tree entries younger than the one at hand. Why is this optimization not possible for proofs of a highest version?\n\nI'm not sure what you mean here.",
+          "createdAt": "2025-03-04T21:01:46Z",
+          "updatedAt": "2025-03-04T21:01:46Z"
         }
       ]
     }
@@ -1605,6 +1657,68 @@
           "body": "",
           "createdAt": "2025-02-28T23:46:31Z",
           "updatedAt": "2025-02-28T23:46:31Z",
+          "comments": []
+        }
+      ]
+    },
+    {
+      "number": 21,
+      "id": "PR_kwDOLrnaA86NR-Kn",
+      "title": "Shorter description of prefix proofs",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/21",
+      "state": "MERGED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I found the wording of:\r\n> The `prefix_proofs` array differs from the `timestamps` array in two important ways.\r\n\r\nConfusing because it is not specified how they are the same. Or put differently, it's silently assumed that `prefix_proofs` and `timestamps` are similar. I think it's clearer if we only describe how `prefix_proofs` is structured, and I used more spec-language (may, must, must not, etc.).",
+      "createdAt": "2025-03-04T10:05:12Z",
+      "updatedAt": "2025-03-04T20:35:11Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "c3a370bb0306fc52b90339185a802543cf2ddd60",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "combined-tree-proof",
+      "headRefOid": "046f9fb25ff741ed6f0c07701c6f98029dfc0cd5",
+      "closedAt": "2025-03-04T20:35:11Z",
+      "mergedAt": "2025-03-04T20:35:11Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "6fc4e91c0b8d9ed131476650da4e72e9a9c0d162"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86ee_Qf",
+          "commit": {
+            "abbreviatedOid": "0e32dbb"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-03-04T20:34:46Z",
+          "updatedAt": "2025-03-04T20:34:46Z",
+          "comments": [
+            {
+              "originalPosition": 29,
+              "body": "```suggestion\r\n`prefix_proofs` or `prefix_roots` that correspond to log entries whose timestamps\r\nare not included in `timestamps` if the user is expected to have\r\nretained the timestamps from a previous query response.\r\n```",
+              "createdAt": "2025-03-04T20:34:46Z",
+              "updatedAt": "2025-03-04T20:34:47Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86ee_XW",
+          "commit": {
+            "abbreviatedOid": "046f9fb"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-03-04T20:35:02Z",
+          "updatedAt": "2025-03-04T20:35:02Z",
           "comments": []
         }
       ]
