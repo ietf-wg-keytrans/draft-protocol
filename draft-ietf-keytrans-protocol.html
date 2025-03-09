@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 5 September 2025</td>
+<td class="center">Expires 10 September 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-03-04" class="published">4 March 2025</time>
+<time datetime="2025-03-09" class="published">9 March 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-09-05">5 September 2025</time></dd>
+<dd class="expires"><time datetime="2025-09-10">10 September 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 5 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 10 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1354,7 +1354,7 @@ accounts. Ensuring a consistent view allows users to detect when unauthorized
 public keys have been associated with their account, indicating a potential
 compromise.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">More detailed information about the protocol participants and the ways the
-protocol can be deployed can be found in <span>[<a href="#I-D.ietf-keytrans-architecture" class="cite xref">I-D.ietf-keytrans-architecture</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+protocol can be deployed can be found in <span>[<a href="#ARCH" class="cite xref">ARCH</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1380,20 +1380,19 @@ properties are maintained.<a href="#section-2-2" class="pilcrow">¶</a></p>
       <h2 id="name-tree-construction">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-tree-construction" class="section-name selfRef">Tree Construction</a>
       </h2>
-<p id="section-3-1">A Transparency Log is a verifiable data structure that maps <em>label-version
-pairs</em> to cryptographic keys or other structured data. Labels correspond to user
-identifiers, and a new version of a label is created each time the label's
-associated value changes. Transparency Logs have an <em>epoch</em> counter which is
-incremented every time a new set of label-version pairs are added.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">KT uses a <em>prefix tree</em> to establish a mapping between each label-version pair
-and a commitment to the label's value at that version. Every time the prefix
+<p id="section-3-1">A Transparency Log is a verifiable data structure that maps a <em>label-version
+pair</em> to some unstructured data such as a cryptographic public key. Labels
+correspond to user identifiers, and a new version of a label is created each
+time the label's associated value changes.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">KT uses a <em>prefix tree</em> to store a mapping from each label-version pair
+to a commitment to the label's value at that version. Every time the prefix
 tree changes, its new root hash and the current timestamp are stored in a <em>log
-tree</em>. The benefit of the prefix tree is that it is easily searchable, and the
+tree</em>. The benefit of the prefix tree is that it is easily searchable and the
 benefit of the log tree is that it can easily be verified to be append-only. The
 data structure powering KT combines a log tree and a prefix tree, and is called
 the <em>combined tree</em>.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">This section describes the operation of both prefix and log trees at a high
-level and the way that they're combined. More precise algorithms for computing
+<p id="section-3-3">This section describes the operation of prefix trees, log trees, and the
+combined tree structure, at a high level. More precise algorithms for computing
 the intermediate and root values of the trees are given in
 <a href="#cryptographic-computations" class="auto internal xref">Section 9</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="terminology">
@@ -1401,12 +1400,11 @@ the intermediate and root values of the trees are given in
         <h3 id="name-terminology">
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
         </h3>
-<p id="section-3.1-1">Trees consist of
-<em>nodes</em>, which have a byte string as their <em>hash value</em>. A node is either a
-<em>leaf</em> if it has no children, or a <em>parent</em>
-if it has either a <em>left child</em> or a <em>right child</em>. A node is the <em>root</em> of a
-tree if it has no parents, and an <em>intermediate</em> if it has both children and
-parents. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-1">Trees consist of <em>nodes</em>, which have a byte string as their <em>value</em>. A node is
+either a <em>leaf</em> if it has no children, or a <em>parent</em> if it has either a <em>left
+child</em> or a <em>right child</em>. A node is the <em>root</em> of a tree if it has no parents,
+and an <em>intermediate</em> if it has both children and parents. Nodes are <em>siblings</em>
+if they share the same parent.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">The <em>descendants</em> of a node are that node, its children, and the descendants of
 its children. A <em>subtree</em> of a tree is the tree given by the descendants of a
 particular node, called the <em>head</em> of the subtree.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
@@ -1423,8 +1421,8 @@ contains.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
         <h3 id="name-log-tree">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-log-tree" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-3.2-1">Log trees are used for storing information in the chronological order that it
-was added and are constructed as <em>left-balanced</em> binary trees.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">Log trees store information in the chronological order that it was added, and
+are constructed as <em>left-balanced</em> binary trees.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">A binary tree is <em>balanced</em> if its size is a power of two and for any parent
 node in the tree, its left and right subtrees have the same size. A binary tree
 is <em>left-balanced</em> if for every parent, either the parent is balanced, or the
@@ -1521,31 +1519,32 @@ construct the left-balanced binary tree with <code>n+1</code> leaves.<a href="#s
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
           </figcaption></figure>
-<p id="section-3.2-6">While leaves contain arbitrary data, the value of a parent node is always the
-hash of the combined values of its left and right children.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">While leaves can have arbitrary data as their value, the value of a parent node
+is always the hash of the combined values of its left and right children.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
 <p id="section-3.2-7">Log trees are powerful in that they can provide both <em>inclusion proofs</em>, which
 demonstrate that a leaf is included in a log, and <em>consistency proofs</em>, which
-demonstrate that a new version of a log is an extension of a past version of the
-log.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
-<p id="section-3.2-8">An inclusion proof is given by providing the copath values of a leaf. The proof
-is verified by hashing together the leaf with the copath values and checking
-that the result equals the root hash value of the log. Consistency proofs are a
-more general version of the same idea. With a consistency proof, the prover
-provides the minimum set of intermediate node values from the current tree that
-allows the verifier to compute both the old root value and the current root
-value.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
-<p id="section-3.2-9">However, the protocol described in this document generally doesn't provide pure
-inclusion or consistency proofs to verifiers. Instead, it relies on the more
-general idea of providing the smallest number of intermediate node values that are
-necessary to allow a verifier to compute the tree's root hash from
-intermediate and leaf values that they already have. The verifier may already have
-intermediate and leaf values because they were provided by the Transparency Log as
-part of its response to the current query, or because they were retained from
-responses to previous queries. This pattern of providing proofs ensures that
-there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
-<span id="name-illustration-of-a-proof-of-"></span><figure id="figure-3">
-          <div id="section-3.2-10.1">
-            <div class="alignLeft art-svg artwork" id="section-3.2-10.1.1">
+demonstrate that a new version of a log is an extension of a previous version.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<p id="section-3.2-8">Inclusion and consistency proofs in KT differ from similar protocols in that
+proofs only ever contain the values of nodes that are the head of a balanced
+subtree. Whenever the value of the head of a non-balanced subtree is needed by a
+verifier, the prover breaks down the non-balanced subtree into the
+smallest-possible number of balanced subtrees and provides the value of the head
+of each. This allows verifiers to cache a larger number of intermediate values
+than would otherwise be possible, reducing the size of subsequent responses.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
+<p id="section-3.2-9">As a result, an inclusion proof for a leaf is given by providing the copath
+values of the leaf with any non-balanced subtrees broken down as mentioned. The
+proof is verified by hashing the leaf value together with the copath values,
+re-computing the head values of non-balanced subtrees where needed, and checking
+that the result equals the root value of the log.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<p id="section-3.2-10">When requesting a consistency proof, verifiers are expected to have retained the
+head values of the largest-possible balanced subtrees (these will later be
+defined as the "full subtrees") of the previous version of the log. A
+consistency proof then consists of the minimum set of node values that are
+necessary to compute the root value of the new version of the log from the
+values that the verifier retained.<a href="#section-3.2-10" class="pilcrow">¶</a></p>
+<span id="name-illustration-of-an-inclusio"></span><figure id="figure-3">
+          <div id="section-3.2-11.1">
+            <div class="alignLeft art-svg artwork" id="section-3.2-11.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="320" viewBox="0 0 320 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
                 <path d="M 240,48 L 240,64" fill="none" stroke="black"></path>
@@ -1554,7 +1553,7 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                 <path d="M 112,128 L 176,128" fill="none" stroke="black"></path>
                 <path d="M 104,176 L 112,192" fill="none" stroke="black"></path>
                 <path d="M 176,128 L 184,144" fill="none" stroke="black"></path>
-                <path d="M 200,176 L 212,200" fill="none" stroke="black"></path>
+                <path d="M 200,176 L 208,192" fill="none" stroke="black"></path>
                 <path d="M 296,176 L 304,192" fill="none" stroke="black"></path>
                 <path d="M 272,64 L 288,96" fill="none" stroke="black"></path>
                 <path d="M 80,192 L 88,176" fill="none" stroke="black"></path>
@@ -1566,59 +1565,14 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                   <text x="240" y="36">X</text>
                   <text x="144" y="100">X</text>
                   <text x="96" y="164">(X)</text>
-                  <text x="200" y="164">X</text>
+                  <text x="192" y="164">X</text>
                   <text x="288" y="164">(X)</text>
                   <text x="72" y="212">X</text>
                   <text x="120" y="212">X</text>
                   <text x="168" y="212">X</text>
-                  <text x="208" y="212">(X)</text>
-                  <text x="256" y="212">X</text>
-                  <text x="304" y="212">X</text>
-                  <text x="28" y="244">Index:</text>
-                  <text x="72" y="244">0</text>
-                  <text x="120" y="244">1</text>
-                  <text x="168" y="244">2</text>
-                  <text x="216" y="244">3</text>
-                  <text x="264" y="244">4</text>
-                  <text x="312" y="244">5</text>
-                </g>
-              </svg><a href="#section-3.2-10.1.1" class="pilcrow">¶</a>
-</div>
-</div>
-<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
-<a href="#name-illustration-of-a-proof-of-" class="selfRef">Illustration of a proof of inclusion. To verify that leaf 2 is included in the tree, the server provides the client with the hashes of the nodes on its copath, i.e., all hashes that are required for the client to compute the root hash itself. In the figure, the copath consists of the nodes marked by (X).</a>
-          </figcaption></figure>
-<span id="name-illustration-of-a-consisten"></span><figure id="figure-4">
-          <div id="section-3.2-11.1">
-            <div class="alignLeft art-svg artwork" id="section-3.2-11.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="328" viewBox="0 0 328 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
-                <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
-                <path d="M 240,48 L 240,64" fill="none" stroke="black"></path>
-                <path d="M 288,112 L 288,144" fill="none" stroke="black"></path>
-                <path d="M 160,64 L 280,64" fill="none" stroke="black"></path>
-                <path d="M 112,128 L 176,128" fill="none" stroke="black"></path>
-                <path d="M 104,176 L 112,192" fill="none" stroke="black"></path>
-                <path d="M 176,128 L 184,144" fill="none" stroke="black"></path>
-                <path d="M 200,176 L 208,192" fill="none" stroke="black"></path>
-                <path d="M 296,176 L 304,192" fill="none" stroke="black"></path>
-                <path d="M 280,64 L 296,96" fill="none" stroke="black"></path>
-                <path d="M 80,192 L 88,176" fill="none" stroke="black"></path>
-                <path d="M 104,144 L 112,128" fill="none" stroke="black"></path>
-                <path d="M 152,80 L 160,64" fill="none" stroke="black"></path>
-                <path d="M 176,192 L 184,176" fill="none" stroke="black"></path>
-                <path d="M 272,192 L 280,176" fill="none" stroke="black"></path>
-                <g class="text">
-                  <text x="240" y="36">X</text>
-                  <text x="144" y="100">(X)</text>
-                  <text x="96" y="164">X</text>
-                  <text x="192" y="164">X</text>
-                  <text x="288" y="164">X</text>
-                  <text x="72" y="212">X</text>
-                  <text x="120" y="212">X</text>
-                  <text x="168" y="212">X</text>
-                  <text x="216" y="212">X</text>
-                  <text x="264" y="212">(X)</text>
-                  <text x="312" y="212">[X]</text>
+                  <text x="216" y="212">(X)</text>
+                  <text x="264" y="212">X</text>
+                  <text x="312" y="212">X</text>
                   <text x="28" y="244">Index:</text>
                   <text x="72" y="244">0</text>
                   <text x="120" y="244">1</text>
@@ -1630,8 +1584,60 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
               </svg><a href="#section-3.2-11.1.1" class="pilcrow">¶</a>
 </div>
 </div>
+<figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
+<a href="#name-illustration-of-an-inclusio" class="selfRef">Illustration of an inclusion proof. To verify that leaf 2 is included in the tree, the prover provides the verifier with the values of leaf 2's copath. This is the minimum set of values that are necessary for the verifier to compute the root. In the figure, the copath consists of the nodes marked by (X).</a>
+          </figcaption></figure>
+<span id="name-illustration-of-a-consisten"></span><figure id="figure-4">
+          <div id="section-3.2-12.1">
+            <div class="alignLeft art-svg artwork" id="section-3.2-12.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="376" viewBox="0 0 376 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
+                <path d="M 240,48 L 240,64" fill="none" stroke="black"></path>
+                <path d="M 336,112 L 336,128" fill="none" stroke="black"></path>
+                <path d="M 360,160 L 360,192" fill="none" stroke="black"></path>
+                <path d="M 160,64 L 320,64" fill="none" stroke="black"></path>
+                <path d="M 112,128 L 176,128" fill="none" stroke="black"></path>
+                <path d="M 304,128 L 344,128" fill="none" stroke="black"></path>
+                <path d="M 104,176 L 112,192" fill="none" stroke="black"></path>
+                <path d="M 176,128 L 184,144" fill="none" stroke="black"></path>
+                <path d="M 200,176 L 208,192" fill="none" stroke="black"></path>
+                <path d="M 296,176 L 304,192" fill="none" stroke="black"></path>
+                <path d="M 344,128 L 360,160" fill="none" stroke="black"></path>
+                <path d="M 320,64 L 328,80" fill="none" stroke="black"></path>
+                <path d="M 80,192 L 88,176" fill="none" stroke="black"></path>
+                <path d="M 104,144 L 112,128" fill="none" stroke="black"></path>
+                <path d="M 152,80 L 160,64" fill="none" stroke="black"></path>
+                <path d="M 176,192 L 184,176" fill="none" stroke="black"></path>
+                <path d="M 272,192 L 280,176" fill="none" stroke="black"></path>
+                <path d="M 296,144 L 304,128" fill="none" stroke="black"></path>
+                <g class="text">
+                  <text x="240" y="36">X</text>
+                  <text x="144" y="100">(X)</text>
+                  <text x="336" y="100">X</text>
+                  <text x="96" y="164">X</text>
+                  <text x="192" y="164">X</text>
+                  <text x="288" y="164">X</text>
+                  <text x="72" y="212">X</text>
+                  <text x="120" y="212">X</text>
+                  <text x="168" y="212">X</text>
+                  <text x="216" y="212">X</text>
+                  <text x="264" y="212">(X)</text>
+                  <text x="312" y="212">[X]</text>
+                  <text x="360" y="212">[X]</text>
+                  <text x="28" y="244">Index:</text>
+                  <text x="72" y="244">0</text>
+                  <text x="120" y="244">1</text>
+                  <text x="168" y="244">2</text>
+                  <text x="216" y="244">3</text>
+                  <text x="264" y="244">4</text>
+                  <text x="312" y="244">5</text>
+                  <text x="360" y="244">6</text>
+                </g>
+              </svg><a href="#section-3.2-12.1.1" class="pilcrow">¶</a>
+</div>
+</div>
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
-<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof. The server proves to the client that it correctly extended the tree by giving it the hashes of marked nodes ([X] / (X)). The client can verify that it can construct the old root hash from the hashes of nodes marked by (X), and that it can construct the new root hash when also considering the hash of the node [X].</a>
+<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -1759,8 +1765,8 @@ search key.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
 <p id="section-3.3-8">The value of a leaf node is the encoded key-value pair, while the value of a
 parent node is the hash of the combined values of its left and right children
 (or a stand-in value when one of the children doesn't exist).<a href="#section-3.3-8" class="pilcrow">¶</a></p>
-<p id="section-3.3-9">A proof of membership is given by providing the leaf hash value, along with the
-hash value of each copath entry along the search path. A proof of non-membership
+<p id="section-3.3-9">A proof of membership is given by providing the leaf value, along with the
+value of each copath entry along the search path. A proof of non-membership
 is given by providing an abridged proof of membership that follows the
 path for the intended search key, but ends either at a stand-in node or a leaf for a
 different search key. In either case, the proof is verified by hashing together the
@@ -3369,7 +3375,7 @@ uint16 CipherSuite;
 <a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.ietf-keytrans-architecture">[I-D.ietf-keytrans-architecture]</dt>
+<dt id="ARCH">[ARCH]</dt>
         <dd>
 <span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-03</span>, <time datetime="2025-02-25" class="refDate">25 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
