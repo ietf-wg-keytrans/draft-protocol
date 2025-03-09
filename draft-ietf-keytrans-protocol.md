@@ -206,12 +206,13 @@ construct the left-balanced binary tree with `n+1` leaves.
 
 Index:  0     1     2     3     4     5
 ~~~
-{: title="Example of inserting a new leaf with index 5 into the previously
-depicted log tree. Observe that only the nodes on the path from the new root to
-the new leaf change."}
+{: title="Example of inserting a new leaf with index 5 into the
+previously-depicted log tree. Observe that only the nodes on the path from the
+new root to the new leaf change."}
 
-While leaves can have arbitrary data as their value, the value of a parent node
-is always the hash of the combined values of its left and right children.
+Leaves can have arbitrary data as their value, and are frequently referred to as
+"log entries" later in the document. The value of a parent node is always the
+hash of the combined values of its left and right children.
 
 Log trees are powerful in that they can provide both *inclusion proofs*, which
 demonstrate that a leaf is included in a log, and *consistency proofs*, which
@@ -231,13 +232,6 @@ proof is verified by hashing the leaf value together with the copath values,
 re-computing the head values of non-balanced subtrees where needed, and checking
 that the result equals the root value of the log.
 
-When requesting a consistency proof, verifiers are expected to have retained the
-head values of the largest-possible balanced subtrees (these will later be
-defined as the "full subtrees") of the previous version of the log. A
-consistency proof then consists of the minimum set of node values that are
-necessary to compute the root value of the new version of the log from the
-values that the verifier retained.
-
 ~~~ aasvg
                              X
                              |
@@ -256,9 +250,14 @@ Index:  0     1     2     3     4     5
 ~~~
 {: title="Illustration of an inclusion proof. To verify that leaf 2 is included
 in the tree, the prover provides the verifier with the values of leaf 2's
-copath. This is the minimum set of values that are necessary for the verifier to
-compute the root. In the figure, the copath consists of the nodes marked by
-(X)."}
+copath. These nodes are marked by (X)."}
+
+When requesting a consistency proof, verifiers are expected to have retained the
+head values of the largest-possible balanced subtrees (these will later be
+defined as the "full subtrees") of the previous version of the log. A
+consistency proof then consists of the minimum set of node values that are
+necessary to compute the root value of the new version of the log from the
+values that the verifier retained.
 
 ~~~ aasvg
                              X
@@ -369,31 +368,28 @@ correct. However, it's not possible to efficiently prove that a new version of a
 prefix tree contains the same data as a previous version with only new values
 added.
 
-In the combined tree structure, based on {{Merkle2}}, a prefix tree contains a
-mapping where each label-version pair has a search key, and the search key maps to
-a cryptographic commitment to the label's new contents. A log tree
-contains a record of each version of the prefix tree and the timestamp that it
-was created in milliseconds since the Unix epoch. With some caveats, this
-combined structure supports both efficient consistency proofs and can be
-efficiently searched.
+In the combined tree structure, based on {{Merkle2}}, each label-version pair
+stored by a Transparency Log corresponds to a search key in a prefix tree. This
+prefix tree maps the label-version pair's search key to a commitment to the
+label's contents at that version. To allow users to track changes to the prefix
+tree, a log tree contains a record of each version of the prefix tree along with
+the timestamp of when it was published. With some caveats, this combined
+structure supports both efficient consistency proofs and can be efficiently
+searched.
 
 Note that, although the Transparency Log maintains a single logical prefix tree,
-each modification of this tree results in a new root hash which is then stored
-in the log tree. As part of the protocol, the Transparency Log is often
-required to perform lookups in different versions of the prefix tree. Therefore,
-when instructions refer to "looking up a label-version pair in the prefix tree
-at a given log entry," this means performing the search in the specific version
-of the prefix tree whose root hash is stored at that log entry (where a "log
-entry" refers to a leaf of the log tree).
+each modification of the prefix tree results in a new root value which is then
+stored in the log tree. As part of the protocol, the Transparency Log is often
+required to perform lookups in different versions of the prefix tree. Different
+versions of the prefix tree are identified by the log entry where their root
+value was stored.
 
 ~~~ aasvg
-Epoch:          n                            n+1
-                             ==>
-Log tree:       o                             o
-           o----+----.             o----------+---------o
-          / \         \           / \            .------+----.
-         /   \         |         /   \          /             \
-        /_____\   [T_n; PT_n]   /_____\   [T_n; PT_n]   [T_n+1; PT_n+1]
+        o                                   o
+   o----+----.                   o----------+---------o
+  / \         \         ==>     / \            .------+----.
+ /   \         |               /   \          /             \
+/_____\   (T_n, PT_n)         /_____\   (T_n, PT_n)   (T_n+1, PT_n+1)
 ~~~
 {: title="An example evolution of the combined tree structure. At every epoch, a
 new leaf is added to a log tree containing the timestamp T_n and the new
@@ -405,30 +401,29 @@ prefix tree root hash PT_n."}
 As users interact with the Transparency Log over time, they will see many
 different root hashes as the contents of the log changes. It's necessary for
 users to guarantee that the root hashes they observe are consistent with respect
-to a few important properties:
+to two important properties:
 
 - If root hash B is shown after root hash A, then root hash B contains all the
-  same log entries as A (with some new ones potentially added).
-- If the rightmost log entry of the tree with root hash A has timestamp
-  T_a, and the rightmost log entry of the tree with root hash B has timestamp
-  T_b, then T_b is greater than or equal to T_a.
-  - Furthermore, all log entries between the rightmost log entry of A and the
-    rightmost log entry of B have monotonically increasing timestamps.
+  same log entries as A with any new log entries added to the rightmost edge of
+  A.
+- All log entries in the range starting from the rightmost log entry of A and
+  ending at the rightmost log entry of B, have monotonically increasing
+  timestamps.
 
 The first property is necessary to ensure that the Transparency Log never
 removes a log entry after showing it to a user, as this would allow the
-Transparency Log to remove evidence of its own misbehavior. The second two
-properties ensure that all users have a consistent view of when each portion of
-the tree was created. Disagreement on when portions of the tree were created is
-functionally a fork and it introduces the same security issues. This is because,
-as will be discussed in later sections, users rely on log entry timestamps to
-decide whether to continue monitoring certain labels, or which portions of the
-tree to skip when searching.
+Transparency Log to remove evidence of its own misbehavior. The second property
+ensures that all users have a consistent view of when each portion of the tree
+was created. As will be discussed in later sections, users rely on log entry
+timestamps to decide whether to continue monitoring certain labels and which
+portions of the tree to skip when searching. Disagreement on when portions of
+the tree were created can cause users to disagree on the value of a
+label-version pair, introducing the same security issues as a fork.
 
-Proving the first property, that the log tree is append-only, can be done with a
-typical consistency proof. Proving the latter two properties, that newly added
-log entries have monotonically increasing timestamps, requires establishing
-some additional structure on the log's contents.
+Proving the first property, that the log tree is append-only, can be done by
+providing a consistency proof from the log tree. Proving the second property,
+that newly added log entries have monotonically increasing timestamps, requires
+establishing some additional structure on the log's contents.
 
 ## Implicit Binary Search Tree
 
@@ -468,20 +463,24 @@ Users ensure that log entry timestamps are monotonic by enforcing that the
 structure of this search tree holds. That is, users check that any timestamp
 they observe in the root's left subtree is less than or equal to the root's
 timestamp, and that any timestamp they observe in the root's right subtree is
-greater than or equal to the root's timestamp (and so on recursively). Following
-this tree structure ensures that users can quickly detect misbehavior while
-minimizing the number of log entries that need to be checked. For example, in a
-log with 50 entries, instead of having the root be the typical "middle" entry of
-`50/2 = 25`, it would be entry `31`. The next entry to check to the root's right
-would be `31 + 16 = 47`. As more entries are added to the log, users will
-consistently revisit entries 31 and 47, while they may never revisit entry 25
-after even a single new entry is added to the log.
+greater than or equal to the root's timestamp, and so on recursively. Following
+this tree structure ensures that users can detect misbehavior quickly while
+minimizing the number of log entries that need to be checked.
+
+As an example, consider a log with 50 entries. Instead of having the root be the
+typical "middle" entry of `50/2 = 25`, the root would be entry 31. As new log
+entries are added to the tree's right edge, users will consistently check that
+their timestamps are greater than or equal to the timestamp of entry 31. This is
+until a new root is established with the creation of entry 63. Once entry 63 is
+established, the timestamp of entry 63 is verified to be greater than or equal
+that of entry 31, and from then on the timestamps of new log entries are checked
+against entry 63.
 
 Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the **frontier** of the log. The frontier consists of the root log
 entry, followed by the entries produced by repeatedly moving right until
 reaching the last entry of the log. Using the same example of a log with 50
-entries, the frontier would be entries: 31, 47, 49.
+entries, the frontier would be entries: `31, 47, 49`.
 
 Example code for efficiently navigating the implicit binary search tree is
 provided in {{appendix-implicit-search-tree}}.
@@ -491,38 +490,36 @@ provided in {{appendix-implicit-search-tree}}.
 Users retain the following information about the last tree head they've
 observed:
 
-1. The "size" of the log tree, defined as the number of log entries (leaves) it
-   contains.
-2. The root hashes of the "full subtrees" of the log tree. The full subtrees are
-   the balanced subtrees which are as large as possible. That is, they do not
-   have another balanced subtree as their parent. This allows the Transparency
-   Log to provide more space-efficient consistency and inclusion proofs than if
-   just the root hash was retained.
-3. The timestamps of the log entries along the frontier. This will be used to
-   ensure that subsequent log entry timestamps are correct.
+1. The size of the log tree (that is, the number of leaves it contained).
+2. The head values of the **full subtrees** of the log tree. The full subtrees
+   are the balanced subtrees which are as large as possible, meaning that they
+   do not have another balanced subtree as their parent.
+3. The timestamps of the log entries along the frontier.
 
 When users make queries to the Transparency Log, they advertise the size of the
-last tree head they've observed. If the Transparency Log responds with an
+last tree head they observed. If the Transparency Log responds with an
 updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
 following:
 
-- Starting with the rightmost log entry from the tree that was advertised by
-  the user, compute its direct path in the new implicit binary
-  search tree. Provide the log entry timestamp for each element of the direct
-  path that's to the right of the advertised log entry.
+- In the new implicit binary search tree, compute the direct path of the log
+  entry with index `size-1`, where `size` is the tree size advertised by the
+  user. Provide the timestamp of each log entry in the direct path whose index
+  is greater than or equal to `size`.
 - Exactly one of these log entries will lie on the new tree's frontier. From
   this log entry, compute the remainder of the frontier. That is, compute the
   log entry's right child, the right child's right child, and so on. Provide
   the timestamps for these log entries as well.
 
-Users verify that each timestamp is greater than or equal to the last. While
-this only requires users to verify a logarithmic number of the newly added log
-entries' timestamps, it guarantees that two users with overlapping views of the
-tree will detect any violations. Note that retaining only the rightmost log
-entry's timestamp would be sufficient for this purpose, but users retain the
-timestamps of all log entries along the frontier. The additional timestamps are
-retained to make later parts of the protocol more efficient.
+Users verify that the first timestamp is greater than or equal to the timestamp
+of the rightmost log entry they retained, and that each subsequent timestamp is
+greater than or equal to the one prior. While this only requires users to verify
+a logarithmic number of the newly added log entries' timestamps, it guarantees
+that two users with overlapping views of the tree will detect any violations.
+While retaining only the rightmost log entry's timestamp would be sufficient for
+this purpose, users retain the timestamps of all log entries along the frontier.
+The additional timestamps are retained to make later parts of the protocol more
+efficient.
 
 Additionally, the Transparency Log defines two durations: how far ahead and how
 far behind the current time the rightmost log entry's timestamp may be. Users
@@ -533,6 +530,7 @@ have a previous tree head to advertise, the Transparency Log simply provides the
 timestamps of the log entries on the frontier. The user verifies each timestamp
 is greater than or equal to the last, as above.
 
+<!-- TODO: Do we need to provide timestamps from first log entry up to root? -->
 
 # Fixed-Version Searches
 
