@@ -99,7 +99,7 @@ public keys have been associated with their account, indicating a potential
 compromise.
 
 More detailed information about the protocol participants and the ways the
-protocol can be deployed can be found in {{!I-D.ietf-keytrans-architecture}}.
+protocol can be deployed can be found in {{!ARCH=I-D.ietf-keytrans-architecture}}.
 
 # Conventions and Definitions
 
@@ -116,33 +116,31 @@ properties are maintained.
 
 # Tree Construction
 
-A Transparency Log is a verifiable data structure that maps *label-version
-pairs* to cryptographic keys or other structured data. Labels correspond to user
-identifiers, and a new version of a label is created each time the label's
-associated value changes. Transparency Logs have an *epoch* counter which is
-incremented every time a new set of label-version pairs are added.
+A Transparency Log is a verifiable data structure that maps a *label-version
+pair* to some unstructured data such as a cryptographic public key. Labels
+correspond to user identifiers, and a new version of a label is created each
+time the label's associated value changes.
 
-KT uses a *prefix tree* to establish a mapping between each label-version pair
-and a commitment to the label's value at that version. Every time the prefix
+KT uses a *prefix tree* to store a mapping from each label-version pair
+to a commitment to the label's value at that version. Every time the prefix
 tree changes, its new root hash and the current timestamp are stored in a *log
-tree*. The benefit of the prefix tree is that it is easily searchable, and the
+tree*. The benefit of the prefix tree is that it is easily searchable and the
 benefit of the log tree is that it can easily be verified to be append-only. The
 data structure powering KT combines a log tree and a prefix tree, and is called
 the *combined tree*.
 
-This section describes the operation of both prefix and log trees at a high
-level and the way that they're combined. More precise algorithms for computing
+This section describes the operation of prefix trees, log trees, and the
+combined tree structure, at a high level. More precise algorithms for computing
 the intermediate and root values of the trees are given in
 {{cryptographic-computations}}.
 
 ## Terminology
 
-Trees consist of
-*nodes*, which have a byte string as their *hash value*. A node is either a
-*leaf* if it has no children, or a *parent*
-if it has either a *left child* or a *right child*. A node is the *root* of a
-tree if it has no parents, and an *intermediate* if it has both children and
-parents. Nodes are *siblings* if they share the same parent.
+Trees consist of *nodes*, which have a byte string as their *value*. A node is
+either a *leaf* if it has no children, or a *parent* if it has either a *left
+child* or a *right child*. A node is the *root* of a tree if it has no parents,
+and an *intermediate* if it has both children and parents. Nodes are *siblings*
+if they share the same parent.
 
 The *descendants* of a node are that node, its children, and the descendants of
 its children. A *subtree* of a tree is the tree given by the descendants of a
@@ -158,8 +156,8 @@ contains.
 
 ## Log Tree
 
-Log trees are used for storing information in the chronological order that it
-was added and are constructed as *left-balanced* binary trees.
+Log trees store information in the chronological order that it was added, and
+are constructed as *left-balanced* binary trees.
 
 A binary tree is *balanced* if its size is a power of two and for any parent
 node in the tree, its left and right subtrees have the same size. A binary tree
@@ -212,31 +210,33 @@ Index:  0     1     2     3     4     5
 depicted log tree. Observe that only the nodes on the path from the new root to
 the new leaf change."}
 
-While leaves contain arbitrary data, the value of a parent node is always the
-hash of the combined values of its left and right children.
+While leaves can have arbitrary data as their value, the value of a parent node
+is always the hash of the combined values of its left and right children.
 
 Log trees are powerful in that they can provide both *inclusion proofs*, which
 demonstrate that a leaf is included in a log, and *consistency proofs*, which
-demonstrate that a new version of a log is an extension of a past version of the
-log.
+demonstrate that a new version of a log is an extension of a previous version.
 
-An inclusion proof is given by providing the copath values of a leaf. The proof
-is verified by hashing together the leaf with the copath values and checking
-that the result equals the root hash value of the log. Consistency proofs are a
-more general version of the same idea. With a consistency proof, the prover
-provides the minimum set of intermediate node values from the current tree that
-allows the verifier to compute both the old root value and the current root
-value.
+Inclusion and consistency proofs in KT differ from similar protocols in that
+proofs only ever contain the values of nodes that are the head of a balanced
+subtree. Whenever the value of the head of a non-balanced subtree is needed by a
+verifier, the prover breaks down the non-balanced subtree into the
+smallest-possible number of balanced subtrees and provides the value of the head
+of each. This allows verifiers to cache a larger number of intermediate values
+than would otherwise be possible, reducing the size of subsequent responses.
 
-However, the protocol described in this document generally doesn't provide pure
-inclusion or consistency proofs to verifiers. Instead, it relies on the more
-general idea of providing the smallest number of intermediate node values that are
-necessary to allow a verifier to compute the tree's root hash from
-intermediate and leaf values that they already have. The verifier may already have
-intermediate and leaf values because they were provided by the Transparency Log as
-part of its response to the current query, or because they were retained from
-responses to previous queries. This pattern of providing proofs ensures that
-there is minimal on-the-wire redundancy.
+As a result, an inclusion proof for a leaf is given by providing the copath
+values of the leaf with any non-balanced subtrees broken down as mentioned. The
+proof is verified by hashing the leaf value together with the copath values,
+re-computing the head values of non-balanced subtrees where needed, and checking
+that the result equals the root value of the log.
+
+When requesting a consistency proof, verifiers are expected to have retained the
+head values of the largest-possible balanced subtrees (these will later be
+defined as the "full subtrees") of the previous version of the log. A
+consistency proof then consists of the minimum set of node values that are
+necessary to compute the root value of the new version of the log from the
+values that the verifier retained.
 
 ~~~ aasvg
                              X
@@ -247,40 +247,39 @@ there is minimal on-the-wire redundancy.
                  |                 |
              .---+---.             |
             /         \            |
-          (X)           X         (X)
+          (X)          X          (X)
           / \         / \         / \
          /   \       /   \       /   \
-        X     X     X   (X)    X     X
+        X     X     X    (X)    X     X
 
 Index:  0     1     2     3     4     5
 ~~~
-{: title="Illustration of a proof of inclusion. To verify that leaf 2 is
-included in the tree, the server provides the client with the hashes of the
-nodes on its copath, i.e., all hashes that are required for the client to
-compute the root hash itself. In the figure, the copath consists of the nodes
-marked by (X)."}
+{: title="Illustration of an inclusion proof. To verify that leaf 2 is included
+in the tree, the prover provides the verifier with the values of leaf 2's
+copath. This is the minimum set of values that are necessary for the verifier to
+compute the root. In the figure, the copath consists of the nodes marked by
+(X)."}
 
 ~~~ aasvg
                              X
                              |
-                   .---------+----.
-                  /                \
-                (X)                 |
-                 |                 |
-             .---+---.             |
-            /         \            |
-           X           X           X
-          / \         / \         / \
-         /   \       /   \       /   \
-        X     X     X     X    (X)   [X]
+                   .---------+---------.
+                  /                     \
+                (X)                      X
+                 |                       |
+             .---+---.               .---+.
+            /         \             /      \
+           X           X           X        |
+          / \         / \         / \       |
+         /   \       /   \       /   \      |
+        X     X     X     X    (X)   [X]   [X]
 
-Index:  0     1     2     3     4     5
+Index:  0     1     2     3     4     5     6
 ~~~
-{: title="Illustration of a consistency proof. The server proves to the client
-that it correctly extended the tree by giving it the hashes of marked nodes
-([X] / (X)). The client can verify that it can construct the old root hash
-from the hashes of nodes marked by (X), and that it can construct the new root
-hash when also considering the hash of the node [X]."}
+{: title="Illustration of a consistency proof. The verifier is expected to
+already have the values (X), so the prover provides the verifier with the values
+of the nodes marked [X]. By combining these, the verifier is able to compute the
+new root value of the log."}
 
 ## Prefix Tree
 
@@ -351,8 +350,8 @@ The value of a leaf node is the encoded key-value pair, while the value of a
 parent node is the hash of the combined values of its left and right children
 (or a stand-in value when one of the children doesn't exist).
 
-A proof of membership is given by providing the leaf hash value, along with the
-hash value of each copath entry along the search path. A proof of non-membership
+A proof of membership is given by providing the leaf value, along with the
+value of each copath entry along the search path. A proof of non-membership
 is given by providing an abridged proof of membership that follows the
 path for the intended search key, but ends either at a stand-in node or a leaf for a
 different search key. In either case, the proof is verified by hashing together the
