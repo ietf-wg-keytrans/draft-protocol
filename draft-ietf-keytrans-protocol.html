@@ -1517,10 +1517,11 @@ construct the left-balanced binary tree with <code>n+1</code> leaves.<a href="#s
 </div>
 </div>
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
-<a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
+<a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously-depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
           </figcaption></figure>
-<p id="section-3.2-6">While leaves can have arbitrary data as their value, the value of a parent node
-is always the hash of the combined values of its left and right children.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
+<p id="section-3.2-6">Leaves can have arbitrary data as their value, and are frequently referred to as
+"log entries" later in the document. The value of a parent node is always the
+hash of the combined values of its left and right children.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
 <p id="section-3.2-7">Log trees are powerful in that they can provide both <em>inclusion proofs</em>, which
 demonstrate that a leaf is included in a log, and <em>consistency proofs</em>, which
 demonstrate that a new version of a log is an extension of a previous version.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
@@ -1536,15 +1537,9 @@ values of the leaf with any non-balanced subtrees broken down as mentioned. The
 proof is verified by hashing the leaf value together with the copath values,
 re-computing the head values of non-balanced subtrees where needed, and checking
 that the result equals the root value of the log.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
-<p id="section-3.2-10">When requesting a consistency proof, verifiers are expected to have retained the
-head values of the largest-possible balanced subtrees (these will later be
-defined as the "full subtrees") of the previous version of the log. A
-consistency proof then consists of the minimum set of node values that are
-necessary to compute the root value of the new version of the log from the
-values that the verifier retained.<a href="#section-3.2-10" class="pilcrow">¶</a></p>
 <span id="name-illustration-of-an-inclusio"></span><figure id="figure-3">
-          <div id="section-3.2-11.1">
-            <div class="alignLeft art-svg artwork" id="section-3.2-11.1.1">
+          <div id="section-3.2-10.1">
+            <div class="alignLeft art-svg artwork" id="section-3.2-10.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="320" viewBox="0 0 320 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
                 <path d="M 240,48 L 240,64" fill="none" stroke="black"></path>
@@ -1581,12 +1576,18 @@ values that the verifier retained.<a href="#section-3.2-10" class="pilcrow">¶</
                   <text x="264" y="244">4</text>
                   <text x="312" y="244">5</text>
                 </g>
-              </svg><a href="#section-3.2-11.1.1" class="pilcrow">¶</a>
+              </svg><a href="#section-3.2-10.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
-<a href="#name-illustration-of-an-inclusio" class="selfRef">Illustration of an inclusion proof. To verify that leaf 2 is included in the tree, the prover provides the verifier with the values of leaf 2's copath. This is the minimum set of values that are necessary for the verifier to compute the root. In the figure, the copath consists of the nodes marked by (X).</a>
+<a href="#name-illustration-of-an-inclusio" class="selfRef">Illustration of an inclusion proof. To verify that leaf 2 is included in the tree, the prover provides the verifier with the values of leaf 2's copath. These nodes are marked by (X).</a>
           </figcaption></figure>
+<p id="section-3.2-11">When requesting a consistency proof, verifiers are expected to have retained the
+head values of the largest-possible balanced subtrees (these will later be
+defined as the "full subtrees") of the previous version of the log. A
+consistency proof then consists of the minimum set of node values that are
+necessary to compute the root value of the new version of the log from the
+values that the verifier retained.<a href="#section-3.2-11" class="pilcrow">¶</a></p>
 <span id="name-illustration-of-a-consisten"></span><figure id="figure-4">
           <div id="section-3.2-12.1">
             <div class="alignLeft art-svg artwork" id="section-3.2-12.1.1">
@@ -1787,60 +1788,54 @@ inclusion proofs to convince verifiers that the returned search results are
 correct. However, it's not possible to efficiently prove that a new version of a
 prefix tree contains the same data as a previous version with only new values
 added.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
-<p id="section-3.4-2">In the combined tree structure, based on <span>[<a href="#Merkle2" class="cite xref">Merkle2</a>]</span>, a prefix tree contains a
-mapping where each label-version pair has a search key, and the search key maps to
-a cryptographic commitment to the label's new contents. A log tree
-contains a record of each version of the prefix tree and the timestamp that it
-was created in milliseconds since the Unix epoch. With some caveats, this
-combined structure supports both efficient consistency proofs and can be
-efficiently searched.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">In the combined tree structure, based on <span>[<a href="#Merkle2" class="cite xref">Merkle2</a>]</span>, each label-version pair
+stored by a Transparency Log corresponds to a search key in a prefix tree. This
+prefix tree maps the label-version pair's search key to a commitment to the
+label's contents at that version. To allow users to track changes to the prefix
+tree, a log tree contains a record of each version of the prefix tree along with
+the timestamp of when it was published. With some caveats, this combined
+structure supports both efficient consistency proofs and can be efficiently
+searched.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
 <p id="section-3.4-3">Note that, although the Transparency Log maintains a single logical prefix tree,
-each modification of this tree results in a new root hash which is then stored
-in the log tree. As part of the protocol, the Transparency Log is often
-required to perform lookups in different versions of the prefix tree. Therefore,
-when instructions refer to "looking up a label-version pair in the prefix tree
-at a given log entry," this means performing the search in the specific version
-of the prefix tree whose root hash is stored at that log entry (where a "log
-entry" refers to a leaf of the log tree).<a href="#section-3.4-3" class="pilcrow">¶</a></p>
+each modification of the prefix tree results in a new root value which is then
+stored in the log tree. As part of the protocol, the Transparency Log is often
+required to perform lookups in different versions of the prefix tree. Different
+versions of the prefix tree are identified by the log entry where their root
+value was stored.<a href="#section-3.4-3" class="pilcrow">¶</a></p>
 <span id="name-an-example-evolution-of-the"></span><figure id="figure-7">
           <div id="section-3.4-4.1">
             <div class="alignLeft art-svg artwork" id="section-3.4-4.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="576" viewBox="0 0 576 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
-                <path d="M 136,64 L 136,80" fill="none" stroke="black"></path>
-                <path d="M 376,64 L 376,80" fill="none" stroke="black"></path>
-                <path d="M 456,80 L 456,96" fill="none" stroke="black"></path>
-                <path d="M 240,46 L 256,46" fill="none" stroke="black"></path>
-                <path d="M 240,50 L 256,50" fill="none" stroke="black"></path>
-                <path d="M 104,80 L 176,80" fill="none" stroke="black"></path>
-                <path d="M 296,80 L 448,80" fill="none" stroke="black"></path>
-                <path d="M 400,96 L 496,96" fill="none" stroke="black"></path>
-                <path d="M 96,80 L 124,136" fill="none" stroke="black"></path>
-                <path d="M 176,80 L 192,112" fill="none" stroke="black"></path>
-                <path d="M 288,80 L 316,136" fill="none" stroke="black"></path>
-                <path d="M 496,96 L 504,112" fill="none" stroke="black"></path>
-                <path d="M 68,136 L 96,80" fill="none" stroke="black"></path>
-                <path d="M 260,136 L 288,80" fill="none" stroke="black"></path>
-                <path d="M 392,112 L 400,96" fill="none" stroke="black"></path>
-                <path d="M 68,136 L 124,136" fill="none" stroke="black"></path>
-                <path d="M 260,136 L 316,136" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="264,48 252,42.4 252,53.6" fill="black" transform="rotate(0,256,48)"></polygon>
-                <circle cx="96" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="136" cy="64" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="288" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="376" cy="64" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="456" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="112" width="560" viewBox="0 0 560 112" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 72,32 L 72,48" fill="none" stroke="black"></path>
+                <path d="M 360,32 L 360,48" fill="none" stroke="black"></path>
+                <path d="M 440,48 L 440,64" fill="none" stroke="black"></path>
+                <path d="M 40,48 L 112,48" fill="none" stroke="black"></path>
+                <path d="M 280,48 L 432,48" fill="none" stroke="black"></path>
+                <path d="M 200,62 L 216,62" fill="none" stroke="black"></path>
+                <path d="M 200,66 L 216,66" fill="none" stroke="black"></path>
+                <path d="M 384,64 L 480,64" fill="none" stroke="black"></path>
+                <path d="M 32,48 L 60,104" fill="none" stroke="black"></path>
+                <path d="M 112,48 L 128,80" fill="none" stroke="black"></path>
+                <path d="M 272,48 L 300,104" fill="none" stroke="black"></path>
+                <path d="M 480,64 L 488,80" fill="none" stroke="black"></path>
+                <path d="M 4,104 L 32,48" fill="none" stroke="black"></path>
+                <path d="M 244,104 L 272,48" fill="none" stroke="black"></path>
+                <path d="M 376,80 L 384,64" fill="none" stroke="black"></path>
+                <path d="M 4,104 L 60,104" fill="none" stroke="black"></path>
+                <path d="M 244,104 L 300,104" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="224,64 212,58.4 212,69.6" fill="black" transform="rotate(0,216,64)"></polygon>
+                <circle cx="32" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="72" cy="32" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="272" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="360" cy="32" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="440" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
                 <g class="text">
-                  <text x="28" y="36">Epoch:</text>
-                  <text x="136" y="36">n</text>
-                  <text x="376" y="36">n+1</text>
-                  <text x="16" y="68">Log</text>
-                  <text x="56" y="68">tree:</text>
-                  <text x="168" y="132">[T_n;</text>
-                  <text x="216" y="132">PT_n]</text>
-                  <text x="360" y="132">[T_n;</text>
-                  <text x="408" y="132">PT_n]</text>
-                  <text x="480" y="132">[T_n+1;</text>
-                  <text x="544" y="132">PT_n+1]</text>
+                  <text x="104" y="100">(T_n,</text>
+                  <text x="152" y="100">PT_n)</text>
+                  <text x="344" y="100">(T_n,</text>
+                  <text x="392" y="100">PT_n)</text>
+                  <text x="464" y="100">(T_n+1,</text>
+                  <text x="528" y="100">PT_n+1)</text>
                 </g>
               </svg><a href="#section-3.4-4.1.1" class="pilcrow">¶</a>
 </div>
@@ -1860,37 +1855,32 @@ entry" refers to a leaf of the log tree).<a href="#section-3.4-3" class="pilcrow
 <p id="section-4-1">As users interact with the Transparency Log over time, they will see many
 different root hashes as the contents of the log changes. It's necessary for
 users to guarantee that the root hashes they observe are consistent with respect
-to a few important properties:<a href="#section-4-1" class="pilcrow">¶</a></p>
+to two important properties:<a href="#section-4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4-2.1">
           <p id="section-4-2.1.1">If root hash B is shown after root hash A, then root hash B contains all the
-same log entries as A (with some new ones potentially added).<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
+same log entries as A with any new log entries added to the rightmost edge of
+A.<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-4-2.2">
-          <p id="section-4-2.2.1">If the rightmost log entry of the tree with root hash A has timestamp
-T_a, and the rightmost log entry of the tree with root hash B has timestamp
-T_b, then T_b is greater than or equal to T_a.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4-2.2.2.1">
-              <p id="section-4-2.2.2.1.1">Furthermore, all log entries between the rightmost log entry of A and the
-rightmost log entry of B have monotonically increasing timestamps.<a href="#section-4-2.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+          <p id="section-4-2.2.1">All log entries in the range starting from the rightmost log entry of A and
+ending at the rightmost log entry of B, have monotonically increasing
+timestamps.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-4-3">The first property is necessary to ensure that the Transparency Log never
 removes a log entry after showing it to a user, as this would allow the
-Transparency Log to remove evidence of its own misbehavior. The second two
-properties ensure that all users have a consistent view of when each portion of
-the tree was created. Disagreement on when portions of the tree were created is
-functionally a fork and it introduces the same security issues. This is because,
-as will be discussed in later sections, users rely on log entry timestamps to
-decide whether to continue monitoring certain labels, or which portions of the
-tree to skip when searching.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">Proving the first property, that the log tree is append-only, can be done with a
-typical consistency proof. Proving the latter two properties, that newly added
-log entries have monotonically increasing timestamps, requires establishing
-some additional structure on the log's contents.<a href="#section-4-4" class="pilcrow">¶</a></p>
+Transparency Log to remove evidence of its own misbehavior. The second property
+ensures that all users have a consistent view of when each portion of the tree
+was created. As will be discussed in later sections, users rely on log entry
+timestamps to decide whether to continue monitoring certain labels and which
+portions of the tree to skip when searching. Disagreement on when portions of
+the tree were created can cause users to disagree on the value of a
+label-version pair, introducing the same security issues as a fork.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">Proving the first property, that the log tree is append-only, can be done by
+providing a consistency proof from the log tree. Proving the second property,
+that newly added log entries have monotonically increasing timestamps, requires
+establishing some additional structure on the log's contents.<a href="#section-4-4" class="pilcrow">¶</a></p>
 <div id="implicit-binary-search-tree">
 <section id="section-4.1">
         <h3 id="name-implicit-binary-search-tree">
@@ -1972,21 +1962,24 @@ root.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 structure of this search tree holds. That is, users check that any timestamp
 they observe in the root's left subtree is less than or equal to the root's
 timestamp, and that any timestamp they observe in the root's right subtree is
-greater than or equal to the root's timestamp (and so on recursively). Following
-this tree structure ensures that users can quickly detect misbehavior while
-minimizing the number of log entries that need to be checked. For example, in a
-log with 50 entries, instead of having the root be the typical "middle" entry of
-<code>50/2 = 25</code>, it would be entry <code>31</code>. The next entry to check to the root's right
-would be <code>31 + 16 = 47</code>. As more entries are added to the log, users will
-consistently revisit entries 31 and 47, while they may never revisit entry 25
-after even a single new entry is added to the log.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
-<p id="section-4.1-5">Because we are often looking at the rightmost log entry, it is frequently useful
+greater than or equal to the root's timestamp, and so on recursively. Following
+this tree structure ensures that users can detect misbehavior quickly while
+minimizing the number of log entries that need to be checked.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">As an example, consider a log with 50 entries. Instead of having the root be the
+typical "middle" entry of <code>50/2 = 25</code>, the root would be entry 31. As new log
+entries are added to the tree's right edge, users will consistently check that
+their timestamps are greater than or equal to the timestamp of entry 31. This is
+until a new root is established with the creation of entry 63. Once entry 63 is
+established, the timestamp of entry 63 is verified to be greater than or equal
+that of entry 31, and from then on the timestamps of new log entries are checked
+against entry 63.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the <strong>frontier</strong> of the log. The frontier consists of the root log
 entry, followed by the entries produced by repeatedly moving right until
 reaching the last entry of the log. Using the same example of a log with 50
-entries, the frontier would be entries: 31, 47, 49.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1-6">Example code for efficiently navigating the implicit binary search tree is
-provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">Appendix A</a>.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+entries, the frontier would be entries: <code>31, 47, 49</code>.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-7">Example code for efficiently navigating the implicit binary search tree is
+provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">Appendix A</a>.<a href="#section-4.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="update-algorithm">
@@ -1998,32 +1991,28 @@ provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">
 observed:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.2-2">
 <li id="section-4.2-2.1">
-            <p id="section-4.2-2.1.1">The "size" of the log tree, defined as the number of log entries (leaves) it
-contains.<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.1.1">The size of the log tree (that is, the number of leaves it contained).<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.2">
-            <p id="section-4.2-2.2.1">The root hashes of the "full subtrees" of the log tree. The full subtrees are
-the balanced subtrees which are as large as possible. That is, they do not
-have another balanced subtree as their parent. This allows the Transparency
-Log to provide more space-efficient consistency and inclusion proofs than if
-just the root hash was retained.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.2.1">The head values of the <strong>full subtrees</strong> of the log tree. The full subtrees
+are the balanced subtrees which are as large as possible, meaning that they
+do not have another balanced subtree as their parent.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.3">
-            <p id="section-4.2-2.3.1">The timestamps of the log entries along the frontier. This will be used to
-ensure that subsequent log entry timestamps are correct.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.3.1">The timestamps of the log entries along the frontier.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-4.2-3">When users make queries to the Transparency Log, they advertise the size of the
-last tree head they've observed. If the Transparency Log responds with an
+last tree head they observed. If the Transparency Log responds with an
 updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
 following:<a href="#section-4.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-4.1">
-            <p id="section-4.2-4.1.1">Starting with the rightmost log entry from the tree that was advertised by
-the user, compute its direct path in the new implicit binary
-search tree. Provide the log entry timestamp for each element of the direct
-path that's to the right of the advertised log entry.<a href="#section-4.2-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-4.1.1">In the new implicit binary search tree, compute the direct path of the log
+entry with index <code>size-1</code>, where <code>size</code> is the tree size advertised by the
+user. Provide the timestamp of each log entry in the direct path whose index
+is greater than or equal to <code>size</code>.<a href="#section-4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-4.2">
             <p id="section-4.2-4.2.1">Exactly one of these log entries will lie on the new tree's frontier. From
@@ -2032,13 +2021,15 @@ log entry's right child, the right child's right child, and so on. Provide
 the timestamps for these log entries as well.<a href="#section-4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.2-5">Users verify that each timestamp is greater than or equal to the last. While
-this only requires users to verify a logarithmic number of the newly added log
-entries' timestamps, it guarantees that two users with overlapping views of the
-tree will detect any violations. Note that retaining only the rightmost log
-entry's timestamp would be sufficient for this purpose, but users retain the
-timestamps of all log entries along the frontier. The additional timestamps are
-retained to make later parts of the protocol more efficient.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">Users verify that the first timestamp is greater than or equal to the timestamp
+of the rightmost log entry they retained, and that each subsequent timestamp is
+greater than or equal to the one prior. While this only requires users to verify
+a logarithmic number of the newly added log entries' timestamps, it guarantees
+that two users with overlapping views of the tree will detect any violations.
+While retaining only the rightmost log entry's timestamp would be sufficient for
+this purpose, users retain the timestamps of all log entries along the frontier.
+The additional timestamps are retained to make later parts of the protocol more
+efficient.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.2-6">Additionally, the Transparency Log defines two durations: how far ahead and how
 far behind the current time the rightmost log entry's timestamp may be. Users
 verify this against their local clock.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
