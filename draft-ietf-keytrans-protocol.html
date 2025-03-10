@@ -1369,7 +1369,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-2-2">This document uses the TLS presentation language <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> to describe the
 structure of protocol messages, but does not require the use of a specific
 transport protocol. As such, implementations do not necessarily need to transmit
-messages according to the TLS format and can chose whichever encoding method
+messages according to the TLS format and can choose whichever encoding method
 best suits their application. However, cryptographic computations <span class="bcp14">MUST</span> be done
 with the TLS presentation language format to ensure the protocol's security
 properties are maintained.<a href="#section-2-2" class="pilcrow">¶</a></p>
@@ -1517,7 +1517,7 @@ construct the left-balanced binary tree with <code>n+1</code> leaves.<a href="#s
 </div>
 </div>
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
-<a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously-depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
+<a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
           </figcaption></figure>
 <p id="section-3.2-6">Leaves can have arbitrary data as their value, and are frequently referred to as
 "log entries" later in the document. The value of a parent node is always the
@@ -1992,9 +1992,9 @@ observed:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
             <p id="section-4.2-2.1.1">The size of the log tree (that is, the number of leaves it contained).<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.2">
-            <p id="section-4.2-2.2.1">The head values of the <strong>full subtrees</strong> of the log tree. The full subtrees
-are the balanced subtrees which are as large as possible, meaning that they
-do not have another balanced subtree as their parent.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.2.1">The head values of the log tree's <strong>full subtrees</strong>. The full subtrees are
+the balanced subtrees which are as large as possible, meaning that they do
+not have another balanced subtree as their parent.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.3">
             <p id="section-4.2-2.3.1">The timestamps of the log entries along the frontier.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
@@ -2078,7 +2078,7 @@ right until it terminates.<a href="#section-5.1-3.2.1" class="pilcrow">¶</a></p
 </li>
         </ol>
 <p id="section-5.1-4">However, this description implies that the series of lookups is interactive,
-which is not the case. In practice, binary ladders are always executed with
+which it is not. In practice, binary ladders are always executed with
 respect to a specific <strong>target version</strong> which may or may not be the actual
 greatest version of the label. This allows binary ladders to be optimized in two
 ways:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
@@ -2136,9 +2136,9 @@ portion of the tree), it aborts; to the right (into the unexpired portion of the
 tree), it continues.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
 <p id="section-5.2-5">This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
-lifetime need to be retained. Specifically, only a logarithmic number of log
-entries that have passed their maximum lifetime will still be needed by users and
-the rest can be discarded. Pruning is explained in more detail in TODO.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
+lifetime need to be retained. Specifically, users will still need only a
+logarithmic number of log entries that have passed their maximum lifetime,
+meaning the rest can be discarded. Pruning is explained in more detail in TODO.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="fv-algorithm">
@@ -2231,9 +2231,9 @@ find a specific version of a label may change. New intermediate nodes may be
 established between the search root and the log entry, or a new search root may be
 created. The goal of monitoring a label is to efficiently ensure that, when
 these new parent nodes are created, they're created correctly such that searches
-for the same versions continue converging to the same entries in the log.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">Monitoring is performed both by the users that own a label (meaning they are the
-authoritative source for the label's content) and the users that lookup a label.
+for the same versions of a label continue converging to the same entries in the log.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">Monitoring is performed both by the users that own a label, meaning they are the
+authoritative source for the label's content, and the users that lookup a label.
 Owners monitor their labels to ensure that past (expected) versions of a label
 are still correctly stored in the log and that no new (unexpected) versions have
 been added. Users that looked up a label may sometimes need to monitor it
@@ -2246,12 +2246,12 @@ Transparency Log.<a href="#section-6-2" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-6.1-1">Label owners <span class="bcp14">MUST</span> monitor their labels regularly, ensuring that past versions of
 the label are still correctly represented in the log and that any new versions
-of the label are permissible (alerting the user if not). Service Providers
+of the label are permissible (alerting the user if not). Transparency Logs
 define a duration, referred to as the <strong>Reasonable Monitoring
 Window</strong> (RMW), which is the frequency with which the Transparency Log generally
 expects label owners to perform monitoring. The log entry maximum lifetime, if
 defined, <span class="bcp14">MUST</span> be greater than the RMW.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2"><strong>Distinguished</strong> log entries are chosen (according to the algorithm below) such that there is roughly one per
+<p id="section-6.1-2"><strong>Distinguished</strong> log entries are chosen according to the algorithm below such that there is roughly one per
 every interval of the RMW. If a user looks up a label, either through a
 fixed-version or greatest-version search, and finds that the first log entry
 containing their desired label-version pair is to the right of the rightmost
@@ -2261,13 +2261,13 @@ new distinguished log entry is established to its right and the two log entries
 are verified to be consistent. The purpose of this monitoring is to ensure that
 the label-version pair is not removed or obscured by the Transparency Log before
 the label owner has had an opportunity to detect it.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.1-3">However, if a user looks up a label and finds that the first log entry
+<p id="section-6.1-3">If a user looks up a label and finds that the first log entry
 containing the label-version pair is either a distinguished log entry or to the
 left of any distinguished log entry, they are not required to monitor it
 afterwards. The only state that would be retained from the query would be the
 tree head, as discussed in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">"Regular" monitoring <span class="bcp14">SHOULD</span> be performed at least as frequently as the RMW and
-<span class="bcp14">MUST</span> (if at all possible) happen more frequently than the log entry maximum
+<span class="bcp14">MUST</span>, if at all possible, happen more frequently than the log entry maximum
 lifetime.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2300,16 +2300,16 @@ by executing this algorithm with: the given log entry's right child, the
 timestamp of the given log entry, and the given right timestamp.<a href="#section-6.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.2-3">While the algorithm is recursive, it is initially called with these parameters: the
+<p id="section-6.2-3">The algorithm is initialized with these parameters: the
 root node in the implicit binary search tree, the timestamp 0, and the timestamp
 of the rightmost log entry. Note that step 2 is specifically "less than" and not
 "less than or equal to"; this ensures correct behavior when the RMW is zero.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">This process for choosing distinguished log entries ensures that they are
-<strong>regularly spaced</strong>. Having irregularly-spaced distinguished log entries risks
+<strong>regularly spaced</strong>. Having irregularly spaced distinguished log entries risks
 either overwhelming label owners with a large number of them, or delaying
 consensus between users by having arbitrarily few. Distinguished log entries
 must reliably occur at roughly the same interval as the Reasonable Monitoring
-Window regardless of variations in the tree's growth rate or other factors.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+Window regardless of variations in the tree's growth rate.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <p id="section-6.2-5">This process also ensures that distinguished log entries are <strong>stable</strong>. Once a
 log entry is chosen to be distinguished, it will never stop being distinguished.
 This is important because it means that, if a user looks up a label and checks
@@ -2324,25 +2324,25 @@ inspection by the label owner by losing its distinguished status.<a href="#secti
         </h3>
 <p id="section-6.3-1">Similar to the algorithm for searching the tree, the algorithm for monitoring
 the tree requires a way to prove that the greatest version of a label stored in a
-particular log entry is greater than or equal to a target version. Since we
-already know that the target version exists, we only need to prove that there
+particular log entry's prefix tree is greater than or equal to a target version. Since users
+already know that the target version exists, the Transparency Log only needs to prove that there
 has not been an unexpected downgrade. As such, the steps of the binary ladder
 for monitoring, called a <strong>lower-bound binary ladder</strong>, are slightly different
 than for search:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.3-2">
 <li id="section-6.3-2.1">
-            <p id="section-6.3-2.1.1">First, version <code>x</code> of the label is looked up, where <code>x</code> is consecutively higher
-powers of two minus one (0, 1, 3, 7, ...). This is repeated until <code>x</code> is the
+            <p id="section-6.3-2.1.1">First, version <code>x</code> of the label is looked up, where <code>x</code> is a consecutively higher
+power of two minus one (0, 1, 3, 7, ...). This is repeated until <code>x</code> is the
 largest such value less than or equal to the target version.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
-            <p id="section-6.3-2.2.1">Second, the largest <code>x</code> that was looked up is retained, and consecutively
-smaller powers of two are added to it until it equals the target version.
+            <p id="section-6.3-2.2.1">Second, the largest <code>x</code> that was looked up is retained and consecutively
+smaller powers of two are added to such that the final result equals the target version.
 Each time a power of two is added, this version of the label is looked up.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.3-3">This could be equivalently computed as a search binary ladder, excluding lookups
-for any versions greater than the target.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">This could be equivalently computed as a search binary ladder with any lookups
+for versions greater than the target version excluded.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="m-algorithm">
@@ -2369,8 +2369,8 @@ the position-version pair in the map and move on to the next map entry.<a href="
             <p id="section-6.4-3.2.1">Compute the ordered list of log entries to inspect:<a href="#section-6.4-3.2.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.4-3.2.2">
 <li id="section-6.4-3.2.2.1">
-                <p id="section-6.4-3.2.2.1.1">Initiate the list by setting it to be the log entry's direct path in the
-implicit binary search tree based on the current tree size.<a href="#section-6.4-3.2.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-6.4-3.2.2.1.1">Initialize the list by setting it to be the log entry's direct path in the
+implicit binary search tree, based on the current tree size.<a href="#section-6.4-3.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-6.4-3.2.2.2">
                 <p id="section-6.4-3.2.2.2.1">Remove all entries that are to the left of the log entry.<a href="#section-6.4-3.2.2.2.1" class="pilcrow">¶</a></p>
@@ -2398,7 +2398,7 @@ from the map and move on to the next map entry.<a href="#section-6.4-3.4.2.1.1" 
                 <p id="section-6.4-3.4.2.2.1">Receive and verify a lower-bound binary ladder from this log entry for the
 version currently in the map. This proves that, at the indicated log
 entry, the greatest version present is greater than or equal to the
-previously-observed version.<a href="#section-6.4-3.4.2.2.1" class="pilcrow">¶</a></p>
+previously observed version.<a href="#section-6.4-3.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-6.4-3.4.2.3">
                 <p id="section-6.4-3.4.2.3.1">If the above check fails, return an error to the user. Otherwise, remove
@@ -2419,7 +2419,7 @@ monitoring is no longer necessary and the relevant entry is removed from the
 map. Note that users can often execute this process with the output of Search or
 Update operations for a label without waiting to make explicit Monitor queries.
 It is also worth noting that the work required to monitor several versions of
-the same label scales sublinearly due to the fact that the direct paths of the
+the same label scales sublinearly because the direct paths of the
 different versions will often intersect. Intersections reduce the total number
 of entries in the map and therefore the amount of work that will be needed to
 monitor the label from then on.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
@@ -2439,7 +2439,7 @@ binary ladder according to the rules described in <a href="#binary-ladder" class
 lookups for any versions of the label that were already provided in a
 lower-bound binary ladder from the same log entry <em>are</em> omitted.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.4.1-2">Users verify that the version has not unexpectedly increased or decreased, and
-that the binary ladder terminates in way that's consistent with the provided
+that the binary ladder terminates in a way that's consistent with the provided
 version being the greatest that exists. Importantly, users also verify that they
 receive a binary ladder for the distinguished log entry immediately following
 the one they've advertised, the distinguished log entry immediately following
@@ -2450,7 +2450,7 @@ distinguished log entries it provides binary ladders for in a single response.<a
 <p id="section-6.4.1-3">If the user is monitoring the label for the first time since it was created,
 they advertise the first distinguished log entry to the left of the first log
 entry to contain the label. The Transparency Log provides binary ladders for
-subsequent distinguised log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
+subsequent distinguished log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2481,7 +2481,7 @@ the frontier: the starting log entry's right child, the right child's right
 child, and so on until reaching the last log entry. From each of these log
 entries, a binary ladder targeting the label's greatest version is provided.<a href="#section-7-3" class="pilcrow">¶</a></p>
 <p id="section-7-4">As in <a href="#fixed-version-searches" class="auto internal xref">Section 5</a>, users verify that the log entry timestamps and
-the binary ladders from each log entry each represent a monotonically-increasing
+the binary ladders from each log entry each represent a monotonically increasing
 series. Users additionally verify that the binary ladder from the rightmost log
 entry terminates in a way that is consistent with the target version being the
 greatest that exists. If this verification is successful, users move on to
@@ -2517,7 +2517,7 @@ cryptographic computations:<a href="#section-8-1" class="pilcrow">¶</a></p>
           <p id="section-8-2.5.1"><code>Kc</code>: A fixed string of bytes used in the computation of commitments<a href="#section-8-2.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-8-3">The hash algorithm is used for computing the intermediate and root values of
+<p id="section-8-3">The hash algorithm is used to calculate intermediate and root values of
 hash trees. The signature algorithm is used for signatures from both the service
 operator and the third party, if one is present. The VRF is used for preserving
 the privacy of labels. One of the VRF algorithms from <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span> must be
@@ -2577,7 +2577,7 @@ struct {
   };
 
   uint64 max_ahead;
-  unit64 max_behind;
+  uint64 max_behind;
   uint64 reasonable_monitoring_window;
   optional&lt;uint64&gt; maximum_lifetime;
 } Configuration;
@@ -2908,8 +2908,8 @@ struct {
 } CombinedTreeProof;
 </pre><a href="#section-10.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-10.3-5">The elements of the <code>timestamps</code> field are the timestamps of log entries, and
-the elements of the <code>prefix_proofs</code> field are search proofs from the prefix
+<p id="section-10.3-5">The elements of the <code>timestamps</code> field are the timestamps of log entries.
+The elements of the <code>prefix_proofs</code> field are search proofs from the prefix
 trees at particular log entries. There is no explicit indication as to which log
 entry the elements correspond to, as they are provided in the order that the
 algorithm the user is executing would request them. The elements of the
@@ -2918,7 +2918,7 @@ hashes for any log entries whose timestamp was provided in <code>timestamps</cod
 search proof was not provided in <code>prefix_proofs</code>.<a href="#section-10.3-5" class="pilcrow">¶</a></p>
 <p id="section-10.3-6">If a log entry's timestamp is referenced multiple times, its timestamp <span class="bcp14">MUST NOT</span>
 be repeated in <code>timestamps</code> but <span class="bcp14">MUST</span> only be added the first time. Additionally,
-when a user advertises a previously-observed tree size in their request, log
+when a user advertises a previously observed tree size in their request, log
 entry timestamps that the user is expected to have retained are excluded from
 <code>timestamps</code>.<a href="#section-10.3-6" class="pilcrow">¶</a></p>
 <p id="section-10.3-7"><code>prefix_proofs</code> <span class="bcp14">MAY</span> contain multiple <code>PrefixProof</code> structures for the same log
@@ -3127,7 +3127,7 @@ field is empty.<a href="#section-11.1-6" class="pilcrow">¶</a></p>
 leaves where either a search proof was provided in
 <code>search.prefix_proofs</code> or the prefix tree root hash was provided
 directly in <code>search.prefix_roots</code>. If the user advertised a
-previously-observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
+previously observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
 as a consistency proof.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
 <p id="section-11.1-8">Users verify a search response by following these steps:<a href="#section-11.1-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-11.1-9">
@@ -3140,7 +3140,7 @@ as a consistency proof.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-9.3">
             <p id="section-11.1-9.3.1">Compute a candidate root value for the tree from the proof in <code>inclusion</code>,
-the hashes of log entries used in <code>search</code>, and any previously-retained full
+the hashes of log entries used in <code>search</code>, and any previously retained full
 subtrees of the log tree.<a href="#section-11.1-9.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-9.4">
@@ -3283,7 +3283,7 @@ log entries.<a href="#section-11.3-9" class="pilcrow">¶</a></p>
 leaves where either a search proof was provided in
 <code>CombinedTreeProof.prefix_proofs</code> or the prefix tree root hash was provided
 directly in <code>CombinedTreeProof.prefix_roots</code>. If the user advertised a
-previously-observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
+previously observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
 as a consistency proof.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
 <p id="section-11.3-11">Users verify a MonitorResponse by following these steps:<a href="#section-11.3-11" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-11.3-12">
@@ -3299,7 +3299,7 @@ field is not empty.<a href="#section-11.3-12.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.3-12.3">
             <p id="section-11.3-12.3.1">Compute a candidate root value for the tree from the proof in <code>inclusion</code>,
-the hashes of log entries used in <code>search</code>, and any previously-retained full
+the hashes of log entries used in <code>search</code>, and any previously retained full
 subtrees of the log tree.<a href="#section-11.3-12.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.3-12.4">
@@ -3307,7 +3307,7 @@ subtrees of the log tree.<a href="#section-11.3-12.3.1" class="pilcrow">¶</a></
 </li>
         </ol>
 <p id="section-11.3-13">Some information is omitted from MonitorResponse in the interest of efficiency,
-due to the fact that the user would have already seen and verified it as part of
+because the user would have already seen and verified it as part of
 conducting other queries. In particular, VRF proofs for different versions of
 each label are not provided, given that these can be cached from the
 original Search or Update query.<a href="#section-11.3-13" class="pilcrow">¶</a></p>
