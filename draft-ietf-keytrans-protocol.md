@@ -809,7 +809,7 @@ entry:
    the position-version pair in the map and move on to the next map entry.
 2. Compute the ordered list of log entries to inspect:
    1. Initialize the list by setting it to be the log entry's direct path in the
-      implicit binary search tree, based on the current tree size.
+      implicit binary search tree based on the current tree size.
    2. Remove all entries that are to the left of the log entry.
    3. If any of the remaining log entries are distinguished, terminate the list
       just after the first distinguished log entry.
@@ -837,26 +837,29 @@ In summary, monitoring works by progressively moving up the tree as new
 intermediate/root nodes are established and verifying that they're constructed
 correctly. Once a distinguished log entry is reached and successfully verified,
 monitoring is no longer necessary and the relevant entry is removed from the
-map. Note that users can often execute this process with the output of Search or
-Update operations for a label without waiting to make explicit Monitor queries.
-It is also worth noting that the work required to monitor several versions of
-the same label scales sublinearly because the direct paths of the
-different versions will often intersect. Intersections reduce the total number
-of entries in the map and therefore the amount of work that will be needed to
-monitor the label from then on.
+map.
+
+Users will often be able to execute the monitoring process, at least partially,
+with the output of a fixed-version or greatest-version search for the label.
+This may reduce the need for monitoring-specific requests. It is also worth
+noting that the work required to monitor several versions of the same label
+scales sublinearly because the direct paths of the different versions will often
+intersect. Intersections reduce the total number of entries in the map and
+therefore the amount of work that will be needed to monitor the label from then
+on.
 
 ### Owner Algorithm
 
 If the user owns the label being monitored, they will additionally need to
 retain the rightmost distinguished log entry where they've verified that the
-most recent version of the label is correct. Users advertise this log entry's
+greatest version of the label is correct. Users advertise this log entry's
 position in their Monitor request. For a number of subsequent distinguished log
 entries, the Transparency Log states the greatest version of the label that the
 log entry's prefix tree contains and provides a search-style binary ladder, as
-described in {{binary-ladder}}, to prove it. No lookups are omitted from the
+described in {{binary-ladder}}, to prove that this is correct. No lookups are omitted from the
 binary ladder according to the rules described in {{binary-ladder}}. However,
-lookups for any versions of the label that were already provided in a
-lower-bound binary ladder from the same log entry *are* omitted.
+lookups for any versions of the label that were provided in the same query response in a
+lower-bound binary ladder for the same log entry *are* omitted.
 
 Users verify that the version has not unexpectedly increased or decreased, and
 that the binary ladder terminates in a way that's consistent with the provided
@@ -865,20 +868,20 @@ receive a binary ladder for the distinguished log entry immediately following
 the one they've advertised, the distinguished log entry immediately following
 that one, and so on. The Transparency Log provides whichever intermediate
 timestamps are necessary to demonstrate that this is the case. To avoid
-overloading itself, the Transparency Log has the option to limit the number of
+excessive load, the Transparency Log SHOULD limit the number of
 distinguished log entries it provides binary ladders for in a single response.
 
-If the user is monitoring the label for the first time since it was created,
-they advertise the first distinguished log entry to the left of the first log
-entry to contain the label. The Transparency Log provides binary ladders for
-subsequent distinguished log entries.
+If a user is monitoring the label for the first time since it was created, they
+advertise the first log entry to contain the label even if it is not known to be
+distinguished. The Transparency Log provides binary ladders for subsequent
+distinguished log entries.
 
 
 # Greatest-Version Searches
 
 Users often wish to search for the "most recent" version, or the greatest
 version, of a label. Unlike searches for a specific version, label owners
-regularly verify that their most recent version is correctly represented in the
+regularly verify that the greatest version is correctly represented in the
 log. This enables a simpler, more efficient approach to searching.
 
 {{reasonable-monitoring-window}} and {{distinguished-log-entries}} define the
@@ -888,30 +891,28 @@ at the rightmost distinguished log entry and only consider new versions which
 have been created since then. The rightmost distinguished log entry will always
 be on the frontier of the log and will never be past its maximum lifetime.
 
-To perform a greatest-version search, the Transparency Log provides the greatest
-version of the label that exists. It then provides a binary ladder, with the
-greatest version as the target, from the rightmost distinguished log entry. If
-there is no distinguished log entry yet, the binary ladder is provided from the root instead.
-From this log entry, the Transparency Log then proceeds down the remainder of
-the frontier: the starting log entry's right child, the right child's right
-child, and so on until reaching the last log entry. From each of these log
-entries, a binary ladder targeting the label's greatest version is provided.
+To perform a greatest-version search, the Transparency Log first provides the
+greatest version of the label that exists as of the rightmost log entry. This is
+followed by a series of binary ladders each targeting this version: The first is
+from either the rightmost distinguished log entry, or the root if there is no
+distinguished log entry. Subsequent binary ladders are then provided from this
+log entry's right child, its right child's right child, and so on until the
+rightmost log entry is reached.
 
-As in {{fixed-version-searches}}, users verify that the log entry timestamps and
-the binary ladders from each log entry each represent a monotonically increasing
+As in {{fixed-version-searches}}, users verify that the binary ladders from each
+log entry, and the log enties' timestamps, represent a monotonically increasing
 series. Users additionally verify that the binary ladder from the rightmost log
-entry terminates in a way that is consistent with the target version being the
-greatest that exists. If this verification is successful, users move on to
-opening the commitment for whichever label-version pair was identified as the
-greatest.
+entry terminates in a way that is consistent with the claimed greatest version actually being the
+greatest that exists.
 
-If the starting log entry was not distinguished or if the starting log entry did
+Note that if the starting log entry was not distinguished or if the starting log entry did
 not contain the greatest version of the label, the user may be obligated to
 monitor the label in the future, per {{reasonable-monitoring-window}}.
 
+
 # Ciphersuites
 
-Each Transparency Log uses a single fixed ciphersuite, chosen when the log is
+Each Transparency Log uses a single fixed ciphersuite, chosen when it is
 initially created, that specifies the following primitives and parameters to be used for
 cryptographic computations:
 
@@ -935,8 +936,8 @@ defined in {{kt-ciphersuites}}.
 
 ## Tree Head Signature
 
-The head of a Transparency Log, which represents the log's most recent state, is
-represented as:
+The head of a Transparency Log, which represents its most recent state, is
+encoded as:
 
 ~~~ tls-presentation
 struct {
@@ -945,10 +946,10 @@ struct {
 } TreeHead;
 ~~~
 
-where `tree_size` counts the number of leaves of the log tree. If the
-Transparency Log is deployed with Third-party Management, then the public key
+where `tree_size` is the number of log entries. If the
+Transparency Log is deployed with Third-Party Management, then the public key
 used to verify the signature belongs to the third-party manager; otherwise the
-public key used belongs to the service operator.
+public key used belongs to the Service Operator.
 
 The signature itself is computed over a `TreeHeadTBS` structure which
 incorporates the log's current state as well as long-term log configuration:
@@ -1001,9 +1002,10 @@ Finally, `Hash.Nh` is the output size of the ciphersuite hash function in bytes.
 
 ## Update Format
 
-The updates committed to by the prefix tree contain the new value of a label,
-along with additional information depending on the deployment mode of the
-Transparency Log. They are serialized as follows:
+The leaves of the prefix tree contain commitments which open to the value of a
+label-version pair, potentially with some additional information depending on
+the deployment mode of the Transparency Log. The contents of these commitments
+is serialized as follows:
 
 ~~~ tls-presentation
 struct {
@@ -1019,10 +1021,10 @@ struct {
 } UpdateValue;
 ~~~
 
-The `value` field contains the new value associated with the label.
+The `value` field contains the value associated with the label-version pair.
 
-In the event that third-party management is used, the `prefix` field contains a
-signature from the service operator, using the public key from
+In the event that Third-Party Management is used, the `prefix` field contains a
+signature from the Service Operator, using the public key from
 `Configuration.leaf_public_key`, over the following structure:
 
 ~~~ tls-presentation
@@ -1033,17 +1035,14 @@ struct {
 } UpdateTBS;
 ~~~
 
-The `label` field contains the label being updated, `version` contains the new
-version, and `value` contains the same contents as `UpdateValue.value`. Clients
+The `value` contains the same contents as `UpdateValue.value`. Clients
 MUST successfully verify this signature before consuming `UpdateValue.value`.
 
 ## Commitment
 
-As discussed in {{combined-tree}}, commitments are stored in the leaves of the
-prefix tree rather than raw `UpdateValue` structures. Commitments are computed
-with HMAC {{!RFC2104}}, using the hash function specified by the ciphersuite. To
-produce a new commitment, the application generates a random `Nc`-byte value
-called `opening` and computes:
+Commitments are computed with HMAC {{!RFC2104}} using the hash function
+specified by the ciphersuite. To produce a new commitment, the application
+generates a random `Nc`-byte value called `opening` and computes:
 
 ~~~ pseudocode
 commitment = HMAC(Kc, CommitmentValue)
@@ -1060,10 +1059,8 @@ struct {
 } CommitmentValue;
 ~~~
 
-The `label` field of CommitmentValue contains the label being updated and the
-`update` field contains the new value for the label. The output value
-`commitment` may be published, while `opening` should only be revealed to users
-that are authorized to receive the label's contents.
+The output value `commitment` may be published, while `opening` should only be
+revealed to users that are authorized to receive the label's contents.
 
 The Transparency Log MAY generate `opening` in a programmatic way. However, it
 SHOULD ensure that `opening` can later be deleted and not feasibly recovered.
@@ -1072,9 +1069,10 @@ compliance with privacy laws.
 
 ## Verifiable Random Function
 
-Each label-version pair created will have a unique
-representation in the prefix tree. This is computed by providing the combined
-label and version as inputs to the VRF:
+Each label-version pair corresponds to a unique search key in the prefix tree.
+This search key is the output of executing the VRF, with the private key
+corresponding to `Configuration.vrf_public_key`, on the combined label and
+version:
 
 ~~~ tls-presentation
 struct {
@@ -1082,9 +1080,6 @@ struct {
   uint32 version;
 } VrfInput;
 ~~~
-
-The VRF's output evaluated on `VrfInput` is the concrete value inserted into the
-prefix tree.
 
 ## Log Tree {#crypto-log-tree}
 
