@@ -391,9 +391,9 @@ value was stored.
  /   \         |               /   \          /             \
 /_____\   (T_n, PT_n)         /_____\   (T_n, PT_n)   (T_n+1, PT_n+1)
 ~~~
-{: title="An example evolution of the combined tree structure. At every epoch, a
-new leaf is added to a log tree containing the timestamp T_n and the new
-prefix tree root hash PT_n."}
+{: title="An example evolution of the combined tree structure. Every new log
+entry added contains the timestamp T_n of when it was created and the new prefix
+tree root hash PT_n."}
 
 
 # Updating Views of the Tree
@@ -469,12 +469,10 @@ minimizing the number of log entries that need to be checked.
 
 As an example, consider a log with 50 entries. Instead of having the root be the
 typical "middle" entry of `50/2 = 25`, the root would be entry 31. As new log
-entries are added to the tree's right edge, users will consistently check that
-their timestamps are greater than or equal to the timestamp of entry 31. This is
-until a new root is established with the creation of entry 63. Once entry 63 is
-established, the timestamp of entry 63 is verified to be greater than or equal
-that of entry 31, and from then on the timestamps of new log entries are checked
-against entry 63.
+entries are added to the tree's right edge, all users that interact with the
+Transparency Log will require log entries to the right of entry 31 to have
+timestamps that are greater than or equal to that of entry 31, regardless of how
+much or how little the tree grows.
 
 Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the **frontier** of the log. The frontier consists of the root log
@@ -537,61 +535,66 @@ is greater than or equal to the last, as above.
 When searching the combined tree structure described in {{combined-tree}}, users
 perform a binary search for the first log entry where the prefix tree at that
 entry contains the desired label-version pair. Users reuse the implicit binary
-search tree from {{implicit-binary-search-tree}} for this purpose to ensure that
-all users will check the same or similar entries when searching for the same
-label. This allows for efficient client-side monitoring of the Transparency Log.
+search tree from {{implicit-binary-search-tree}} for this purpose. This ensures
+that all users will check the same or similar entries when searching for the
+same label, allowing for efficient user monitoring of the Transparency Log.
 
 ## Binary Ladder
 
-To perform a binary search, at each log entry the search needs to determine
-whether it should move left or right. That is, it needs to determine, out of the
-set of label-version pairs stored in the prefix tree, whether the highest
-version of a label that's present at a given log entry is greater than, equal
-to, or less than the target version.
+To perform a binary search, users need to be able to inspect individual log
+entries and determine whether their search should continue to the left of the
+current log entry or the right. Specifically, they need to be able to determine
+if the greatest version of their label that was present in some version of the
+prefix tree was greater than, equal to, or less than their target version.
 
 A **binary ladder** is a series of lookups in a single log entry's prefix tree
-that determines the highest version of a label that exists, and it proceeds as
+that determines the greatest version of a label that exists. It proceeds as
 follows:
 
 1. First, version `x` of the label is looked up, where `x` is a consecutively
    higher power of two minus one (0, 1, 3, 7, ...). This is repeated until the
-   first proof of non-inclusion is produced.
-2. Once the first proof of non-inclusion is produced, a binary search is
-   conducted between the highest version that was proved to be included, and the
-   version that was proved to not be included. Each step of the binary search
-   produces either a proof of inclusion or non-inclusion, which guides the
-   search left or right, until it terminates.
+   first non-inclusion proof is produced.
+2. Once the first non-inclusion proof is produced, a binary search is conducted
+   between the greatest version that was proved to be included, and the version
+   that was proved to not be included. Each step of the binary search produces
+   either an inclusion or non-inclusion proof, which guides the search left or
+   right until it terminates.
 
-However, for the purpose of searching for a specific version of a
-label, this is optimized in the two ways discussed below:
+However, this description implies that the series of lookups is interactive,
+which is not the case. In practice, binary ladders are always executed with
+respect to a specific **target version** which may or may not be the actual
+greatest version of the label. This allows binary ladders to be optimized in two
+ways:
 
-First, the series of lookups ends after the first proof of inclusion for a
-version greater than or equal to the target version, or the first proof of
-non-inclusion for a version less than the target version. This is because users
-are only interested in whether the highest version of a label that exists, as of
-a particular log entry, is greater than or less than their target version -- not
-its exact value.
+First, the series of lookups ends after the first inclusion proof for a version
+greater than or equal to the target version, or the first non-inclusion proof
+for a version less than the target version. This is because, when searching for
+a specific version of a label, users are only interested in whether the greatest
+version of a label that existed as of a particular log entry is greater than or
+less than their target version -- not its exact value.
 
-Second, the Transparency Log omits proofs of inclusion for any versions of the
-label where another proof of inclusion for the same version was already provided
-in the same query response for a log entry to the left. Similarly, the
-Transparency Log also omits proofs of non-inclusion for any versions of the
-label where another proof of non-inclusion for the same version was already
-provided in the same query response for a log entry to the right. These proofs
-are unnecessary to conduct the user's search and omitting them does not affect
-the protocol's security.
+Second, the Transparency Log omits inclusion proofs for any versions of the
+label where another inclusion proof for the same version was already provided in
+the same query response for a log entry to the left. Similarly, the Transparency
+Log omits non-inclusion proofs for any versions of the label where another
+non-inclusion proof for the same version was already provided in the same query
+response for a log entry to the right. Providing these proofs is unnecessary
+since the only possible outcome they could have on the user's binary search
+would be to cause it to fail.
 
-As an example, if the highest version of a label is 6, a binary ladder would
-proceed as follows: proofs of inclusion for versions 0, 1, 3, terminated by a
-proof of non-inclusion for version 7. It would then conclude with proofs of
-inclusion for versions 5 and 6, as this uniquely identifies 6 as the highest
-version available. However, any of these proofs may be omitted in a particular
-query response due to the two rules just stated.
+As an example, if a user was searching for version 6 of a label, the longest
+possible binary ladder would be: inclusion proofs for versions 0, 1, 3, a
+non-inclusion proof for version 7, then followed by inclusion proofs for
+versions 5 and 6. This would uniquely identify version 6 as the greatest that
+exists in the prefix tree. However, in the context of a specific query response,
+the series may be terminated early if the greatest version in the prefix tree is
+not 6, and any of the lookups may be omitted depending on the output of previous
+binary ladders from other log entries.
 
 ## Maximum Lifetime
 
 A Transparency Log operator MAY define a maximum lifetime for log entries. If
-defined, it MUST be greater than zero seconds. Whether a log entry has surpassed
+defined, it MUST be greater than zero milliseconds. Whether a log entry has surpassed
 its maximum lifetime is determined by subtracting the timestamp of the rightmost
 log entry from the timestamp of the log entry in question and checking if the
 result is greater than or equal to the defined duration.
@@ -620,7 +623,7 @@ tree), it continues.
 This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
 lifetime need to be retained. Specifically, only a logarithmic number of log
-entries that have passed their maximum lifetime will still be needed by users;
+entries that have passed their maximum lifetime will still be needed by users and
 the rest can be discarded. Pruning is explained in more detail in TODO.
 
 ## Algorithm {#fv-algorithm}
@@ -641,17 +644,18 @@ recurses to left or right children, each time starting back at step 1.
    right child always exists, as the rightmost log entry cannot exceed its
    maximum lifetime by definition.
 3. Obtain a binary ladder from the current log entry for the target version.
-   Accounting for any proofs of inclusion or non-inclusion which were omitted,
+   Accounting for any inclusion or non-inclusion proofs which were omitted,
    verify that the binary ladder terminates in a way that is consistent with
-   previously-inspected log entries. Specifically, verify that it indicates a
+   previously inspected log entries. Specifically, verify that it indicates a
    maximum version greater than or equal to any log entries to the left, and
    less than or equal to any log entries to the right.
-4. If the binary ladder was terminated early due to a proof of non-inclusion for a version less than the target version,
-   recurse to the log entry's right child. Otherwise, check if the log entry has
-   surpassed its maximum lifetime. If so, abort the search with an error
-   indicating that the desired version of the label has expired and is no longer
-   available. If not, recurse to the log entry's left child. If, in either case,
-   recursion isn't possible because the search is at a leaf node:
+4. If the binary ladder was terminated early due to a non-inclusion proof for a
+   version less than the target version, recurse to the log entry's right child.
+   Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
+   abort the search with an error indicating that the desired version of the
+   label has expired and is no longer available. If not, recurse to the log
+   entry's left child. If, in either case, recursion isn't possible because the
+   search is at a leaf node:
 5. This largely concludes the search. However, there are some additional
    technicalities to address. First, it's possible for the binary search to
    conclude successfully even if the label-version pair that the user is
@@ -662,13 +666,15 @@ recurses to left or right children, each time starting back at step 1.
 6. It's also possible at this point that a commitment to the contents of the
    desired label-version pair has not been provided by the Transparency Log.
    This can happen, for example, if multiple versions of a label were inserted
-   in a single epoch and the binary ladder was terminated early due to a proof of inclusion for a version greater than the target version. If this
-   has happened, obtain a search proof for the target label-version pair from
-   the prefix tree in the first log entry to contain it (identified in step 5).
+   in the same log entry and the binary ladder was terminated early due to an
+   inclusion proof for a version greater than the target version. If this has
+   happened, obtain a search proof for the target label-version pair from the
+   prefix tree in the first log entry to contain it (identified in step 5).
 7. Finally, if the binary search failed to find a log entry containing the
-   desired label-version pair, or if the search proof in step 6 returned a proof
-   of non-inclusion, return an error to the user indicating that the version of
-   the label does not exist. Otherwise, terminate the search successfully.
+   desired label-version pair, or if the search proof from step 6 proves
+   non-inclusion rather than inclusion, return an error to the user indicating
+   that the version of the label does not exist. Otherwise, terminate the search
+   successfully.
 
 The most important goal of this algorithm is correctly identifying the first log
 entry that contains the target label-version pair. The purpose of
@@ -676,12 +682,9 @@ doing this is to make monitoring more efficient for the label owner. If a label
 has a large number of versions, it can become prohibitively expensive for its
 owner to repeatedly check that every single version is represented correctly in
 multiple log entries. Instead, the label owner can check that the version was
-created correctly in the one epoch where it was first added and then enforce
-that binary searches for that version will always converge back to that same log
+created correctly in the one log entry where it was first added and then enforce
+that binary searches for that version always converge back to that same log
 entry.
-
-Once users successfully complete the search and the specified verification, they
-move on to opening the target label-version pair's commitment.
 
 
 # Monitoring the Tree
@@ -771,7 +774,7 @@ inspection by the label owner by losing its distinguished status.
 ## Lower-Bound Binary Ladder
 
 Similar to the algorithm for searching the tree, the algorithm for monitoring
-the tree requires a way to prove that the highest version of a label stored in a
+the tree requires a way to prove that the greatest version of a label stored in a
 particular log entry is greater than or equal to a target version. Since we
 already know that the target version exists, we only need to prove that there
 has not been an unexpected downgrade. As such, the steps of the binary ladder
@@ -791,8 +794,8 @@ for any versions greater than the target.
 ## Algorithm {#m-algorithm}
 
 To monitor a given label, users maintain a small amount of state: a map from a
-position in the log to a version counter. The version counter is the highest
-version of the label that's been proven to exist at that log position. Users
+position in the log to a version counter. The version counter is the greatest
+version of the label that's been proved to exist at that log position. Users
 initially populate this map by setting the position of the first log entry to
 contain the label-version pair they've looked up to map to that version. A map
 may track several different versions of a label simultaneously if a user has
@@ -819,7 +822,7 @@ entry:
       from the map and move on to the next map entry.
    2. Receive and verify a lower-bound binary ladder from this log entry for the
       version currently in the map. This proves that, at the indicated log
-      entry, the highest version present is greater than or equal to the
+      entry, the greatest version present is greater than or equal to the
       previously-observed version.
    3. If the above check fails, return an error to the user. Otherwise, remove
       the current position-version pair from the map and replace it with a new
@@ -1170,7 +1173,7 @@ nodeValue(node):
 ## Log Tree
 
 The inclusion of some leaf in a tree head, or consistency between two tree
-heads, is proven by providing the smallest set of intermediate nodes from the
+heads, is proved by providing the smallest set of intermediate nodes from the
 log tree that allows the user to compute the tree's root hash from the leaf or
 other intermediate node values they already have. Such a proof is encoded as:
 
@@ -1475,12 +1478,12 @@ was provided in `SearchRequest` or not. If searching for the greatest version of
 the label, this version is provided in `SearchResponse.version`; otherwise, the
 field is empty.
 
-The `inclusion` field contains a proof of inclusion for all of the log tree
+The `inclusion` field contains an inclusion proof for all of the log tree
 leaves where either a search proof was provided in
 `search.prefix_proofs` or the prefix tree root hash was provided
 directly in `search.prefix_roots`. If the user advertised a
 previously-observed tree size in `last`, the proof in `inclusion` also functions
-as a proof of consistency.
+as a consistency proof.
 
 Users verify a search response by following these steps:
 
@@ -1615,12 +1618,12 @@ was present has a corresponding entry in `label_versions` containing the
 greatest version of the label present in a number of subsequent distinguished
 log entries.
 
-The `inclusion` field contains a proof of inclusion for all of the log tree
+The `inclusion` field contains an inclusion proof for all of the log tree
 leaves where either a search proof was provided in
 `CombinedTreeProof.prefix_proofs` or the prefix tree root hash was provided
 directly in `CombinedTreeProof.prefix_roots`. If the user advertised a
 previously-observed tree size in `last`, the proof in `inclusion` also functions
-as a proof of consistency.
+as a consistency proof.
 
 Users verify a MonitorResponse by following these steps:
 
