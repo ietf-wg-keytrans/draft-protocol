@@ -2370,7 +2370,7 @@ the position-version pair in the map and move on to the next map entry.<a href="
 <ol start="1" type="1" class="normal type-1" id="section-6.4-3.2.2">
 <li id="section-6.4-3.2.2.1">
                 <p id="section-6.4-3.2.2.1.1">Initialize the list by setting it to be the log entry's direct path in the
-implicit binary search tree, based on the current tree size.<a href="#section-6.4-3.2.2.1.1" class="pilcrow">¶</a></p>
+implicit binary search tree based on the current tree size.<a href="#section-6.4-3.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-6.4-3.2.2.2">
                 <p id="section-6.4-3.2.2.2.1">Remove all entries that are to the left of the log entry.<a href="#section-6.4-3.2.2.2.1" class="pilcrow">¶</a></p>
@@ -2416,13 +2416,15 @@ entries lying on the log's frontier.<a href="#section-6.4-4" class="pilcrow">¶<
 intermediate/root nodes are established and verifying that they're constructed
 correctly. Once a distinguished log entry is reached and successfully verified,
 monitoring is no longer necessary and the relevant entry is removed from the
-map. Note that users can often execute this process with the output of Search or
-Update operations for a label without waiting to make explicit Monitor queries.
-It is also worth noting that the work required to monitor several versions of
-the same label scales sublinearly because the direct paths of the
-different versions will often intersect. Intersections reduce the total number
-of entries in the map and therefore the amount of work that will be needed to
-monitor the label from then on.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
+map.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
+<p id="section-6.4-6">Users will often be able to execute the monitoring process, at least partially,
+with the output of a fixed-version or greatest-version search for the label.
+This may reduce the need for monitoring-specific requests. It is also worth
+noting that the work required to monitor several versions of the same label
+scales sublinearly because the direct paths of the different versions will often
+intersect. Intersections reduce the total number of entries in the map and
+therefore the amount of work that will be needed to monitor the label from then
+on.<a href="#section-6.4-6" class="pilcrow">¶</a></p>
 <div id="owner-algorithm">
 <section id="section-6.4.1">
           <h4 id="name-owner-algorithm">
@@ -2430,14 +2432,14 @@ monitor the label from then on.<a href="#section-6.4-5" class="pilcrow">¶</a></
           </h4>
 <p id="section-6.4.1-1">If the user owns the label being monitored, they will additionally need to
 retain the rightmost distinguished log entry where they've verified that the
-most recent version of the label is correct. Users advertise this log entry's
+greatest version of the label is correct. Users advertise this log entry's
 position in their Monitor request. For a number of subsequent distinguished log
 entries, the Transparency Log states the greatest version of the label that the
 log entry's prefix tree contains and provides a search-style binary ladder, as
-described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>, to prove it. No lookups are omitted from the
+described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>, to prove that this is correct. No lookups are omitted from the
 binary ladder according to the rules described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>. However,
-lookups for any versions of the label that were already provided in a
-lower-bound binary ladder from the same log entry <em>are</em> omitted.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
+lookups for any versions of the label that were provided in the same query response in a
+lower-bound binary ladder for the same log entry <em>are</em> omitted.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.4.1-2">Users verify that the version has not unexpectedly increased or decreased, and
 that the binary ladder terminates in a way that's consistent with the provided
 version being the greatest that exists. Importantly, users also verify that they
@@ -2445,12 +2447,12 @@ receive a binary ladder for the distinguished log entry immediately following
 the one they've advertised, the distinguished log entry immediately following
 that one, and so on. The Transparency Log provides whichever intermediate
 timestamps are necessary to demonstrate that this is the case. To avoid
-overloading itself, the Transparency Log has the option to limit the number of
+excessive load, the Transparency Log <span class="bcp14">SHOULD</span> limit the number of
 distinguished log entries it provides binary ladders for in a single response.<a href="#section-6.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.4.1-3">If the user is monitoring the label for the first time since it was created,
-they advertise the first distinguished log entry to the left of the first log
-entry to contain the label. The Transparency Log provides binary ladders for
-subsequent distinguished log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.4.1-3">If a user is monitoring the label for the first time since it was created, they
+advertise the first log entry to contain the label even if it is not known to be
+distinguished. The Transparency Log provides binary ladders for subsequent
+distinguished log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2464,7 +2466,7 @@ subsequent distinguished log entries.<a href="#section-6.4.1-3" class="pilcrow">
       </h2>
 <p id="section-7-1">Users often wish to search for the "most recent" version, or the greatest
 version, of a label. Unlike searches for a specific version, label owners
-regularly verify that their most recent version is correctly represented in the
+regularly verify that the greatest version is correctly represented in the
 log. This enables a simpler, more efficient approach to searching.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2"><a href="#reasonable-monitoring-window" class="auto internal xref">Section 6.1</a> and <a href="#distinguished-log-entries" class="auto internal xref">Section 6.2</a> define the
 concept of a distinguished log entry, which is any log entry that label owners
@@ -2472,22 +2474,19 @@ are required to check for correctness. As a result, users can start their search
 at the rightmost distinguished log entry and only consider new versions which
 have been created since then. The rightmost distinguished log entry will always
 be on the frontier of the log and will never be past its maximum lifetime.<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3">To perform a greatest-version search, the Transparency Log provides the greatest
-version of the label that exists. It then provides a binary ladder, with the
-greatest version as the target, from the rightmost distinguished log entry. If
-there is no distinguished log entry yet, the binary ladder is provided from the root instead.
-From this log entry, the Transparency Log then proceeds down the remainder of
-the frontier: the starting log entry's right child, the right child's right
-child, and so on until reaching the last log entry. From each of these log
-entries, a binary ladder targeting the label's greatest version is provided.<a href="#section-7-3" class="pilcrow">¶</a></p>
-<p id="section-7-4">As in <a href="#fixed-version-searches" class="auto internal xref">Section 5</a>, users verify that the log entry timestamps and
-the binary ladders from each log entry each represent a monotonically increasing
+<p id="section-7-3">To perform a greatest-version search, the Transparency Log first provides the
+greatest version of the label that exists as of the rightmost log entry. This is
+followed by a series of binary ladders each targeting this version: The first is
+from either the rightmost distinguished log entry, or the root if there is no
+distinguished log entry. Subsequent binary ladders are then provided from this
+log entry's right child, its right child's right child, and so on until the
+rightmost log entry is reached.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-4">As in <a href="#fixed-version-searches" class="auto internal xref">Section 5</a>, users verify that the binary ladders from each
+log entry, and the log enties' timestamps, represent a monotonically increasing
 series. Users additionally verify that the binary ladder from the rightmost log
-entry terminates in a way that is consistent with the target version being the
-greatest that exists. If this verification is successful, users move on to
-opening the commitment for whichever label-version pair was identified as the
-greatest.<a href="#section-7-4" class="pilcrow">¶</a></p>
-<p id="section-7-5">If the starting log entry was not distinguished or if the starting log entry did
+entry terminates in a way that is consistent with the claimed greatest version actually being the
+greatest that exists.<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">Note that if the starting log entry was not distinguished or if the starting log entry did
 not contain the greatest version of the label, the user may be obligated to
 monitor the label in the future, per <a href="#reasonable-monitoring-window" class="auto internal xref">Section 6.1</a>.<a href="#section-7-5" class="pilcrow">¶</a></p>
 </section>
@@ -2497,7 +2496,7 @@ monitor the label in the future, per <a href="#reasonable-monitoring-window" cla
       <h2 id="name-ciphersuites">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ciphersuites" class="section-name selfRef">Ciphersuites</a>
       </h2>
-<p id="section-8-1">Each Transparency Log uses a single fixed ciphersuite, chosen when the log is
+<p id="section-8-1">Each Transparency Log uses a single fixed ciphersuite, chosen when it is
 initially created, that specifies the following primitives and parameters to be used for
 cryptographic computations:<a href="#section-8-1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2536,8 +2535,8 @@ defined in <a href="#kt-ciphersuites" class="auto internal xref">Section 13.1</a
         <h3 id="name-tree-head-signature">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-tree-head-signature" class="section-name selfRef">Tree Head Signature</a>
         </h3>
-<p id="section-9.1-1">The head of a Transparency Log, which represents the log's most recent state, is
-represented as:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-1">The head of a Transparency Log, which represents its most recent state, is
+encoded as:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.1-2">
 <pre>
 struct {
@@ -2546,10 +2545,10 @@ struct {
 } TreeHead;
 </pre><a href="#section-9.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.1-3">where <code>tree_size</code> counts the number of leaves of the log tree. If the
-Transparency Log is deployed with Third-party Management, then the public key
+<p id="section-9.1-3">where <code>tree_size</code> is the number of log entries. If the
+Transparency Log is deployed with Third-Party Management, then the public key
 used to verify the signature belongs to the third-party manager; otherwise the
-public key used belongs to the service operator.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+public key used belongs to the Service Operator.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
 <p id="section-9.1-4">The signature itself is computed over a <code>TreeHeadTBS</code> structure which
 incorporates the log's current state as well as long-term log configuration:<a href="#section-9.1-4" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.1-5">
@@ -2604,9 +2603,10 @@ stored in the <code>maximum_lifetime</code> field.<a href="#section-9.1-6" class
         <h3 id="name-update-format">
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-update-format" class="section-name selfRef">Update Format</a>
         </h3>
-<p id="section-9.2-1">The updates committed to by the prefix tree contain the new value of a label,
-along with additional information depending on the deployment mode of the
-Transparency Log. They are serialized as follows:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.2-1">The leaves of the prefix tree contain commitments which open to the value of a
+label-version pair, potentially with some additional information depending on
+the deployment mode of the Transparency Log. The contents of these commitments
+is serialized as follows:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.2-2">
 <pre>
 struct {
@@ -2622,9 +2622,9 @@ struct {
 } UpdateValue;
 </pre><a href="#section-9.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.2-3">The <code>value</code> field contains the new value associated with the label.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
-<p id="section-9.2-4">In the event that third-party management is used, the <code>prefix</code> field contains a
-signature from the service operator, using the public key from
+<p id="section-9.2-3">The <code>value</code> field contains the value associated with the label-version pair.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.2-4">In the event that Third-Party Management is used, the <code>prefix</code> field contains a
+signature from the Service Operator, using the public key from
 <code>Configuration.leaf_public_key</code>, over the following structure:<a href="#section-9.2-4" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.2-5">
 <pre>
@@ -2635,8 +2635,7 @@ struct {
 } UpdateTBS;
 </pre><a href="#section-9.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-9.2-6">The <code>label</code> field contains the label being updated, <code>version</code> contains the new
-version, and <code>value</code> contains the same contents as <code>UpdateValue.value</code>. Clients
+<p id="section-9.2-6">The <code>value</code> contains the same contents as <code>UpdateValue.value</code>. Clients
 <span class="bcp14">MUST</span> successfully verify this signature before consuming <code>UpdateValue.value</code>.<a href="#section-9.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2645,11 +2644,9 @@ version, and <code>value</code> contains the same contents as <code>UpdateValue.
         <h3 id="name-commitment">
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-commitment" class="section-name selfRef">Commitment</a>
         </h3>
-<p id="section-9.3-1">As discussed in <a href="#combined-tree" class="auto internal xref">Section 3.4</a>, commitments are stored in the leaves of the
-prefix tree rather than raw <code>UpdateValue</code> structures. Commitments are computed
-with HMAC <span>[<a href="#RFC2104" class="cite xref">RFC2104</a>]</span>, using the hash function specified by the ciphersuite. To
-produce a new commitment, the application generates a random <code>Nc</code>-byte value
-called <code>opening</code> and computes:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-1">Commitments are computed with HMAC <span>[<a href="#RFC2104" class="cite xref">RFC2104</a>]</span> using the hash function
+specified by the ciphersuite. To produce a new commitment, the application
+generates a random <code>Nc</code>-byte value called <code>opening</code> and computes:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-9.3-2">
 <pre>
 commitment = HMAC(Kc, CommitmentValue)
@@ -2666,10 +2663,8 @@ struct {
 } CommitmentValue;
 </pre><a href="#section-9.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-9.3-5">The <code>label</code> field of CommitmentValue contains the label being updated and the
-<code>update</code> field contains the new value for the label. The output value
-<code>commitment</code> may be published, while <code>opening</code> should only be revealed to users
-that are authorized to receive the label's contents.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
+<p id="section-9.3-5">The output value <code>commitment</code> may be published, while <code>opening</code> should only be
+revealed to users that are authorized to receive the label's contents.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
 <p id="section-9.3-6">The Transparency Log <span class="bcp14">MAY</span> generate <code>opening</code> in a programmatic way. However, it
 <span class="bcp14">SHOULD</span> ensure that <code>opening</code> can later be deleted and not feasibly recovered.
 This preserves the Transparency Log's ability to delete certain information in
@@ -2681,9 +2676,10 @@ compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
         <h3 id="name-verifiable-random-function">
 <a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-verifiable-random-function" class="section-name selfRef">Verifiable Random Function</a>
         </h3>
-<p id="section-9.4-1">Each label-version pair created will have a unique
-representation in the prefix tree. This is computed by providing the combined
-label and version as inputs to the VRF:<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-1">Each label-version pair corresponds to a unique search key in the prefix tree.
+This search key is the output of executing the VRF, with the private key
+corresponding to <code>Configuration.vrf_public_key</code>, on the combined label and
+version:<a href="#section-9.4-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.4-2">
 <pre>
 struct {
@@ -2692,8 +2688,6 @@ struct {
 } VrfInput;
 </pre><a href="#section-9.4-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.4-3">The VRF's output evaluated on <code>VrfInput</code> is the concrete value inserted into the
-prefix tree.<a href="#section-9.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="crypto-log-tree">
