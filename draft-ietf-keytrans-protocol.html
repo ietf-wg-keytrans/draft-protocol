@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 11 September 2025</td>
+<td class="center">Expires 12 September 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-03-10" class="published">10 March 2025</time>
+<time datetime="2025-03-11" class="published">11 March 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-09-11">11 September 2025</time></dd>
+<dd class="expires"><time datetime="2025-09-12">12 September 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 11 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 12 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2665,10 +2665,12 @@ struct {
 </div>
 <p id="section-9.3-5">The output value <code>commitment</code> may be published, while <code>opening</code> should only be
 revealed to users that are authorized to receive the label's contents.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
-<p id="section-9.3-6">The Transparency Log <span class="bcp14">MAY</span> generate <code>opening</code> in a programmatic way. However, it
-<span class="bcp14">SHOULD</span> ensure that <code>opening</code> can later be deleted and not feasibly recovered.
-This preserves the Transparency Log's ability to delete certain information in
-compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
+<p id="section-9.3-6">The Transparency Log <span class="bcp14">MAY</span> generate <code>opening</code> in a non-random way, such as
+deriving it from a secret key, as long as the result is indistinguishable from
+random to other participants. The Transparency Log <span class="bcp14">SHOULD</span> ensure that individual
+<code>opening</code> values can later be deleted in a way where they can not feasibly be
+recovered. This preserves the Transparency Log's ability to delete certain
+information in compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="verifiable-random-function">
@@ -2695,24 +2697,21 @@ struct {
         <h3 id="name-log-tree-2">
 <a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-log-tree-2" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-9.5-1">The leaf and parent nodes of a log tree are serialized as:<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-1">The value of a leaf node in the log tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.5-2">
 <pre>
 struct {
   uint64 timestamp;
   opaque prefix_tree[Hash.Nh];
 } LogLeaf;
-
-struct {
-  opaque value[Hash.Nh];
-} LogParent;
 </pre><a href="#section-9.5-2" class="pilcrow">¶</a>
 </div>
 <p id="section-9.5-3">The <code>timestamp</code> field contains the timestamp that the leaf was created in
-milliseconds since the Unix epoch. The <code>prefix_tree</code> field contains the new root
-hash of the prefix tree after inserting any new desired entries.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
-<p id="section-9.5-4">The value of a parent node is computed by hashing together the values of its
-left and right children:<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+milliseconds since the Unix epoch. The <code>prefix_tree</code> field contains the updated
+root hash of the prefix tree after making any desired modifications.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
+<p id="section-9.5-4">The value of a parent node in the log tree is computed by hashing together the
+values of its left and right children:<a href="#section-9.5-4" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-9.5-5">
 <pre>
 parent.value = Hash(hashContent(parent.leftChild) ||
@@ -2720,15 +2719,9 @@ parent.value = Hash(hashContent(parent.leftChild) ||
 
 hashContent(node):
   if node.type == leafNode:
-    return 0x00 || nodeValue(node)
+    return 0x00 || node.value
   else if node.type == parentNode:
-    return 0x01 || nodeValue(node)
-
-nodeValue(node):
-  if node.type == leafNode:
-    return Hash(node.timestamp || node.prefix_tree)
-  else if node.type == parentNode:
-    return node.value
+    return 0x01 || node.value
 </pre><a href="#section-9.5-5" class="pilcrow">¶</a>
 </div>
 <p id="section-9.5-6">where <code>Hash</code> denotes the ciphersuite hash function.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
@@ -2739,7 +2732,8 @@ nodeValue(node):
         <h3 id="name-prefix-tree-2">
 <a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-prefix-tree-2" class="section-name selfRef">Prefix Tree</a>
         </h3>
-<p id="section-9.6-1">The leaf nodes of a prefix tree are serialized as:<a href="#section-9.6-1" class="pilcrow">¶</a></p>
+<p id="section-9.6-1">The value of a leaf node in the prefix tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 <div class="lang-tls sourcecode" id="section-9.6-2">
 <pre>
 struct {
@@ -2748,33 +2742,25 @@ struct {
 } PrefixLeaf;
 </pre><a href="#section-9.6-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.6-3">where <code>vrf_output</code> is the VRF output for the label-version pair, <code>VRF.Nh</code> is the
-output size of the ciphersuite VRF in bytes, and <code>commitment</code> is the commitment
-to the corresponding <code>UpdateValue</code> structure.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
-<p id="section-9.6-4">The parent nodes of a prefix tree are serialized as:<a href="#section-9.6-4" class="pilcrow">¶</a></p>
-<div class="lang-tls sourcecode" id="section-9.6-5">
+<p id="section-9.6-3">The <code>vrf_output</code> field contains the VRF output for the label-version pair.
+<code>VRF.Nh</code> denotes the output size of the ciphersuite VRF in bytes. The
+<code>commitment</code> field contains the commitment to the corresponding <code>UpdateValue</code>
+structure.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<p id="section-9.6-4">The value of a parent node in the prefix tree is computed by hashing together
+the values of its left and right children:<a href="#section-9.6-4" class="pilcrow">¶</a></p>
+<div class="lang-pseudocode sourcecode" id="section-9.6-5">
 <pre>
-struct {
-  opaque value[Hash.Nh];
-} PrefixParent;
-</pre><a href="#section-9.6-5" class="pilcrow">¶</a>
-</div>
-<p id="section-9.6-6">The value of a parent node is computed by hashing together the values of its
-left and right children:<a href="#section-9.6-6" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-9.6-7">
-<pre>
-parent.value = Hash(0x01 ||
-                   nodeValue(parent.leftChild) ||
-                   nodeValue(parent.rightChild))
+parent.value = Hash(hashContent(parent.leftChild) ||
+                    hashContent(parent.rightChild))
 
-nodeValue(node):
+hashContent(node):
   if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh
+    return 0 // all-zero vector of length Hash.Nh+1
   else if node.type == leafNode:
-    return Hash(0x00 || node.vrf_output || node.commitment)
+    return 0x01 || node.value
   else if node.type == parentNode:
-    return node.value
-</pre><a href="#section-9.6-7" class="pilcrow">¶</a>
+    return 0x02 || node.value
+</pre><a href="#section-9.6-5" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
@@ -2790,29 +2776,40 @@ nodeValue(node):
         <h3 id="name-log-tree-3">
 <a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-log-tree-3" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-10.1-1">The inclusion of some leaf in a tree head, or consistency between two tree
-heads, is proved by providing the smallest set of intermediate nodes from the
-log tree that allows the user to compute the tree's root hash from the leaf or
-other intermediate node values they already have. Such a proof is encoded as:<a href="#section-10.1-1" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-10.1-2">
+<p id="section-10.1-1">In the interest of efficiency, KT combines multiple inclusion proofs and
+consistency proofs into a single batch proof. Recalling from the discussion in
+<a href="#log-tree" class="auto internal xref">Section 3.2</a>,<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10.1-2.1">
+            <p id="section-10.1-2.1.1">When a user requests an inclusion proof for a leaf of the log tree, the
+Transparency Log provides the minimum set of head values from balanced subtrees
+that would allow the user to compute the root hash from the leaf's value.<a href="#section-10.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.1-2.2">
+            <p id="section-10.1-2.2.1">When a user requests a consistency proof, the user is expected to have
+retained the head values of the full subtrees of the previous version of the
+log. The Transparency Log provides the minimum set of head values from
+balanced subtrees that would allow the user to compute the root hash from
+their retained values.<a href="#section-10.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-10.1-3">These two proof types are composed together as such: considering the leaf values
+which will be proved included, and any node values the user is understood to
+have retained, the Transparency Log provides the minimum set of head values from
+balanced subtrees that would allow the user to compute the root hash from the
+leaf and retained values. This proof is encoded as follows:<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-10.1-4">
 <pre>
 opaque NodeValue[Hash.Nh];
 
 struct {
   NodeValue elements&lt;0..2^16-1&gt;;
 } InclusionProof;
-</pre><a href="#section-10.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-10.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-10.1-3">Each <code>NodeValue</code> is a uniform size, computed by passing the relevant <code>LogLeaf</code>
-or <code>LogParent</code> structures through the <code>nodeValue</code> function in
-<a href="#crypto-log-tree" class="auto internal xref">Section 9.5</a>. The contents of the <code>elements</code> array is kept in
-left-to-right order: if a node is present in the root's left subtree, its value
-must be listed before any values provided from nodes that are in the root's
-right subtree, and so on recursively.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
-<p id="section-10.1-4">Additionally, each <code>NodeValue</code> corresponds to a balanced subtree of the log tree. If
-an intermediate node's value needs to be provided to satisfy the verifier, but
-the node is a non-balanced subtree, the values of the node's descendant full
-subtrees are provided instead.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
+<p id="section-10.1-5">The contents of the <code>elements</code> array is in left-to-right order: if a node is
+present in the root's left subtree then its value is listed before the values of
+any nodes in the root's right subtree, and so on recursively.<a href="#section-10.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="prefix-tree-2">
@@ -2882,13 +2879,13 @@ that the result equals the root value of the prefix tree.<a href="#section-10.2-
 <a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-combined-tree-2" class="section-name selfRef">Combined Tree</a>
         </h3>
 <p id="section-10.3-1">As users execute the algorithms for searching, monitoring, or updating their
-view of the tree, they inspect a series of leaves in the log tree. For some of
-these leaves, only the timestamp of the log entry is needed. For other leaves,
+view of the tree, they inspect a series of log entries. For some of
+these, only the timestamp of the log entry is needed. For others,
 both the timestamp and a <code>PrefixProof</code> from the log entry's prefix tree are
 needed.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
 <p id="section-10.3-2">This subsection defines a general structure, called a <code>CombinedTreeProof</code>, that
 contains the minimum set of timestamps and <code>PrefixProof</code> structures that a user
-needs for their execution of these algorithms. For the purpose of this protocol,
+needs for their execution of these algorithms. For the purposes of this protocol,
 the user always executes the algorithm to update their view of the tree,
 described in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>, followed immediately by one of the
 algorithms to search or monitor the current tree.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
@@ -2904,23 +2901,24 @@ struct {
 </div>
 <p id="section-10.3-5">The elements of the <code>timestamps</code> field are the timestamps of log entries.
 The elements of the <code>prefix_proofs</code> field are search proofs from the prefix
-trees at particular log entries. There is no explicit indication as to which log
+trees at specific log entries. There is no explicit indication as to which log
 entry the elements correspond to, as they are provided in the order that the
 algorithm the user is executing would request them. The elements of the
 <code>prefix_roots</code> field are, in left-to-right order, the prefix tree root
 hashes for any log entries whose timestamp was provided in <code>timestamps</code> but a
 search proof was not provided in <code>prefix_proofs</code>.<a href="#section-10.3-5" class="pilcrow">¶</a></p>
-<p id="section-10.3-6">If a log entry's timestamp is referenced multiple times, its timestamp <span class="bcp14">MUST NOT</span>
-be repeated in <code>timestamps</code> but <span class="bcp14">MUST</span> only be added the first time. Additionally,
-when a user advertises a previously observed tree size in their request, log
-entry timestamps that the user is expected to have retained are excluded from
-<code>timestamps</code>.<a href="#section-10.3-6" class="pilcrow">¶</a></p>
-<p id="section-10.3-7"><code>prefix_proofs</code> <span class="bcp14">MAY</span> contain multiple <code>PrefixProof</code> structures for the same log
-entry. Users <span class="bcp14">MUST</span> verify that all <code>PrefixProof</code> structures corresponding to the
-same log entry compute the same prefix tree root hash. There <span class="bcp14">MAY</span> be elements of
-<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries whose timestamps
-are not included in <code>timestamps</code> if the user is expected to have
-retained the timestamps from a previous query response.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
+<p id="section-10.3-6">If a log entry's timestamp is referenced multiple times by algorithms in the
+same <code>CombinedTreeProof</code>, it is only added to the <code>timestamps</code> array the first
+time. Additionally, when a user advertises a previously observed tree size in
+their request, log entry timestamps that the user is expected to have retained
+are always omitted from <code>timestamps</code>. This may result in there being elements of
+<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries whose
+timestamps are not included in <code>timestamps</code><a href="#section-10.3-6" class="pilcrow">¶</a></p>
+<p id="section-10.3-7">If different algorithms in the same <code>CombinedTreeProof</code> require a search proof
+from the same log entry, the <code>prefix_proofs</code> array will contain multiple
+<code>PrefixProof</code> structures for the same log entry. Users <span class="bcp14">MUST</span> verify that all
+<code>PrefixProof</code> structures corresponding to the same log entry compute the same
+prefix tree root hash.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
 <p id="section-10.3-8">Users processing a <code>CombinedTreeProof</code> <span class="bcp14">MUST</span> verify that each field contains
 exactly the expected number of entries -- no more and no less.<a href="#section-10.3-8" class="pilcrow">¶</a></p>
 <div id="updating-view">
