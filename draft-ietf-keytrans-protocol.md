@@ -1062,10 +1062,12 @@ struct {
 The output value `commitment` may be published, while `opening` should only be
 revealed to users that are authorized to receive the label's contents.
 
-The Transparency Log MAY generate `opening` in a programmatic way. However, it
-SHOULD ensure that `opening` can later be deleted and not feasibly recovered.
-This preserves the Transparency Log's ability to delete certain information in
-compliance with privacy laws.
+The Transparency Log MAY generate `opening` in a non-random way, such as
+deriving it from a secret key, as long as the result is indistinguishable from
+random to other participants. The Transparency Log SHOULD ensure that individual
+`opening` values can later be deleted in a way where they can not feasibly be
+recovered. This preserves the Transparency Log's ability to delete certain
+information in compliance with privacy laws.
 
 ## Verifiable Random Function
 
@@ -1083,25 +1085,22 @@ struct {
 
 ## Log Tree {#crypto-log-tree}
 
-The leaf and parent nodes of a log tree are serialized as:
+The value of a leaf node in the log tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:
 
 ~~~ tls-presentation
 struct {
   uint64 timestamp;
   opaque prefix_tree[Hash.Nh];
 } LogLeaf;
-
-struct {
-  opaque value[Hash.Nh];
-} LogParent;
 ~~~
 
 The `timestamp` field contains the timestamp that the leaf was created in
-milliseconds since the Unix epoch. The `prefix_tree` field contains the new root
-hash of the prefix tree after inserting any new desired entries.
+milliseconds since the Unix epoch. The `prefix_tree` field contains the updated
+root hash of the prefix tree after making any desired modifications.
 
-The value of a parent node is computed by hashing together the values of its
-left and right children:
+The value of a parent node in the log tree is computed by hashing together the
+values of its left and right children:
 
 ~~~ pseudocode
 parent.value = Hash(hashContent(parent.leftChild) ||
@@ -1109,22 +1108,17 @@ parent.value = Hash(hashContent(parent.leftChild) ||
 
 hashContent(node):
   if node.type == leafNode:
-    return 0x00 || nodeValue(node)
+    return 0x00 || node.value
   else if node.type == parentNode:
-    return 0x01 || nodeValue(node)
-
-nodeValue(node):
-  if node.type == leafNode:
-    return Hash(node.timestamp || node.prefix_tree)
-  else if node.type == parentNode:
-    return node.value
+    return 0x01 || node.value
 ~~~
 
 where `Hash` denotes the ciphersuite hash function.
 
 ## Prefix Tree
 
-The leaf nodes of a prefix tree are serialized as:
+The value of a leaf node in the prefix tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:
 
 ~~~ tls
 struct {
@@ -1133,33 +1127,25 @@ struct {
 } PrefixLeaf;
 ~~~
 
-where `vrf_output` is the VRF output for the label-version pair, `VRF.Nh` is the
-output size of the ciphersuite VRF in bytes, and `commitment` is the commitment
-to the corresponding `UpdateValue` structure.
+The `vrf_output` field contains the VRF output for the label-version pair.
+`VRF.Nh` denotes the output size of the ciphersuite VRF in bytes. The
+`commitment` field contains the commitment to the corresponding `UpdateValue`
+structure.
 
-The parent nodes of a prefix tree are serialized as:
-
-~~~ tls
-struct {
-  opaque value[Hash.Nh];
-} PrefixParent;
-~~~
-
-The value of a parent node is computed by hashing together the values of its
-left and right children:
+The value of a parent node in the prefix tree is computed by hashing together
+the values of its left and right children:
 
 ~~~ pseudocode
-parent.value = Hash(0x01 ||
-                   nodeValue(parent.leftChild) ||
-                   nodeValue(parent.rightChild))
+parent.value = Hash(hashContent(parent.leftChild) ||
+                    hashContent(parent.rightChild))
 
-nodeValue(node):
+hashContent(node):
   if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh
+    return 0 // all-zero vector of length Hash.Nh+1
   else if node.type == leafNode:
-    return Hash(0x00 || node.vrf_output || node.commitment)
+    return 0x01 || node.value
   else if node.type == parentNode:
-    return node.value
+    return 0x02 || node.value
 ~~~
 
 
@@ -1167,10 +1153,24 @@ nodeValue(node):
 
 ## Log Tree
 
-The inclusion of some leaf in a tree head, or consistency between two tree
-heads, is proved by providing the smallest set of intermediate nodes from the
-log tree that allows the user to compute the tree's root hash from the leaf or
-other intermediate node values they already have. Such a proof is encoded as:
+In the interest of efficiency, KT combines multiple inclusion proofs and
+consistency proofs into a single batch proof. Recalling from the discussion in
+{{log-tree}},
+
+- When a user requests an inclusion proof for a leaf of the log tree, the
+  Transparency Log provides the minimum set of head values from balanced subtrees
+  that would allow the user to compute the root hash from the leaf's value.
+- When a user requests a consistency proof, the user is expected to have
+  retained the head values of the full subtrees of the previous version of the
+  log. The Transparency Log provides the minimum set of head values from
+  balanced subtrees that would allow the user to compute the root hash from
+  their retained values.
+
+These two proof types are composed together as such: considering the leaf values
+which will be proved included, and any node values the user is understood to
+have retained, the Transparency Log provides the minimum set of head values from
+balanced subtrees that would allow the user to compute the root hash from the
+leaf and retained values. This proof is encoded as follows:
 
 ~~~ tls-presentation
 opaque NodeValue[Hash.Nh];
@@ -1180,17 +1180,9 @@ struct {
 } InclusionProof;
 ~~~
 
-Each `NodeValue` is a uniform size, computed by passing the relevant `LogLeaf`
-or `LogParent` structures through the `nodeValue` function in
-{{crypto-log-tree}}. The contents of the `elements` array is kept in
-left-to-right order: if a node is present in the root's left subtree, its value
-must be listed before any values provided from nodes that are in the root's
-right subtree, and so on recursively.
-
-Additionally, each `NodeValue` corresponds to a balanced subtree of the log tree. If
-an intermediate node's value needs to be provided to satisfy the verifier, but
-the node is a non-balanced subtree, the values of the node's descendant full
-subtrees are provided instead.
+The contents of the `elements` array is in left-to-right order: if a node is
+present in the root's left subtree then its value is listed before the values of
+any nodes in the root's right subtree, and so on recursively.
 
 ## Prefix Tree
 
@@ -1248,14 +1240,14 @@ that the result equals the root value of the prefix tree.
 ## Combined Tree {#proof-combined-tree}
 
 As users execute the algorithms for searching, monitoring, or updating their
-view of the tree, they inspect a series of leaves in the log tree. For some of
-these leaves, only the timestamp of the log entry is needed. For other leaves,
+view of the tree, they inspect a series of log entries. For some of
+these, only the timestamp of the log entry is needed. For others,
 both the timestamp and a `PrefixProof` from the log entry's prefix tree are
 needed.
 
 This subsection defines a general structure, called a `CombinedTreeProof`, that
 contains the minimum set of timestamps and `PrefixProof` structures that a user
-needs for their execution of these algorithms. For the purpose of this protocol,
+needs for their execution of these algorithms. For the purposes of this protocol,
 the user always executes the algorithm to update their view of the tree,
 described in {{updating-views-of-the-tree}}, followed immediately by one of the
 algorithms to search or monitor the current tree.
@@ -1272,25 +1264,26 @@ struct {
 
 The elements of the `timestamps` field are the timestamps of log entries.
 The elements of the `prefix_proofs` field are search proofs from the prefix
-trees at particular log entries. There is no explicit indication as to which log
+trees at specific log entries. There is no explicit indication as to which log
 entry the elements correspond to, as they are provided in the order that the
 algorithm the user is executing would request them. The elements of the
 `prefix_roots` field are, in left-to-right order, the prefix tree root
 hashes for any log entries whose timestamp was provided in `timestamps` but a
 search proof was not provided in `prefix_proofs`.
 
-If a log entry's timestamp is referenced multiple times, its timestamp MUST NOT
-be repeated in `timestamps` but MUST only be added the first time. Additionally,
-when a user advertises a previously observed tree size in their request, log
-entry timestamps that the user is expected to have retained are excluded from
-`timestamps`.
+If a log entry's timestamp is referenced multiple times by algorithms in the
+same `CombinedTreeProof`, it is only added to the `timestamps` array the first
+time. Additionally, when a user advertises a previously observed tree size in
+their request, log entry timestamps that the user is expected to have retained
+are always omitted from `timestamps`. This may result in there being elements of
+`prefix_proofs` or `prefix_roots` that correspond to log entries whose
+timestamps are not included in `timestamps`
 
-`prefix_proofs` MAY contain multiple `PrefixProof` structures for the same log
-entry. Users MUST verify that all `PrefixProof` structures corresponding to the
-same log entry compute the same prefix tree root hash. There MAY be elements of
-`prefix_proofs` or `prefix_roots` that correspond to log entries whose timestamps
-are not included in `timestamps` if the user is expected to have
-retained the timestamps from a previous query response.
+If different algorithms in the same `CombinedTreeProof` require a search proof
+from the same log entry, the `prefix_proofs` array will contain multiple
+`PrefixProof` structures for the same log entry. Users MUST verify that all
+`PrefixProof` structures corresponding to the same log entry compute the same
+prefix tree root hash.
 
 Users processing a `CombinedTreeProof` MUST verify that each field contains
 exactly the expected number of entries -- no more and no less.
