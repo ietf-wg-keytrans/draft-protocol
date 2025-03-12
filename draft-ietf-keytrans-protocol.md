@@ -1223,10 +1223,10 @@ struct {
 } PrefixProof;
 ~~~
 
-The `results` field contains the search result for each individual value. It is
-sorted lexicographically by search key (which is always a VRF output in this
-protocol). The `result_type` field of each `PrefixSearchResult` struct indicates
-what the terminal node of the search for that value was:
+The `results` field contains the search result for each individual value. Every
+index corresponds to the respectively indexed binary ladder step targeting the
+queried version. The `result_type` field of each `PrefixSearchResult` struct
+indicates what the terminal node of the search for that value was:
 
 - `inclusion` for a leaf node matching the requested value.
 - `nonInclusionLeaf` for a leaf node not matching the requested value. In this
