@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 12 September 2025                                 11 March 2025
+Expires: 13 September 2025                                 12 March 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 12 September 2025.
+   This Internet-Draft will expire on 13 September 2025.
 
 Copyright Notice
 
@@ -1315,6 +1315,19 @@ Table of Contents
    before the values of any nodes in the root's right subtree, and so on
    recursively.
 
+   Batching together inclusion and consistency proofs creates an edge
+   case that requires special care: when a user has requested a
+   consistency proof, and also requested inclusion proofs for leaves
+   located in one or more of the subtrees that the user has retained the
+   head of.  When this happens, the portion of the batch proof that
+   shows inclusion for the leaves in these subtrees will itself be
+   sufficient to recompute the retained head values.  This makes the
+   retained values redundant for the purpose of computing the new root
+   hash, which could result in the retained values being disregarded in
+   a naive implementation.  To avoid accepting invalid proofs, users
+   MUST verify that the computed value for the head of any such subtree
+   matches the retained value.
+
 10.2.  Prefix Tree
 
    A proof from a prefix tree authenticates that a search was done
@@ -1507,7 +1520,7 @@ Table of Contents
 11.  User Operations
 
    The basic user operations are organized as a request-response
-   protocol between a user and the Transparency Log operator.
+   protocol between a user and the Transparency Log.
 
    Users MUST retain the most recent TreeHead they've successfully
    verified as part of any query response, and populate the last field
@@ -1515,13 +1528,9 @@ Table of Contents
    ensures that all operations performed by the user return consistent
    results.
 
-   struct {
-     TreeHead tree_head;
-     select (Configuration.mode) {
-       case thirdPartyAuditing:
-         AuditorTreeHead auditor_tree_head;
-     };
-   } FullTreeHead;
+   ~~~ tls-presentation struct { TreeHead tree_head; select
+   (Configuration.mode) { case thirdPartyAuditing: AuditorTreeHead
+   auditor_tree_head; }; } FullTreeHead; ~~~
 
    Modifications to a user's state MUST only be persisted once the query
    response has been fully verified.  Queries that fail full
@@ -1535,7 +1544,7 @@ Table of Contents
    to receive, if not the most recent one.
 
    struct {
-     optional<uint32> last;
+     optional<uint64> last;
 
      opaque label<0..2^8-1>;
      optional<uint32> version;
@@ -1609,7 +1618,7 @@ Table of Contents
    the Transparency Log containing the new label and value to store.
 
    struct {
-     optional<uint32> last;
+     optional<uint64> last;
 
      opaque label<0..2^8-1>;
      opaque value<0..2^32-1>;
@@ -1655,7 +1664,7 @@ Table of Contents
    } MonitorLabel;
 
    struct {
-     optional<uint32> last;
+     optional<uint64> last;
      MonitorLabel labels<0..2^8-1>;
    } MonitorRequest;
 
