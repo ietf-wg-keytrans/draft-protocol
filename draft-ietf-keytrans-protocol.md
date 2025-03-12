@@ -1133,21 +1133,33 @@ The `vrf_output` field contains the VRF output for the label-version pair.
 structure.
 
 The value of a parent node in the prefix tree is computed by hashing together
-the values of its left and right children:
+the values of its left and right children. Overall, a prefix tree node's value
+is computed as follows.
 
-~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
+~~~
+struct {
+  opaque value[Hash.Nh];
+  optional<PrefixLeaf> leafData;
+  optional<PrefixNode> leftChild;
+  optional<PrefixNode> rightChild;
+} PrefixNode;
+
+prefix_node.value = nodeValue(node)
+
+nodeValue(node):
+  if node.type.leftChild == null && node.rightChild == null:
+    return Hash(node.leafData)
+  else:
+    return Hash(hashContent(node.leftChild) || hashContent(node.rightChild))
 
 hashContent(node):
-  if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh+1
-  else if node.type == leafNode:
+  if node == undefined:
+    return 0x00...0x00 // all-zero vector of length Hash.Nh+1
+  else if node.leftChild == null && node.rightChild == null:
     return 0x01 || node.value
   else if node.type == parentNode:
-    return 0x02 || node.value
+    return 0x02 || node.value
 ~~~
-
 
 # Tree Proofs
 
