@@ -1184,6 +1184,17 @@ The contents of the `elements` array is in left-to-right order: if a node is
 present in the root's left subtree then its value is listed before the values of
 any nodes in the root's right subtree, and so on recursively.
 
+Batching together inclusion and consistency proofs creates an edge case that
+requires special care: when a user has requested a consistency proof, and also
+requested inclusion proofs for leaves located in one or more of the subtrees
+that the user has retained the head of. When this happens, the portion of the
+batch proof that shows inclusion for the leaves in these subtrees will itself be
+sufficient to recompute the retained head values. This makes the retained values
+redundant for the purpose of computing the new root hash, which could result in
+the retained values being disregarded in a naive implementation. To avoid
+accepting invalid proofs, users MUST verify that the computed value for the head
+of any such subtree matches the retained value.
+
 ## Prefix Tree
 
 A proof from a prefix tree authenticates that a search was done correctly for a
@@ -1393,14 +1404,14 @@ tree.
 # User Operations
 
 The basic user operations are organized as a request-response protocol between a
-user and the Transparency Log operator.
+user and the Transparency Log.
 
 Users MUST retain the most recent `TreeHead` they've successfully
 verified as part of any query response, and populate the `last` field of any
 query request with the `tree_size` from this `TreeHead`. This ensures that all
 operations performed by the user return consistent results.
 
-~~~ tls-presentation
+~~~ tls-presentation <!-- TODO: Specify verification -->
 struct {
   TreeHead tree_head;
   select (Configuration.mode) {
@@ -1425,7 +1436,7 @@ most recent one.
 
 ~~~ tls-presentation
 struct {
-  optional<uint32> last;
+  optional<uint64> last;
 
   opaque label<0..2^8-1>;
   optional<uint32> version;
@@ -1496,7 +1507,7 @@ Transparency Log containing the new label and value to store.
 
 ~~~ tls-presentation
 struct {
-  optional<uint32> last;
+  optional<uint64> last;
 
   opaque label<0..2^8-1>;
   opaque value<0..2^32-1>;
@@ -1548,7 +1559,7 @@ struct {
 } MonitorLabel;
 
 struct {
-  optional<uint32> last;
+  optional<uint64> last;
   MonitorLabel labels<0..2^8-1>;
 } MonitorRequest;
 ~~~
