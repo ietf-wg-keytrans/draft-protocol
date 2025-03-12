@@ -1100,16 +1100,30 @@ milliseconds since the Unix epoch. The `prefix_tree` field contains the updated
 root hash of the prefix tree after making any desired modifications.
 
 The value of a parent node in the log tree is computed by hashing together the
-values of its left and right children:
+values of its left and right children. Overall, a log tree node's value
+is computed as follows.
 
 ~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
+struct {
+  opaque value[Hash.Nh];
+  optional<LogLeaf> leafData;
+  optional<LogTreeNode> leftChild;
+  optional<LogTreeNode> rightChild;
+} LogTreeNode;
 
-hashContent(node):
-  if node.type == leafNode:
+log_node.value = logTreeValue(log_node)
+
+logTreeValue(node):
+  if node.leftChild == undefined && node.rightChild == undefined:
+    return Hash(node.leafData)
+  else:
+    return Hash(logTreeHashContent(node.leftChild) ||
+                logTreeHashContent(node.rightChild))
+
+logTreeHashContent(node):
+  if node.leftChild == undefined && node.rightChild == undefined:
     return 0x00 || node.value
-  else if node.type == parentNode:
+  else:
     return 0x01 || node.value
 ~~~
 
