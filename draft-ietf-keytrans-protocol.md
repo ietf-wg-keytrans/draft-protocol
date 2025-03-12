@@ -536,10 +536,15 @@ A **binary ladder** is an algorithm that operates on a prefix tree and *targets*
 a label-version `v`. A binary ladder checks whether `v` should be included in
 the prefix tree. The binary ladder algorithm works as follows.
 
-1. Check inclusion of version `x` where `x` is a consecutively higher power of
-   two minus one (0, 1, 3, 7, ...) until the first version not to be included in
-   the prefix tree is found. Let `x_in` be the highest `x` included in the
-   prefix tree and `x_out` the lowest `x` not included in the prefix tree.
+1. Check inclusion consecutively higher powers of two minus one (0, 1, 3, 7,
+   ...) until the first version not to be included in the prefix tree is found.
+   Concretely, let `i = 0`. Check inclusion of `x = 2^i - 1`. If `x` is included
+   in the prefix tree, increment `i` by one and execute step 1 again. If `x` is
+   not included in the prefix tree:
+   - If `i = 0`, return "non-inclusion".
+   - Otherwise, set `x_in = 2^(i-1) - 1` (the highest version checked to be
+   included in the prefix tree) and `x_out = 2^i - 1` (the lowest version check
+   to not be included in the prefix tree).
 2. Perform a binary search between `x_in` and `x_out`. Check whether `k = x_in +
    (x_out - x_in) / 2` is included in the prefix tree. If it is, `x_in` is set
    to `k`. If it is not, `x_out` is set to `k`.
