@@ -1106,22 +1106,22 @@ is computed as follows.
 ~~~ pseudocode
 struct {
   opaque value[Hash.Nh];
-  optional<LogLeaf> leafData;
-  optional<LogTreeNode> leftChild;
-  optional<LogTreeNode> rightChild;
+  optional<LogLeaf> leaf_data;
+  optional<LogTreeNode> left_child;
+  optional<LogTreeNode> right_child;
 } LogTreeNode;
 
 log_node.value = logTreeValue(log_node)
 
 logTreeValue(node):
-  if node.leftChild == undefined && node.rightChild == undefined:
-    return Hash(node.leafData)
+  if node.left_child == undefined && node.right_child == undefined:
+    return Hash(node.leaf_data)
   else:
-    return Hash(logTreeHashContent(node.leftChild) ||
-                logTreeHashContent(node.rightChild))
+    return Hash(logTreeHashContent(node.left_child) ||
+                logTreeHashContent(node.right_child))
 
 logTreeHashContent(node):
-  if node.leftChild == undefined && node.rightChild == undefined:
+  if node.left_child == undefined && node.right_child == undefined:
     return 0x00 || node.value
   else:
     return 0x01 || node.value
@@ -1153,23 +1153,24 @@ is computed as follows.
 ~~~
 struct {
   opaque value[Hash.Nh];
-  optional<PrefixLeaf> leafData;
-  optional<PrefixNode> leftChild;
-  optional<PrefixNode> rightChild;
+  optional<PrefixLeaf> leaf_data;
+  optional<PrefixNode> left_child;
+  optional<PrefixNode> right_child;
 } PrefixNode;
 
-prefix_node.value = nodeValue(node)
+prefix_node.value = prefixTreeValue(node)
 
-nodeValue(node):
-  if node.type.leftChild == null && node.rightChild == null:
-    return Hash(node.leafData)
+prefixTreeValue(node):
+  if node.type.left_child == undefined && node.right_child == undefined:
+    return Hash(node.leaf_data)
   else:
-    return Hash(hashContent(node.leftChild) || hashContent(node.rightChild))
+    return Hash(prefixTreeHashContent(node.left_child) ||
+                prefixTreeHashContent(node.right_child))
 
-hashContent(node):
+prefixTreeHashContent(node):
   if node == undefined:
     return 0x00...0x00 // all-zero vector of length Hash.Nh+1
-  else if node.leftChild == null && node.rightChild == null:
+  else if node.left_child == undefined && node.right_child == undefined:
     return 0x01 || node.value
   else if node.type == parentNode:
     return 0x02 || node.value
