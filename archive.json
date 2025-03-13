@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-11T00:58:37.186601+00:00",
+  "timestamp": "2025-03-13T00:58:54.883741+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -224,7 +224,7 @@
       "labels": [],
       "body": "Two questions on the binary ladder for fixed version searches as described [here](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-5.1-4).\n\n1. Presume highest version is 7 and 6 is queried. It is stated: \"the series of lookups ends after the first proof of inclusion for a\nversion greater than or equal to the target version.\" Does this mean 6 is not proven to be included in the prefix tree? It sounds like that, but it seems odd.\n2. It is stated that proofs of inclusion can be omitted should they have been provided for log tree entries younger than the one at hand. Why is this optimization not possible for proofs of a highest version?",
       "createdAt": "2025-03-04T10:40:50Z",
-      "updatedAt": "2025-03-04T21:01:47Z",
+      "updatedAt": "2025-03-11T12:21:23Z",
       "closedAt": null,
       "comments": [
         {
@@ -233,8 +233,103 @@
           "body": "> Presume highest version is 7 and 6 is queried. It is stated: \"the series of lookups ends after the first proof of inclusion for a\nversion greater than or equal to the target version.\" Does this mean 6 is not proven to be included in the prefix tree? It sounds like that, but it seems odd.\n\nThat /can/ happen. Your binary ladder will be for version 6 will be versions: 0, 1, 3, 7, 5, 6. You can do an entire binary search through the log entries for version 6 but always terminate the binary ladder early with a proof of inclusion for version 7. The implication there though is that version 6 and 7 were created in the same epoch.\n\n> It is stated that proofs of inclusion can be omitted should they have been provided for log tree entries younger than the one at hand. Why is this optimization not possible for proofs of a highest version?\n\nI'm not sure what you mean here.",
           "createdAt": "2025-03-04T21:01:46Z",
           "updatedAt": "2025-03-04T21:01:46Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Okay, your edits made it clearer. I read it as: \"There are two flavors of a binary ladder and we can optimize one of them in two ways.\" I was wondering why the second optimization couldn't apply to the greatest-version search. But now I see that the optimizations apply generally.",
+          "createdAt": "2025-03-11T12:21:22Z",
+          "updatedAt": "2025-03-11T12:21:22Z"
         }
       ]
+    },
+    {
+      "number": 24,
+      "id": "I_kwDOLrnaA86trCE9",
+      "title": "How does a server negatively respond to a search request?",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/24",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Presume a client queries a server for a non-existent label's latest version or a non-existent version of a label. How does the server respond such queries? This doesn't seem to be specified. The `SearchResponse` struct fields don't look like they could encode a negative response, and the corresponding section also doesn't mention it. (See https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-search)",
+      "createdAt": "2025-03-12T12:03:27Z",
+      "updatedAt": "2025-03-12T12:03:27Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 25,
+      "id": "I_kwDOLrnaA86trSOa",
+      "title": "Clients do not verify which log entries are distinguished",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/25",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "For greatest-version searches, the spec requires clients to branch on whether the proofs of inclusion on prefix trees start the the implicit binary search tree's root or at a distinguished log entry. Clients can implicitly tell whether the provided log entry is distinguished by checking whether it's the root or not, but the specification does not tell clients to verify that a provided non-root is a distinguished log entry, and I think, they cannot. When updating the view on the log tree, clients are only given nodes on the frontier, and nodes on the path from their previous root back to the frontier. It seems to me that this would not be sufficient to verify which nodes on the frontier are distinguished.",
+      "createdAt": "2025-03-12T12:28:17Z",
+      "updatedAt": "2025-03-12T19:56:21Z",
+      "closedAt": null,
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The timestamps of the nodes on the frontier are all that are necessary to find the rightmost distinguished log entry",
+          "createdAt": "2025-03-12T19:56:20Z",
+          "updatedAt": "2025-03-12T19:56:20Z"
+        }
+      ]
+    },
+    {
+      "number": 27,
+      "id": "I_kwDOLrnaA86tru29",
+      "title": "node.type used but not defined",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/27",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "The hash computation in 9.5/9.6 uses the field `node.type` but it is not specified anywhere. I can see what it ought to mean, however, there are some ambiguities. For example, Figure 5 shows a prefix tree with nodes that have only a single child node. I guess it is expected that in an implementation, every node in the prefix tree has either two children or is a leaf. The node that is not rendered is probably of type `emptyNode`. But this should be made explicit.",
+      "createdAt": "2025-03-12T13:09:25Z",
+      "updatedAt": "2025-03-12T13:09:39Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 28,
+      "id": "I_kwDOLrnaA86tr1qC",
+      "title": "node.value for leafs undefined",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/28",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Both sections 9.5/9.6 define the hashes of nodes, and there are base cases for leaves. Leaves are defined as `0x0_ || node.value`, but `node.value` is not defined. It is implicitly clear from context that this should be `LogLeaf` and `PrefixLeaf`, but it should be made explicit.",
+      "createdAt": "2025-03-12T13:19:41Z",
+      "updatedAt": "2025-03-12T13:19:41Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 29,
+      "id": "I_kwDOLrnaA86tsPxh",
+      "title": "RFC 8446 does not define optional fields but this spec uses them",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/29",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "It should be made explicit how to encode fields that are optional. Are they left out? Are they replaced with a zero-bytes sequence or something similar?\n\nI would also like to use syntax that checks whether an optional field is present. Should we use `undefined` as the value of optional fields that have no \"actual value\"?",
+      "createdAt": "2025-03-12T13:51:03Z",
+      "updatedAt": "2025-03-12T13:51:03Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -1722,6 +1817,121 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 23,
+      "id": "PR_kwDOLrnaA86OLCgL",
+      "title": "Rework binary ladder and search algorithms",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/23",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A number of changes concerning #20 and #22.\r\n\r\nI don't think the PR is fully ready set. In particular:\r\n- Consistency with other parts of the draft must be checked. In particular, \"Tree Proofs\" and \"User Operations\" may need to change.\r\n- I do not specify anymore really what the log server does, only what the client does. This may be okay. We could specify server behavior together with the datatypes.\r\n\r\nMy changes were motivated by the following.\r\n\r\n- I now give the binary ladder its own section. It didn't sit right with me that it was defined as part of the specific-version search, although it is used in the greatest-version search too.\r\n- Descriptions are now more algorithmic, i.e., less ambiguous. I think this is critical. Working this out wasn't trivial for me and we should reduce ambiguity.\r\n- The binary ladder is now an algorithm that is intended to be executed by clients. Thus, it doesn't make sense to say \"the server provides a binary ladder.\" I think we should adjust phrasing in the other parts of the spec to say that \"the server provides all inputs necessary to perform a binary ladder.\"\r\n\r\nLet me know what you think of the PR's direction!",
+      "createdAt": "2025-03-11T14:05:56Z",
+      "updatedAt": "2025-03-12T12:23:48Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "a4861ed31eb377326690ed84eed17cf3aceb7c2a",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "binary-ladder",
+      "headRefOid": "01c4dead616cee1075561c49118038bf82ce0913",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "> I now give the binary ladder its own section. It didn't sit right with me that it was defined as part of the specific-version search, although it is used in the greatest-version search too.\r\n\r\nBinary ladders are used in every algorithm: fixed-version, greatest-version, monitoring. The current organization is to build up one idea at a time in a productive way, so people see how the ideas fit together. The RMW, for example, is also used in greatest-version searches but is introduced in the monitoring section. If we were to pull all of these things out on their own, there would be a big bag of sections to read before anything useful is described.\r\n\r\n> Descriptions are now more algorithmic, i.e., less ambiguous. I think this is critical. Working this out wasn't trivial for me and we should reduce ambiguity.\r\n\r\nThe description you give of the binary ladder is more ambiguous to me. \"Check inclusion of version `x`... until the first version not to be included is found\" -- it's not clear that ending this step requires receiving and validating a non-inclusion proof. The description is also incorrect. If the target version is 7, I believe this will keep going unnecessarily.",
+          "createdAt": "2025-03-11T17:55:28Z",
+          "updatedAt": "2025-03-11T17:55:28Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I tried clarifying the ambiguity of exponential offset in the initial step of the binary ladder with my most recent commit!\r\n\r\nI agree that my writing has less \"hand holding\" than your writing. This has pros and cons. During my implementation of the client, I noticed that I needed to think a lot about which steps the algorithms are supposed to take. I think this will lead to diverging implementations, and we should specify binary ladder/searches/etc. in more detail. So I think we must define the client algorithms in more detail.\r\n\r\nFor example, in my latest commit, I wasn't entirely sure what to do what to do if version 0 is not included, and such edge cases should be made explicit. While one can with a bit of thinking infer what should happen in case that immediately version 0 is found not-to-be-included, people might even forget about the edge case in the first place.\r\n\r\nWhat do you think about a super high-level overview section after the tree introductions? There we could say something like: \"Clients will run queries X, Y, Z. The server needs to provide the clients with the minimal data s.t. they have enough knowledge of the tree to run this query. Fixed version search is binary search on log tree to find committing leaf. Greatest version search is ....\" Then, we can use the dedicated sections to introduce the algorithms that the client runs, and the sections towards the end to define exact server-proof format.\r\n\r\nYou are also correct that I do not mention that server proofs are required for the binary ladder, but this was intentional. You can run this algorithm on a prefix tree independently of your view on the tree. You could get the entire tree or just the minimal tree that lets you exactly run the binary ladder. (This connects to the changes not having cascaded to the entire document.) In the proofs data structures later, I intend to change them to: \"The server provides all prefix tree hashes that let the client run the binary ladder as specified in X.\" (Or something similar.)",
+          "createdAt": "2025-03-12T08:58:12Z",
+          "updatedAt": "2025-03-12T08:58:12Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Ah - and regarding binary ladder for greatest-version 7. How would the binary ladder run there? I find the current description ambiguous. We have the \"higher powers of two minus one part,\" which would lead to proof of inclusion of 7 and non-inclusion of 15. Do we do the binary search then? I guess we do. The spec simply says \"until it terminates\" but doesn't specify when to terminate. I say we terminate when we proved non-inclusion of 8 in this PR.",
+          "createdAt": "2025-03-12T09:00:51Z",
+          "updatedAt": "2025-03-12T09:00:51Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I completely missed that there's an algorithm Section in the Fixed-Version Searches section. I will rework my changes to account for this.",
+          "createdAt": "2025-03-12T12:23:47Z",
+          "updatedAt": "2025-03-12T12:23:47Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 26,
+      "id": "PR_kwDOLrnaA86OVqRS",
+      "title": "Change order of PrefixProof.results",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/26",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I think changing the order this way would simplify implementation as clients can directly infer which results targets which index. This spares implementations from sorting `SearchResponse.binary_ladder`. Instead, they can just zip the two arrays (speaking functionally).",
+      "createdAt": "2025-03-12T12:39:01Z",
+      "updatedAt": "2025-03-12T19:59:50Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "prefix-proof-results",
+      "headRefOid": "d704d87c459e73794489c66fde9adffea3626f46",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I am not wholly opposed to this, but want to clarify one thing:\r\n\r\n> This spares implementations from sorting `SearchResponse.binary_ladder`\r\n\r\nThis is not true. Users will always need to sort SearchResponse.binary_ladder because the prefix tree itself is sorted lexicographically, and users need to know in what order to hash together the node values in PrefixProof.elements.\r\n\r\nGiven that, is this still worth it in your opinion?",
+          "createdAt": "2025-03-12T19:59:50Z",
+          "updatedAt": "2025-03-12T19:59:50Z"
+        }
+      ],
+      "reviews": []
+    },
+    {
+      "number": 30,
+      "id": "PR_kwDOLrnaA86OWhO3",
+      "title": "Tree node values",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/30",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "PR provides a complete algorithm to determine a prefix and log tree node values.\r\n\r\nCloses #27 and closes #28.\r\n\r\nRelated to #29 as I'm using `undefined` here.",
+      "createdAt": "2025-03-12T14:02:19Z",
+      "updatedAt": "2025-03-12T14:58:38Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "prefix-tree-values",
+      "headRefOid": "454fbf420fc256f6d546c4c56acc6cac07befa17",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
