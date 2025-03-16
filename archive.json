@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-13T00:58:54.883741+00:00",
+  "timestamp": "2025-03-16T01:02:56.440397+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -327,9 +327,17 @@
       "labels": [],
       "body": "It should be made explicit how to encode fields that are optional. Are they left out? Are they replaced with a zero-bytes sequence or something similar?\n\nI would also like to use syntax that checks whether an optional field is present. Should we use `undefined` as the value of optional fields that have no \"actual value\"?",
       "createdAt": "2025-03-12T13:51:03Z",
-      "updatedAt": "2025-03-12T13:51:03Z",
+      "updatedAt": "2025-03-14T07:16:19Z",
       "closedAt": null,
-      "comments": []
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "The proper definition is in MLS: https://www.rfc-editor.org/rfc/rfc9420.html#name-optional-value\n\nThat said, we are changing the encoding language soon so this is fine to ignore",
+          "createdAt": "2025-03-14T07:16:18Z",
+          "updatedAt": "2025-03-14T07:16:18Z"
+        }
+      ]
     }
   ],
   "pulls": [
@@ -1919,7 +1927,7 @@
       "labels": [],
       "body": "PR provides a complete algorithm to determine a prefix and log tree node values.\r\n\r\nCloses #27 and closes #28.\r\n\r\nRelated to #29 as I'm using `undefined` here.",
       "createdAt": "2025-03-12T14:02:19Z",
-      "updatedAt": "2025-03-12T14:58:38Z",
+      "updatedAt": "2025-03-14T08:11:05Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
@@ -1930,7 +1938,15 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I feel like this new code is more complicated and loses a lot of the pedagogical value. It's pseudocode -- it doesn't need to compile, you just need to know what it means. And you did!\r\n\r\n> node.value is not defined. It is implicitly clear from context that this should be LogLeaf and PrefixLeaf, but it should be made explicit.\r\n\r\nIt is explicitly defined. The text says that every node in these trees has a value. We say exactly how to compute the byte string value of a leaf node from LogLeaf/PrefixLeaf, and how to compute the byte string value of a parent node.",
+          "createdAt": "2025-03-14T08:11:04Z",
+          "updatedAt": "2025-03-14T08:11:04Z"
+        }
+      ],
       "reviews": []
     }
   ]
