@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-18T00:58:45.337098+00:00",
+  "timestamp": "2025-03-20T00:58:18.294084+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1838,7 +1838,7 @@
       "labels": [],
       "body": "A number of changes concerning #20 and #22.\r\n\r\nI don't think the PR is fully ready set. In particular:\r\n- Consistency with other parts of the draft must be checked. In particular, \"Tree Proofs\" and \"User Operations\" may need to change.\r\n- I do not specify anymore really what the log server does, only what the client does. This may be okay. We could specify server behavior together with the datatypes.\r\n\r\nMy changes were motivated by the following.\r\n\r\n- I now give the binary ladder its own section. It didn't sit right with me that it was defined as part of the specific-version search, although it is used in the greatest-version search too.\r\n- Descriptions are now more algorithmic, i.e., less ambiguous. I think this is critical. Working this out wasn't trivial for me and we should reduce ambiguity.\r\n- The binary ladder is now an algorithm that is intended to be executed by clients. Thus, it doesn't make sense to say \"the server provides a binary ladder.\" I think we should adjust phrasing in the other parts of the spec to say that \"the server provides all inputs necessary to perform a binary ladder.\"\r\n\r\nLet me know what you think of the PR's direction!",
       "createdAt": "2025-03-11T14:05:56Z",
-      "updatedAt": "2025-03-12T12:23:48Z",
+      "updatedAt": "2025-03-19T07:27:42Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "a4861ed31eb377326690ed84eed17cf3aceb7c2a",
@@ -1877,6 +1877,13 @@
           "body": "I completely missed that there's an algorithm Section in the Fixed-Version Searches section. I will rework my changes to account for this.",
           "createdAt": "2025-03-12T12:23:47Z",
           "updatedAt": "2025-03-12T12:23:47Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@Bren2010 Thought a bit more about this. What do you think about leaving the original sections mostly as is, but providing an \"Algorithms\" section (somewhere around current sections 9-11) that is more formal? Then people can have both the introduction as is and more clearly specified algorithms.\r\n\r\nI would disambiguate the term \"binary ladder\" still though as its used with slightly different meanings over the document.",
+          "createdAt": "2025-03-19T07:27:41Z",
+          "updatedAt": "2025-03-19T07:27:41Z"
         }
       ],
       "reviews": []
