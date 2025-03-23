@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-20T00:58:18.294084+00:00",
+  "timestamp": "2025-03-23T01:03:19.393400+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1900,7 +1900,7 @@
       "labels": [],
       "body": "I think changing the order this way would simplify implementation as clients can directly infer which results targets which index. This spares implementations from sorting `SearchResponse.binary_ladder`. Instead, they can just zip the two arrays (speaking functionally).",
       "createdAt": "2025-03-12T12:39:01Z",
-      "updatedAt": "2025-03-17T03:43:41Z",
+      "updatedAt": "2025-03-21T23:01:36Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
@@ -1925,6 +1925,13 @@
           "body": "Is it though? In my implementation, if this were to change, I wouldn't need to sort the leaves. What I do in my implementation is the following: For all leaves in `SearchResponse.binary_ladder`, iI transform them to a VRF output and \"default insert them as leaves.\" That is, I walk a partial prefix tree data structure, initializing inner nodes where necessary along the way. After that, I DFS the prefix tree left-to-right and take the provided hashes from the array in the prefix tree proof structure. I guess you could be marginally more efficient, but this was the easiest to implement for me and requires no sorting. Is it correct, though?",
           "createdAt": "2025-03-17T03:43:40Z",
           "updatedAt": "2025-03-17T03:43:40Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "It's correct, but it is also definitely sorting :) When you do your depth-first left-to-right search, could you not pull the PrefixProof.results entries in similar to how you pull PrefixProof.elements entries in?",
+          "createdAt": "2025-03-21T23:01:35Z",
+          "updatedAt": "2025-03-21T23:01:35Z"
         }
       ],
       "reviews": []
