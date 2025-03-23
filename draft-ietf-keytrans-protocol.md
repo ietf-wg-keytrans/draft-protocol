@@ -561,10 +561,9 @@ follows:
    right until it terminates.
 
 However, this description implies that the series of lookups is interactive,
-which it is not. In practice, binary ladders are always executed with
+which it is not. Binary ladders are always executed with
 respect to a specific **target version** which may or may not be the actual
-greatest version of the label. This allows binary ladders to be optimized in two
-ways:
+greatest version of the label. This allows for two optimizations:
 
 First, the series of lookups ends after the first inclusion proof for a version
 greater than or equal to the target version, or the first non-inclusion proof
@@ -1035,7 +1034,7 @@ struct {
 } UpdateTBS;
 ~~~
 
-The `value` contains the same contents as `UpdateValue.value`. Clients
+The `value` contains the same contents as `UpdateValue.value`. Users
 MUST successfully verify this signature before consuming `UpdateValue.value`.
 
 ## Commitment
@@ -1206,6 +1205,7 @@ enum {
   inclusion(1),
   nonInclusionLeaf(2),
   nonInclusionParent(3),
+  (255)
 } PrefixSearchResultType;
 
 struct {
