@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 13 September 2025                                 12 March 2025
+Expires: 24 September 2025                                 23 March 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 13 September 2025.
+   This Internet-Draft will expire on 24 September 2025.
 
 Copyright Notice
 
@@ -637,10 +637,10 @@ Table of Contents
        it terminates.
 
    However, this description implies that the series of lookups is
-   interactive, which it is not.  In practice, binary ladders are always
-   executed with respect to a specific *target version* which may or may
-   not be the actual greatest version of the label.  This allows binary
-   ladders to be optimized in two ways:
+   interactive, which it is not.  Binary ladders are always executed
+   with respect to a specific *target version* which may or may not be
+   the actual greatest version of the label.  This allows for two
+   optimizations:
 
    First, the series of lookups ends after the first inclusion proof for
    a version greater than or equal to the target version, or the first
@@ -1174,7 +1174,7 @@ Table of Contents
      opaque value<0..2^32-1>;
    } UpdateTBS;
 
-   The value contains the same contents as UpdateValue.value.  Clients
+   The value contains the same contents as UpdateValue.value.  Users
    MUST successfully verify this signature before consuming
    UpdateValue.value.
 
@@ -1338,6 +1338,7 @@ Table of Contents
      inclusion(1),
      nonInclusionLeaf(2),
      nonInclusionParent(3),
+     (255)
    } PrefixSearchResultType;
 
    struct {
