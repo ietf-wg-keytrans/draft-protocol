@@ -528,28 +528,16 @@ have a previous tree head to advertise, the Transparency Log simply provides the
 timestamps of the log entries on the frontier. The user verifies each timestamp
 is greater than or equal to the last, as above.
 
-<!-- TODO: Do we need to provide timestamps from first log entry up to root? -->
 
-# Fixed-Version Searches
+# Binary Ladder
 
-When searching the combined tree structure described in {{combined-tree}}, users
-perform a binary search for the first log entry where the prefix tree at that
-entry contains the desired label-version pair. Users reuse the implicit binary
-search tree from {{implicit-binary-search-tree}} for this purpose. This ensures
-that all users will check the same or similar entries when searching for the
-same label, allowing for efficient user monitoring of the Transparency Log.
-
-## Binary Ladder
-
-To perform a binary search, users need to be able to inspect individual log
-entries and determine whether their search should continue to the left of the
-current log entry or the right. Specifically, they need to be able to determine
-if the greatest version of their label that was present in some version of the
-prefix tree was greater than, equal to, or less than their target version.
-
-A **binary ladder** is a series of lookups in a single log entry's prefix tree
-that determines the greatest version of a label that exists. It proceeds as
-follows:
+A **binary ladder** is a series of lookups, producing a series of inclusion and
+non-inclusion proofs, from a single log entry's prefix tree. The purpose of a
+binary ladder varies depending on the exact context in which it is provided, but
+it is generally to establish some bound on the greatest version of a label that
+existed as of a particular log entry. All binary ladders are variants of the
+following series of lookups, which exactly determines the greatest version of a
+label that exists:
 
 1. First, version `x` of the label is looked up, where `x` is a consecutively
    higher power of two minus one (0, 1, 3, 7, ...). This is repeated until the
@@ -560,17 +548,50 @@ follows:
    either an inclusion or non-inclusion proof, which guides the search left or
    right until it terminates.
 
-However, this description implies that the series of lookups is interactive,
-which it is not. Binary ladders are always executed with
-respect to a specific **target version** which may or may not be the actual
-greatest version of the label. This allows for two optimizations:
+As an example, if the greatest version of a label that existed in a particular
+log entry was version 6, that would be established by the following: inclusion
+proofs for versions 0, 1, 3, a non-inclusion proof for version 7, then followed
+by inclusion proofs for versions 5 and 6. This series of lookups uniquely
+identifies 6 as the greatest version that exists, in the sense that the
+Transparency Log would be unable to prove a different greatest version to any
+user.
+
+While the description above may imply that the series of lookups is interactive,
+this is not the case in practice. Users may receive one or more binary ladders,
+corresponding to the same or different log entries, in a single query response.
+The Transparency Log's query response always contains sufficient information to
+allow users to predict the outcome of each lookup (inclusion or non-inclusion of
+a particular version) in the binary ladder.
+
+
+# Fixed-Version Searches
+
+When searching the combined tree structure described in {{combined-tree}}, users
+perform a binary search for the first log entry where the prefix tree at that
+entry contains the target label-version pair. Users reuse the implicit binary
+search tree from {{implicit-binary-search-tree}} for this purpose. This ensures
+that all users will check the same or similar entries when searching for the
+same label, allowing for efficient user monitoring of the Transparency Log.
+
+## Binary Ladder {#fv-binary-ladder}
+
+To perform a binary search, users need to be able to inspect individual log
+entries and determine whether their search should continue to the left of the
+current log entry or the right. Specifically, they need to be able to determine
+if the greatest version of their label that was present in some version of the
+prefix tree was greater than, equal to, or less than their **target version**.
+
+This is accomplished by having the Transparency Log provide a binary ladder from
+each log entry in the user's search path. Binary ladders provided for the
+purpose of a fixed-version search follow the series of lookups described in
+{{binary-ladder}}, but with two optimizations:
 
 First, the series of lookups ends after the first inclusion proof for a version
 greater than or equal to the target version, or the first non-inclusion proof
-for a version less than the target version. This is because, when searching for
-a specific version of a label, users are only interested in whether the greatest
-version of a label that existed as of a particular log entry is greater than or
-less than their target version -- not its exact value.
+for a version less than the target version. The additional lookups are
+unnecessary, since the user only needs to know whether the greatest version of
+the label that existed as of a particular log entry is greater than or less than
+their target version -- not its exact value.
 
 Second, the Transparency Log omits inclusion proofs for any versions of the
 label where another inclusion proof for the same version was already provided in
@@ -580,15 +601,6 @@ non-inclusion proof for the same version was already provided in the same query
 response for a log entry to the right. Providing these proofs is unnecessary
 since the only possible outcome they could have on the user's binary search
 would be to cause it to fail.
-
-As an example, if a user was searching for version 6 of a label, the longest
-possible binary ladder would be: inclusion proofs for versions 0, 1, 3, a
-non-inclusion proof for version 7, then followed by inclusion proofs for
-versions 5 and 6. This would uniquely identify version 6 as the greatest that
-exists in the prefix tree. However, in the context of a specific query response,
-the series may be terminated early if the greatest version in the prefix tree is
-not 6, and any of the lookups may be omitted depending on the output of previous
-binary ladders from other log entries.
 
 ## Maximum Lifetime
 
@@ -762,7 +774,7 @@ This process for choosing distinguished log entries ensures that they are
 either overwhelming label owners with a large number of them, or delaying
 consensus between users by having arbitrarily few. Distinguished log entries
 must reliably occur at roughly the same interval as the Reasonable Monitoring
-Window regardless of variations in the tree's growth rate.
+Window regardless of variations in how quickly new log entries are added.
 
 This process also ensures that distinguished log entries are **stable**. Once a
 log entry is chosen to be distinguished, it will never stop being distinguished.
@@ -770,25 +782,34 @@ This is important because it means that, if a user looks up a label and checks
 consistency with some distinguished log entry, this log entry can't later avoid
 inspection by the label owner by losing its distinguished status.
 
-## Lower-Bound Binary Ladder
+## Binary Ladder {#monitor-binary-ladder}
 
 Similar to the algorithm for searching the tree, the algorithm for monitoring
-the tree requires a way to prove that the greatest version of a label stored in a
-particular log entry's prefix tree is greater than or equal to a target version. Since users
-already know that the target version exists, the Transparency Log only needs to prove that there
-has not been an unexpected downgrade. As such, the steps of the binary ladder
-for monitoring, called a **lower-bound binary ladder**, are slightly different
-than for search:
+the tree requires a way to prove that the greatest version of a label stored in
+a particular log entry's prefix tree is greater than or equal to a **target
+version**. The target version in this case is the version of the label that the
+user is monitoring. Unlike in a search though, users already know that the
+target version of the label exists and only need proof that there has not been
+an unexpected downgrade.
 
-1. First, version `x` of the label is looked up, where `x` is a consecutively higher
-   power of two minus one (0, 1, 3, 7, ...). This is repeated until `x` is the
-   largest such value less than or equal to the target version.
-2. Second, the largest `x` that was looked up is retained and consecutively
-   smaller powers of two are added to such that the final result equals the target version.
-   Each time a power of two is added, this version of the label is looked up.
+Binary ladders provided for the purpose of monitoring follow the series of
+lookups that would be made by the algorithm in {{binary-ladder}} if the target
+version of the label was the greatest that existed. Note that this means the
+series of lookups performed is always the same for the same target version,
+regardless of whatever the actual greatest version of the label is. From this
+series of lookups, two optimizations are made:
 
-This could be equivalently computed as a search binary ladder with any lookups
-for versions greater than the target version excluded.
+First, any lookup for a version greater than the target version is omitted. As a
+result, all lookups in the binary ladder will result in an inclusion proof if
+the Transparency Log is behaving honestly.
+
+Second, any lookup that would be omitted from a binary ladder for the log entry
+when executing a fixed-version or greatest-version search for the label-version
+pair is also omitted here. That is, when preparing a binary ladder for a log
+entry, the Transparency Log considers the log entries that are in its direct
+path and to its left. If, during a search for the label-version pair being
+monitored, the user would receive an inclusion proof for some version `v` from
+one of these log entries, then the lookup for version `v` is omitted.
 
 ## Algorithm {#m-algorithm}
 
@@ -819,7 +840,7 @@ entry:
       version. If so, this version of the label no longer needs to be monitored.
       Remove the current position-version pair (the one with the lesser version)
       from the map and move on to the next map entry.
-   2. Receive and verify a lower-bound binary ladder from this log entry for the
+   2. Receive and verify a binary ladder from this log entry, where the target version is the
       version currently in the map. This proves that, at the indicated log
       entry, the greatest version present is greater than or equal to the
       previously observed version.
@@ -853,22 +874,18 @@ If the user owns the label being monitored, they will additionally need to
 retain the rightmost distinguished log entry where they've verified that the
 greatest version of the label is correct. Users advertise this log entry's
 position in their Monitor request. For a number of subsequent distinguished log
-entries, the Transparency Log states the greatest version of the label that the
-log entry's prefix tree contains and provides a search-style binary ladder, as
-described in {{binary-ladder}}, to prove that this is correct. No lookups are omitted from the
-binary ladder according to the rules described in {{binary-ladder}}. However,
-lookups for any versions of the label that were provided in the same query response in a
-lower-bound binary ladder for the same log entry *are* omitted.
+entries, the Transparency Log provides the greatest version of the label that
+the log entry's prefix tree contains, along with a binary ladder (according to
+the rules stated in {{gv-binary-ladder}}) to prove that this is correct.
 
-Users verify that the version has not unexpectedly increased or decreased, and
-that the binary ladder terminates in a way that's consistent with the provided
-version being the greatest that exists. Importantly, users also verify that they
-receive a binary ladder for the distinguished log entry immediately following
-the one they've advertised, the distinguished log entry immediately following
-that one, and so on. The Transparency Log provides whichever intermediate
-timestamps are necessary to demonstrate that this is the case. To avoid
-excessive load, the Transparency Log SHOULD limit the number of
-distinguished log entries it provides binary ladders for in a single response.
+Users verify that the version has not unexpectedly increased or decreased.
+Importantly, users also verify that they receive a binary ladder for the
+distinguished log entry immediately following the one they've advertised, the
+distinguished log entry immediately following that one, and so on. The
+Transparency Log provides whichever intermediate timestamps are necessary to
+demonstrate that this is the case. To avoid excessive load, the Transparency Log
+SHOULD limit the number of distinguished log entries it provides binary ladders
+for in a single response.
 
 If a user is monitoring the label for the first time since it was created, they
 advertise the first log entry to contain the label even if it is not known to be
@@ -890,6 +907,42 @@ at the rightmost distinguished log entry and only consider new versions which
 have been created since then. The rightmost distinguished log entry will always
 be on the frontier of the log and will never be past its maximum lifetime.
 
+## Binary Ladder {#gv-binary-ladder}
+
+One special consideration for a greatest-version search is that the Transparency
+Log must prove that it is revealing the absolute greatest version of a label
+that exists, referred to as the **target version**. This differs from the binary
+ladders described for fixed-version searches ({{fv-binary-ladder}}) and
+monitoring ({{monitor-binary-ladder}}), which aim only to prove only a lower
+bound on the greatest version.
+
+Binary ladders provided for the purpose of a greatest-version search follow the
+series of lookups described in {{binary-ladder}}, with two optimizations:
+
+First, the series of lookups ends after the first non-inclusion proof for a
+version less than the target version. This differs from {{fv-binary-ladder}} in
+that the binary ladder algorithm will continue even after receiving an inclusion
+proof for a version equal to the target version. This is often necessary to
+demonstrate that there are no versions greater than the target version.
+
+Second, depending on whether the binary ladder is for a distinguished or
+non-distinguished log entry:
+
+- If the log entry is non-distinguished:
+  - An inclusion proof for a version is omitted if an inclusion proof for the
+    same version has already been provided in the same query response from a log
+    entry to the left.
+  - A non-inclusion proof for a version is omitted if a non-inclusion proof for
+    the same version has already been provided in the same query response from a
+    log entry to the right.
+- If the log entry is distinguished:
+  - An inclusion or non-inclusion proof for a version is omitted only if it has
+    previously been provided in the same query response from the same log entry.
+    This may happen if the binary ladder is provided in a Monitor query response
+    and the user owns the label being monitored.
+
+## Algorithm
+
 To perform a greatest-version search, the Transparency Log first provides the
 greatest version of the label that exists as of the rightmost log entry. This is
 followed by a series of binary ladders each targeting this version: The first is
@@ -901,12 +954,13 @@ rightmost log entry is reached.
 As in {{fixed-version-searches}}, users verify that the binary ladders from each
 log entry, and the log enties' timestamps, represent a monotonically increasing
 series. Users additionally verify that the binary ladder from the rightmost log
-entry terminates in a way that is consistent with the claimed greatest version actually being the
-greatest that exists.
+entry terminates in a way that is consistent with the claimed greatest version
+actually being the greatest that exists.
 
-Note that if the starting log entry was not distinguished or if the starting log entry did
-not contain the greatest version of the label, the user may be obligated to
-monitor the label in the future, per {{reasonable-monitoring-window}}.
+Note that if the starting log entry was not distinguished or if the starting log
+entry did not contain the greatest version of the label, the user may be
+obligated to monitor the label in the future, per
+{{reasonable-monitoring-window}}.
 
 
 # Ciphersuites
@@ -1323,7 +1377,7 @@ following is provided:
     the right child's timestamp.
   - If it is not the case that the log entry has surpassed its maximum lifetime,
     is on the frontier, and the log entry's right child has also surpassed its
-    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder in
+    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder ({{fv-binary-ladder}}) in
     the log entry's prefix tree is provided.
 - If the `PrefixProof` from the first log entry containing the target label-version
   pair didn't include a lookup for the target version, provide a second `PrefixProof` from this
@@ -1340,12 +1394,12 @@ For a user to monitor a label in the combined tree, the following is provided:
     determine where the monitoring algorithm would first reach a distinguished
     log entry. This may either be the log entry in the user's monitoring map, or
     some other log entry from the list computed in step 2 of {{m-algorithm}}.
-  - Where necessary for the algorithm in {{m-algorithm}}, a lower-bound binary
-    ladder targeting the version in the user's monitoring map.
+  - Where necessary for the algorithm in {{m-algorithm}}, a binary
+    ladder ({{monitor-binary-ladder}}) targeting the version in the user's monitoring map.
 - If the user owns the label:
   - The timestamps needed by the algorithm in {{distinguished-log-entries}} to
     conduct a depth-first search for each subsequent distinguished log entry.
-  - For each distinguished log entry, a binary ladder targeting the greatest
+  - For each distinguished log entry, a binary ladder ({{gv-binary-ladder}}) targeting the greatest
     version of the label that the log entry contains.
 
 ### Greatest-Version Search
@@ -1355,7 +1409,7 @@ following is provided:
 
 - For each log entry along the frontier, starting from the log entry identified
   in {{greatest-version-searches}}: a `PrefixProof` corresponding to a binary
-  ladder.
+  ladder ({{gv-binary-ladder}}).
 
 Note that the log entry timestamps are already provided as part of updating the
 user's view of the tree, and that no additional timestamps are necessary to
