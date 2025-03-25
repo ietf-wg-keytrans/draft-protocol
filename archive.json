@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-23T01:03:19.393400+00:00",
+  "timestamp": "2025-03-25T01:00:03.774184+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1975,6 +1975,32 @@
           "updatedAt": "2025-03-17T03:41:18Z"
         }
       ],
+      "reviews": []
+    },
+    {
+      "number": 31,
+      "id": "PR_kwDOLrnaA86P5_z4",
+      "title": "Be more explicit about binary ladder contents",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/31",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This PR:\r\n- Adds a new top-level section on binary ladders\r\n- Adds a subsection to each algorithm (fixed-version / greatest-version search, monitor) explaining the specific binary ladder for this algorithm\r\n- Avoids sending unnecessary lookups in monitor algorithm\r\n- Avoids not sending necessary lookups in greatest-version search algorithm\r\n\r\n@felixlinker Let me know your thoughts / if this addresses the same concerns as #23 ",
+      "createdAt": "2025-03-24T17:11:41Z",
+      "updatedAt": "2025-03-24T17:11:42Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/binary-ladder",
+      "headRefOid": "2dc3a67471bb71feb7b47cbe09bb44dc71536f54",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
       "reviews": []
     }
   ]
