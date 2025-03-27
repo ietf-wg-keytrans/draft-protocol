@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-25T01:00:03.774184+00:00",
+  "timestamp": "2025-03-27T00:59:21.251658+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1989,7 +1989,7 @@
       "labels": [],
       "body": "This PR:\r\n- Adds a new top-level section on binary ladders\r\n- Adds a subsection to each algorithm (fixed-version / greatest-version search, monitor) explaining the specific binary ladder for this algorithm\r\n- Avoids sending unnecessary lookups in monitor algorithm\r\n- Avoids not sending necessary lookups in greatest-version search algorithm\r\n\r\n@felixlinker Let me know your thoughts / if this addresses the same concerns as #23 ",
       "createdAt": "2025-03-24T17:11:41Z",
-      "updatedAt": "2025-03-24T17:11:42Z",
+      "updatedAt": "2025-03-26T14:43:35Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
@@ -2001,7 +2001,21 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86h-i5u",
+          "commit": {
+            "abbreviatedOid": "2dc3a67"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Thanks for taking the time to draft this! I think this PR is good! I didn't have time to think about whether all the specification parts are correct/accurate, but the changes definitely go into a direction addressing what I tried addressing in #23.\r\n\r\nI still think there are some issues that will make the draft harder to implement, and there's still ambiguous wording on what a binary ladder is.\r\n\r\nI think we do need precise algorithms on binary ladders. Happy to put them in the Appendix. I think we both need an explanation with reasoning (as we already have it), and \"dry\" descriptions. Ideally, an engineer should be able to implement a draft without thinking too much about it.\r\n\r\nAs for the wording, you define a binary ladder initially as \"a serious of lookups,\" but then later go on to say that \"the server provides a binary ladder.\" I know what you mean with both, but I think we can use more precise language here.\r\n\r\nBoth my above comments, though, don't block merging the PR :)",
+          "createdAt": "2025-03-26T14:43:35Z",
+          "updatedAt": "2025-03-26T14:43:35Z",
+          "comments": []
+        }
+      ]
     }
   ]
 }
