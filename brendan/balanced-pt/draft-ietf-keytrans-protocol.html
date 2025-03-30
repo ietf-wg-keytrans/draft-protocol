@@ -16,16 +16,16 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.27.0" name="generator">
+<meta content="xml2rfc 3.28.0" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.27.0
+  xml2rfc 3.28.0
     Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
-    Jinja2 3.1.5
+    Jinja2 3.1.6
     lxml 5.3.0
     platformdirs 4.3.6
     pycountry 24.6.1
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">February 2025</td>
+<td class="right">March 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 31 August 2025</td>
+<td class="center">Expires 1 October 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-02-27" class="published">27 February 2025</time>
+<time datetime="2025-03-30" class="published">30 March 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-08-31">31 August 2025</time></dd>
+<dd class="expires"><time datetime="2025-10-01">1 October 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 31 August 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 1 October 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1354,7 +1354,7 @@ accounts. Ensuring a consistent view allows users to detect when unauthorized
 public keys have been associated with their account, indicating a potential
 compromise.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">More detailed information about the protocol participants and the ways the
-protocol can be deployed can be found in <span>[<a href="#I-D.ietf-keytrans-architecture" class="cite xref">I-D.ietf-keytrans-architecture</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
+protocol can be deployed can be found in <span>[<a href="#ARCH" class="cite xref">ARCH</a>]</span>.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-definitions">
@@ -1369,7 +1369,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-2-2">This document uses the TLS presentation language <span>[<a href="#RFC8446" class="cite xref">RFC8446</a>]</span> to describe the
 structure of protocol messages, but does not require the use of a specific
 transport protocol. As such, implementations do not necessarily need to transmit
-messages according to the TLS format and can chose whichever encoding method
+messages according to the TLS format and can choose whichever encoding method
 best suits their application. However, cryptographic computations <span class="bcp14">MUST</span> be done
 with the TLS presentation language format to ensure the protocol's security
 properties are maintained.<a href="#section-2-2" class="pilcrow">¶</a></p>
@@ -1380,20 +1380,19 @@ properties are maintained.<a href="#section-2-2" class="pilcrow">¶</a></p>
       <h2 id="name-tree-construction">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-tree-construction" class="section-name selfRef">Tree Construction</a>
       </h2>
-<p id="section-3-1">A Transparency Log is a verifiable data structure that maps <em>label-version
-pairs</em> to cryptographic keys or other structured data. Labels correspond to user
-identifiers, and a new version of a label is created each time the label's
-associated value changes. Transparency Logs have an <em>epoch</em> counter which is
-incremented every time a new set of label-version pairs are added.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">KT uses a <em>prefix tree</em> to establish a mapping between each label-version pair
-and a commitment to the label's value at that version. Every time the prefix
+<p id="section-3-1">A Transparency Log is a verifiable data structure that maps a <em>label-version
+pair</em> to some unstructured data such as a cryptographic public key. Labels
+correspond to user identifiers, and a new version of a label is created each
+time the label's associated value changes.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">KT uses a <em>prefix tree</em> to store a mapping from each label-version pair
+to a commitment to the label's value at that version. Every time the prefix
 tree changes, its new root hash and the current timestamp are stored in a <em>log
-tree</em>. The benefit of the prefix tree is that it is easily searchable, and the
+tree</em>. The benefit of the prefix tree is that it is easily searchable and the
 benefit of the log tree is that it can easily be verified to be append-only. The
 data structure powering KT combines a log tree and a prefix tree, and is called
 the <em>combined tree</em>.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">This section describes the operation of both prefix and log trees at a high
-level and the way that they're combined. More precise algorithms for computing
+<p id="section-3-3">This section describes the operation of prefix trees, log trees, and the
+combined tree structure, at a high level. More precise algorithms for computing
 the intermediate and root values of the trees are given in
 <a href="#cryptographic-computations" class="auto internal xref">Section 9</a>.<a href="#section-3-3" class="pilcrow">¶</a></p>
 <div id="terminology">
@@ -1401,12 +1400,11 @@ the intermediate and root values of the trees are given in
         <h3 id="name-terminology">
 <a href="#section-3.1" class="section-number selfRef">3.1. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
         </h3>
-<p id="section-3.1-1">Trees consist of
-<em>nodes</em>, which have a byte string as their <em>hash value</em>. A node is either a
-<em>leaf</em> if it has no children, or a <em>parent</em>
-if it has either a <em>left child</em> or a <em>right child</em>. A node is the <em>root</em> of a
-tree if it has no parents, and an <em>intermediate</em> if it has both children and
-parents. Nodes are <em>siblings</em> if they share the same parent.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
+<p id="section-3.1-1">Trees consist of <em>nodes</em>, which have a byte string as their <em>value</em>. A node is
+either a <em>leaf</em> if it has no children, or a <em>parent</em> if it has either a <em>left
+child</em> or a <em>right child</em>. A node is the <em>root</em> of a tree if it has no parents,
+and an <em>intermediate</em> if it has both children and parents. Nodes are <em>siblings</em>
+if they share the same parent.<a href="#section-3.1-1" class="pilcrow">¶</a></p>
 <p id="section-3.1-2">The <em>descendants</em> of a node are that node, its children, and the descendants of
 its children. A <em>subtree</em> of a tree is the tree given by the descendants of a
 particular node, called the <em>head</em> of the subtree.<a href="#section-3.1-2" class="pilcrow">¶</a></p>
@@ -1423,8 +1421,8 @@ contains.<a href="#section-3.1-4" class="pilcrow">¶</a></p>
         <h3 id="name-log-tree">
 <a href="#section-3.2" class="section-number selfRef">3.2. </a><a href="#name-log-tree" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-3.2-1">Log trees are used for storing information in the chronological order that it
-was added and are constructed as <em>left-balanced</em> binary trees.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
+<p id="section-3.2-1">Log trees store information in the chronological order that it was added, and
+are constructed as <em>left-balanced</em> binary trees.<a href="#section-3.2-1" class="pilcrow">¶</a></p>
 <p id="section-3.2-2">A binary tree is <em>balanced</em> if its size is a power of two and for any parent
 node in the tree, its left and right subtrees have the same size. A binary tree
 is <em>left-balanced</em> if for every parent, either the parent is balanced, or the
@@ -1521,29 +1519,25 @@ construct the left-balanced binary tree with <code>n+1</code> leaves.<a href="#s
 <figcaption><a href="#figure-2" class="selfRef">Figure 2</a>:
 <a href="#name-example-of-inserting-a-new-" class="selfRef">Example of inserting a new leaf with index 5 into the previously depicted log tree. Observe that only the nodes on the path from the new root to the new leaf change.</a>
           </figcaption></figure>
-<p id="section-3.2-6">While leaves contain arbitrary data, the value of a parent node is always the
+<p id="section-3.2-6">Leaves can have arbitrary data as their value, and are frequently referred to as
+"log entries" later in the document. The value of a parent node is always the
 hash of the combined values of its left and right children.<a href="#section-3.2-6" class="pilcrow">¶</a></p>
 <p id="section-3.2-7">Log trees are powerful in that they can provide both <em>inclusion proofs</em>, which
 demonstrate that a leaf is included in a log, and <em>consistency proofs</em>, which
-demonstrate that a new version of a log is an extension of a past version of the
-log.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
-<p id="section-3.2-8">An inclusion proof is given by providing the copath values of a leaf. The proof
-is verified by hashing together the leaf with the copath values and checking
-that the result equals the root hash value of the log. Consistency proofs are a
-more general version of the same idea. With a consistency proof, the prover
-provides the minimum set of intermediate node values from the current tree that
-allows the verifier to compute both the old root value and the current root
-value.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
-<p id="section-3.2-9">However, the protocol described in this document generally doesn't provide pure
-inclusion or consistency proofs to verifiers. Instead, it relies on the more
-general idea of providing the smallest number of intermediate node values that are
-necessary to allow a verifier to compute the tree's root hash from
-intermediate and leaf values that they already have. The verifier may already have
-intermediate and leaf values because they were provided by the Transparency Log as
-part of its response to the current query, or because they were retained from
-responses to previous queries. This pattern of providing proofs ensures that
-there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
-<span id="name-illustration-of-a-proof-of-"></span><figure id="figure-3">
+demonstrate that a new version of a log is an extension of a previous version.<a href="#section-3.2-7" class="pilcrow">¶</a></p>
+<p id="section-3.2-8">Inclusion and consistency proofs in KT differ from similar protocols in that
+proofs only ever contain the values of nodes that are the head of a balanced
+subtree. Whenever the value of the head of a non-balanced subtree is needed by a
+verifier, the prover breaks down the non-balanced subtree into the
+smallest-possible number of balanced subtrees and provides the value of the head
+of each. This allows verifiers to cache a larger number of intermediate values
+than would otherwise be possible, reducing the size of subsequent responses.<a href="#section-3.2-8" class="pilcrow">¶</a></p>
+<p id="section-3.2-9">As a result, an inclusion proof for a leaf is given by providing the copath
+values of the leaf with any non-balanced subtrees broken down as mentioned. The
+proof is verified by hashing the leaf value together with the copath values,
+re-computing the head values of non-balanced subtrees where needed, and checking
+that the result equals the root value of the log.<a href="#section-3.2-9" class="pilcrow">¶</a></p>
+<span id="name-illustration-of-an-inclusio"></span><figure id="figure-3">
           <div id="section-3.2-10.1">
             <div class="alignLeft art-svg artwork" id="section-3.2-10.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="320" viewBox="0 0 320 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
@@ -1554,7 +1548,7 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                 <path d="M 112,128 L 176,128" fill="none" stroke="black"></path>
                 <path d="M 104,176 L 112,192" fill="none" stroke="black"></path>
                 <path d="M 176,128 L 184,144" fill="none" stroke="black"></path>
-                <path d="M 200,176 L 212,200" fill="none" stroke="black"></path>
+                <path d="M 200,176 L 208,192" fill="none" stroke="black"></path>
                 <path d="M 296,176 L 304,192" fill="none" stroke="black"></path>
                 <path d="M 272,64 L 288,96" fill="none" stroke="black"></path>
                 <path d="M 80,192 L 88,176" fill="none" stroke="black"></path>
@@ -1566,14 +1560,14 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                   <text x="240" y="36">X</text>
                   <text x="144" y="100">X</text>
                   <text x="96" y="164">(X)</text>
-                  <text x="200" y="164">X</text>
+                  <text x="192" y="164">X</text>
                   <text x="288" y="164">(X)</text>
                   <text x="72" y="212">X</text>
                   <text x="120" y="212">X</text>
                   <text x="168" y="212">X</text>
-                  <text x="208" y="212">(X)</text>
-                  <text x="256" y="212">X</text>
-                  <text x="304" y="212">X</text>
+                  <text x="216" y="212">(X)</text>
+                  <text x="264" y="212">X</text>
+                  <text x="312" y="212">X</text>
                   <text x="28" y="244">Index:</text>
                   <text x="72" y="244">0</text>
                   <text x="120" y="244">1</text>
@@ -1586,30 +1580,41 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
 </div>
 </div>
 <figcaption><a href="#figure-3" class="selfRef">Figure 3</a>:
-<a href="#name-illustration-of-a-proof-of-" class="selfRef">Illustration of a proof of inclusion. To verify that leaf 2 is included in the tree, the server provides the client with the hashes of the nodes on its copath, i.e., all hashes that are required for the client to compute the root hash itself. In the figure, the copath consists of the nodes marked by (X).</a>
+<a href="#name-illustration-of-an-inclusio" class="selfRef">Illustration of an inclusion proof. To verify that leaf 2 is included in the tree, the prover provides the verifier with the values of leaf 2's copath. These nodes are marked by (X).</a>
           </figcaption></figure>
+<p id="section-3.2-11">When requesting a consistency proof, verifiers are expected to have retained the
+head values of the largest-possible balanced subtrees (these will later be
+defined as the "full subtrees") of the previous version of the log. A
+consistency proof then consists of the minimum set of node values that are
+necessary to compute the root value of the new version of the log from the
+values that the verifier retained.<a href="#section-3.2-11" class="pilcrow">¶</a></p>
 <span id="name-illustration-of-a-consisten"></span><figure id="figure-4">
-          <div id="section-3.2-11.1">
-            <div class="alignLeft art-svg artwork" id="section-3.2-11.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="328" viewBox="0 0 328 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+          <div id="section-3.2-12.1">
+            <div class="alignLeft art-svg artwork" id="section-3.2-12.1.1">
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="256" width="376" viewBox="0 0 376 256" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
                 <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
                 <path d="M 240,48 L 240,64" fill="none" stroke="black"></path>
-                <path d="M 288,112 L 288,144" fill="none" stroke="black"></path>
-                <path d="M 160,64 L 280,64" fill="none" stroke="black"></path>
+                <path d="M 336,112 L 336,128" fill="none" stroke="black"></path>
+                <path d="M 360,160 L 360,192" fill="none" stroke="black"></path>
+                <path d="M 160,64 L 320,64" fill="none" stroke="black"></path>
                 <path d="M 112,128 L 176,128" fill="none" stroke="black"></path>
+                <path d="M 304,128 L 344,128" fill="none" stroke="black"></path>
                 <path d="M 104,176 L 112,192" fill="none" stroke="black"></path>
                 <path d="M 176,128 L 184,144" fill="none" stroke="black"></path>
                 <path d="M 200,176 L 208,192" fill="none" stroke="black"></path>
                 <path d="M 296,176 L 304,192" fill="none" stroke="black"></path>
-                <path d="M 280,64 L 296,96" fill="none" stroke="black"></path>
+                <path d="M 344,128 L 360,160" fill="none" stroke="black"></path>
+                <path d="M 320,64 L 328,80" fill="none" stroke="black"></path>
                 <path d="M 80,192 L 88,176" fill="none" stroke="black"></path>
                 <path d="M 104,144 L 112,128" fill="none" stroke="black"></path>
                 <path d="M 152,80 L 160,64" fill="none" stroke="black"></path>
                 <path d="M 176,192 L 184,176" fill="none" stroke="black"></path>
                 <path d="M 272,192 L 280,176" fill="none" stroke="black"></path>
+                <path d="M 296,144 L 304,128" fill="none" stroke="black"></path>
                 <g class="text">
                   <text x="240" y="36">X</text>
                   <text x="144" y="100">(X)</text>
+                  <text x="336" y="100">X</text>
                   <text x="96" y="164">X</text>
                   <text x="192" y="164">X</text>
                   <text x="288" y="164">X</text>
@@ -1619,6 +1624,7 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                   <text x="216" y="212">X</text>
                   <text x="264" y="212">(X)</text>
                   <text x="312" y="212">[X]</text>
+                  <text x="360" y="212">[X]</text>
                   <text x="28" y="244">Index:</text>
                   <text x="72" y="244">0</text>
                   <text x="120" y="244">1</text>
@@ -1626,12 +1632,13 @@ there is minimal on-the-wire redundancy.<a href="#section-3.2-9" class="pilcrow"
                   <text x="216" y="244">3</text>
                   <text x="264" y="244">4</text>
                   <text x="312" y="244">5</text>
+                  <text x="360" y="244">6</text>
                 </g>
-              </svg><a href="#section-3.2-11.1.1" class="pilcrow">¶</a>
+              </svg><a href="#section-3.2-12.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
-<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof. The server proves to the client that it correctly extended the tree by giving it the hashes of marked nodes ([X] / (X)). The client can verify that it can construct the old root hash from the hashes of nodes marked by (X), and that it can construct the new root hash when also considering the hash of the node [X].</a>
+<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -1645,42 +1652,54 @@ with the ability to efficiently prove that a search key's value was looked up
 correctly.<a href="#section-3.3-1" class="pilcrow">¶</a></p>
 <p id="section-3.3-2">Each leaf node in a prefix tree represents a specific mapping from search key to
 value, while each parent node represents some prefix which all search keys in
-the subtree headed by that node have in common. The subtree headed by a parent's
-left child contains all search keys that share its prefix followed by an
-additional 0 bit, while the subtree headed by a parent's right child contains
-all search keys that share its prefix followed by an additional 1 bit.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
-<p id="section-3.3-3">The root node, in particular, represents the empty string as a prefix. The
-root's left child contains all search keys that begin with a 0 bit, while the right
-child contains all search keys that begin with a 1 bit.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
-<p id="section-3.3-4">A prefix tree can be searched by starting at the root node and moving to the
-left child if the first bit of a search key is 0, or the right child if the first bit
-is 1. This is then repeated for the second bit, third bit, and so on until the
-search either terminates at a leaf node (which may or may not be for the desired
-value), or a parent node that lacks the desired child.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+the subtree headed by that node have in common. The prefix that a parent node
+represents is based on the its <strong>midpoint</strong> and the <strong>first unspecified
+byte</strong> of the search key.<a href="#section-3.3-2" class="pilcrow">¶</a></p>
+<p id="section-3.3-3">The first unspecified byte of a search key is the first byte that has not been
+uniquely identified in the course of searching the tree. Initially, this will be
+the leftmost byte of the search key. The midpoint of a parent node is a byte
+value, chosen by the Transparency Log, that bisects the possible values for the
+first unspecified byte: If a search key's first unspecified byte is less than
+the midpoint, this indicates that the search key is stored in the parent's left
+child. If a search key's first unspecified byte is greater than or equal to the
+midpoint, then the search key is stored in the parent's right child.<a href="#section-3.3-3" class="pilcrow">¶</a></p>
+<p id="section-3.3-4">As a user navigates the prefix tree, each parent node's midpoint will restrict
+the possible values for the first unspecified byte. Once there is only one
+possible value remaining, all search keys stored in the subtree are assumed to
+have this prefix. The next byte of the search key then becomes the first
+unspecified byte.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+<p id="section-3.3-5">A prefix tree can be searched by starting at the root node and moving to the
+left child if the first byte of the search key less than the root's midpoint, or
+the right child if the first byte is greater than or equal to the root's
+midpoint. This is then repeated recursively. If a series of parent node
+midpoints uniquely identifies the search key's first byte, the search continues
+by comparing subsequent parent node midpoints against the search key's second
+byte, and so on. This continues until the search either terminates at a leaf
+node (which may or may not be for the desired value), or a parent node that
+lacks the desired child.<a href="#section-3.3-5" class="pilcrow">¶</a></p>
 <span id="name-a-prefix-tree-containing-fi"></span><figure id="figure-5">
-          <div id="section-3.3-5.1">
-            <div class="alignLeft art-svg artwork" id="section-3.3-5.1.1">
+          <div id="section-3.3-6.1">
+            <div class="alignLeft art-svg artwork" id="section-3.3-6.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="296" viewBox="0 0 296 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
-                <path d="M 104,112 L 104,144" fill="none" stroke="black"></path>
+                <path d="M 104,96 L 104,144" fill="none" stroke="black"></path>
                 <path d="M 176,48 L 176,64" fill="none" stroke="black"></path>
                 <path d="M 240,112 L 240,128" fill="none" stroke="black"></path>
                 <path d="M 272,160 L 272,192" fill="none" stroke="black"></path>
-                <path d="M 112,64 L 224,64" fill="none" stroke="black"></path>
+                <path d="M 120,64 L 232,64" fill="none" stroke="black"></path>
                 <path d="M 216,128 L 256,128" fill="none" stroke="black"></path>
                 <path d="M 112,176 L 120,192" fill="none" stroke="black"></path>
                 <path d="M 208,176 L 216,192" fill="none" stroke="black"></path>
-                <path d="M 224,64 L 232,80" fill="none" stroke="black"></path>
                 <path d="M 256,128 L 272,160" fill="none" stroke="black"></path>
-                <path d="M 104,80 L 112,64" fill="none" stroke="black"></path>
+                <path d="M 232,64 L 240,80" fill="none" stroke="black"></path>
+                <path d="M 104,96 L 120,64" fill="none" stroke="black"></path>
                 <path d="M 88,192 L 96,176" fill="none" stroke="black"></path>
                 <path d="M 184,192 L 192,176" fill="none" stroke="black"></path>
                 <path d="M 208,144 L 216,128" fill="none" stroke="black"></path>
                 <g class="text">
-                  <text x="176" y="36">X</text>
-                  <text x="104" y="100">0</text>
-                  <text x="240" y="100">1</text>
-                  <text x="104" y="164">0</text>
-                  <text x="200" y="164">0</text>
+                  <text x="176" y="36">[10000]</text>
+                  <text x="240" y="100">[11000]</text>
+                  <text x="104" y="164">[00100]</text>
+                  <text x="200" y="164">[10100]</text>
                   <text x="20" y="212">Key:</text>
                   <text x="80" y="212">00010</text>
                   <text x="128" y="212">00101</text>
@@ -1694,48 +1713,54 @@ value), or a parent node that lacks the desired child.<a href="#section-3.3-4" c
                   <text x="240" y="228">D</text>
                   <text x="288" y="228">E</text>
                 </g>
-              </svg><a href="#section-3.3-5.1.1" class="pilcrow">¶</a>
+              </svg><a href="#section-3.3-6.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-5" class="selfRef">Figure 5</a>:
 <a href="#name-a-prefix-tree-containing-fi" class="selfRef">A prefix tree containing five entries.</a>
           </figcaption></figure>
-<p id="section-3.3-6">New key-value pairs are added to the tree by searching it according to the same process.
-If the search terminates at a parent without a left or right child, a new leaf
-is simply added as the parent's missing child. If the search terminates at a
-leaf for the wrong search key, one or more intermediate nodes are added until the new
-leaf and the existing leaf would no longer reside in the same place. That is,
-until we reach the first bit that differs between the new search key and the existing
-search key.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
+<p id="section-3.3-7">New key-value pairs are added to the tree by searching it according to the same
+process. If the search terminates at a parent without a left or right child, a
+new leaf is simply added as the parent's missing child. If the search terminates
+at a leaf for the wrong search key, one or more intermediate nodes are added
+until the new leaf and the existing leaf would no longer reside in the same
+place. That is, until reaching the first byte that differs between the new
+search key and the existing search key.<a href="#section-3.3-7" class="pilcrow">¶</a></p>
+<p id="section-3.3-8">Note that the tree may become unbalanced if many key-value pairs are inserted
+into the same subtree. This has the effect of making search paths unnecessarily
+long and inefficient to traverse. For this reason, the Transparency Log has
+complete discretion in choosing parent node midpoints. A parent node's midpoint
+may be changed at any time, corresponding to some transfer of leaves between the
+parent's left and right subtrees, to improve the balance of the tree.<a href="#section-3.3-8" class="pilcrow">¶</a></p>
 <span id="name-the-previous-prefix-tree-af"></span><figure id="figure-6">
-          <div id="section-3.3-7.1">
-            <div class="alignLeft art-svg artwork" id="section-3.3-7.1.1">
+          <div id="section-3.3-9.1">
+            <div class="alignLeft art-svg artwork" id="section-3.3-9.1.1">
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="240" width="344" viewBox="0 0 344 240" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
-                <path d="M 144,112 L 144,128" fill="none" stroke="black"></path>
-                <path d="M 176,160 L 176,192" fill="none" stroke="black"></path>
-                <path d="M 216,48 L 216,64" fill="none" stroke="black"></path>
-                <path d="M 288,112 L 288,128" fill="none" stroke="black"></path>
+                <path d="M 80,160 L 80,192" fill="none" stroke="black"></path>
+                <path d="M 104,112 L 104,128" fill="none" stroke="black"></path>
+                <path d="M 200,48 L 200,64" fill="none" stroke="black"></path>
+                <path d="M 280,112 L 280,128" fill="none" stroke="black"></path>
                 <path d="M 320,160 L 320,192" fill="none" stroke="black"></path>
-                <path d="M 160,64 L 272,64" fill="none" stroke="black"></path>
-                <path d="M 120,128 L 160,128" fill="none" stroke="black"></path>
+                <path d="M 120,64 L 272,64" fill="none" stroke="black"></path>
+                <path d="M 96,128 L 136,128" fill="none" stroke="black"></path>
                 <path d="M 264,128 L 304,128" fill="none" stroke="black"></path>
-                <path d="M 112,176 L 120,192" fill="none" stroke="black"></path>
-                <path d="M 160,128 L 176,160" fill="none" stroke="black"></path>
+                <path d="M 136,128 L 144,144" fill="none" stroke="black"></path>
+                <path d="M 160,176 L 168,192" fill="none" stroke="black"></path>
                 <path d="M 256,176 L 264,192" fill="none" stroke="black"></path>
                 <path d="M 272,64 L 280,80" fill="none" stroke="black"></path>
                 <path d="M 304,128 L 320,160" fill="none" stroke="black"></path>
-                <path d="M 88,192 L 96,176" fill="none" stroke="black"></path>
-                <path d="M 112,144 L 120,128" fill="none" stroke="black"></path>
-                <path d="M 152,80 L 160,64" fill="none" stroke="black"></path>
+                <path d="M 112,80 L 120,64" fill="none" stroke="black"></path>
+                <path d="M 80,160 L 96,128" fill="none" stroke="black"></path>
+                <path d="M 136,192 L 144,176" fill="none" stroke="black"></path>
                 <path d="M 232,192 L 240,176" fill="none" stroke="black"></path>
                 <path d="M 256,144 L 264,128" fill="none" stroke="black"></path>
                 <g class="text">
-                  <text x="216" y="36">X</text>
-                  <text x="144" y="100">0</text>
-                  <text x="288" y="100">1</text>
-                  <text x="104" y="164">0</text>
-                  <text x="248" y="164">0</text>
-                  <text x="28" y="212">Index:</text>
+                  <text x="200" y="36">[10000]</text>
+                  <text x="104" y="100">[00100]</text>
+                  <text x="280" y="100">[11000]</text>
+                  <text x="152" y="164">[00110]</text>
+                  <text x="248" y="164">[10100]</text>
+                  <text x="20" y="212">Key:</text>
                   <text x="80" y="212">00010</text>
                   <text x="128" y="212">00101</text>
                   <text x="176" y="212">01101</text>
@@ -1750,22 +1775,23 @@ search key.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
                   <text x="288" y="228">D</text>
                   <text x="336" y="228">E</text>
                 </g>
-              </svg><a href="#section-3.3-7.1.1" class="pilcrow">¶</a>
+              </svg><a href="#section-3.3-9.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-6" class="selfRef">Figure 6</a>:
 <a href="#name-the-previous-prefix-tree-af" class="selfRef">The previous prefix tree after adding the key-value pair: 01101 -&gt; F.</a>
           </figcaption></figure>
-<p id="section-3.3-8">The value of a leaf node is the encoded key-value pair, while the value of a
-parent node is the hash of the combined values of its left and right children
-(or a stand-in value when one of the children doesn't exist).<a href="#section-3.3-8" class="pilcrow">¶</a></p>
-<p id="section-3.3-9">A proof of membership is given by providing the leaf hash value, along with the
-hash value of each copath entry along the search path. A proof of non-membership
-is given by providing an abridged proof of membership that follows the
-path for the intended search key, but ends either at a stand-in node or a leaf for a
-different search key. In either case, the proof is verified by hashing together the
-leaf with the copath hash values and checking that the result equals the root
-hash value of the tree.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
+<p id="section-3.3-10">The value of a leaf node is the hash of the encoded key-value pair, while the
+value of a parent node is the hash of its midpoint and the combined values of
+its left and right children (or a stand-in value when one of the children
+doesn't exist).<a href="#section-3.3-10" class="pilcrow">¶</a></p>
+<p id="section-3.3-11">A proof of membership is given by providing the leaf value, the value of each
+copath entry along the search path, and the midpoint of each parent node. A
+proof of non-membership is given by providing an abridged proof of membership
+that follows the path for the intended search key, but ends either at a stand-in
+node or a leaf for a different search key. In either case, the proof is verified
+by hashing together the leaf, the copath hash values, and the midpoints and
+checking that the result equals the root hash value of the tree.<a href="#section-3.3-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="combined-tree">
@@ -1781,66 +1807,60 @@ inclusion proofs to convince verifiers that the returned search results are
 correct. However, it's not possible to efficiently prove that a new version of a
 prefix tree contains the same data as a previous version with only new values
 added.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
-<p id="section-3.4-2">In the combined tree structure, based on <span>[<a href="#Merkle2" class="cite xref">Merkle2</a>]</span>, a prefix tree contains a
-mapping where each label-version pair has a search key, and the search key maps to
-a cryptographic commitment to the label's new contents. A log tree
-contains a record of each version of the prefix tree and the timestamp that it
-was created in milliseconds since the Unix epoch. With some caveats, this
-combined structure supports both efficient consistency proofs and can be
-efficiently searched.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
+<p id="section-3.4-2">In the combined tree structure, based on <span>[<a href="#Merkle2" class="cite xref">Merkle2</a>]</span>, each label-version pair
+stored by a Transparency Log corresponds to a search key in a prefix tree. This
+prefix tree maps the label-version pair's search key to a commitment to the
+label's contents at that version. To allow users to track changes to the prefix
+tree, a log tree contains a record of each version of the prefix tree along with
+the timestamp of when it was published. With some caveats, this combined
+structure supports both efficient consistency proofs and can be efficiently
+searched.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
 <p id="section-3.4-3">Note that, although the Transparency Log maintains a single logical prefix tree,
-each modification of this tree results in a new root hash which is then stored
-in the log tree. As part of the protocol, the Transparency Log is often
-required to perform lookups in different versions of the prefix tree. Therefore,
-when instructions refer to "looking up a label-version pair in the prefix tree
-at a given log entry," this means performing the search in the specific version
-of the prefix tree whose root hash is stored at that log entry (where a "log
-entry" refers to a leaf of the log tree).<a href="#section-3.4-3" class="pilcrow">¶</a></p>
+each modification of the prefix tree results in a new root value which is then
+stored in the log tree. As part of the protocol, the Transparency Log is often
+required to perform lookups in different versions of the prefix tree. Different
+versions of the prefix tree are identified by the log entry where their root
+value was stored.<a href="#section-3.4-3" class="pilcrow">¶</a></p>
 <span id="name-an-example-evolution-of-the"></span><figure id="figure-7">
           <div id="section-3.4-4.1">
             <div class="alignLeft art-svg artwork" id="section-3.4-4.1.1">
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="144" width="576" viewBox="0 0 576 144" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
-                <path d="M 136,64 L 136,80" fill="none" stroke="black"></path>
-                <path d="M 376,64 L 376,80" fill="none" stroke="black"></path>
-                <path d="M 456,80 L 456,96" fill="none" stroke="black"></path>
-                <path d="M 240,46 L 256,46" fill="none" stroke="black"></path>
-                <path d="M 240,50 L 256,50" fill="none" stroke="black"></path>
-                <path d="M 104,80 L 176,80" fill="none" stroke="black"></path>
-                <path d="M 296,80 L 448,80" fill="none" stroke="black"></path>
-                <path d="M 400,96 L 496,96" fill="none" stroke="black"></path>
-                <path d="M 96,80 L 124,136" fill="none" stroke="black"></path>
-                <path d="M 176,80 L 192,112" fill="none" stroke="black"></path>
-                <path d="M 288,80 L 316,136" fill="none" stroke="black"></path>
-                <path d="M 496,96 L 504,112" fill="none" stroke="black"></path>
-                <path d="M 68,136 L 96,80" fill="none" stroke="black"></path>
-                <path d="M 260,136 L 288,80" fill="none" stroke="black"></path>
-                <path d="M 392,112 L 400,96" fill="none" stroke="black"></path>
-                <path d="M 68,136 L 124,136" fill="none" stroke="black"></path>
-                <path d="M 260,136 L 316,136" fill="none" stroke="black"></path>
-                <polygon class="arrowhead" points="264,48 252,42.4 252,53.6" fill="black" transform="rotate(0,256,48)"></polygon>
-                <circle cx="96" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="136" cy="64" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="288" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="376" cy="64" r="6" class="opendot" fill="white" stroke="black"></circle>
-                <circle cx="456" cy="80" r="6" class="opendot" fill="white" stroke="black"></circle>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" height="112" width="560" viewBox="0 0 560 112" class="diagram" text-anchor="middle" font-family="monospace" font-size="13px" stroke-linecap="round">
+                <path d="M 72,32 L 72,48" fill="none" stroke="black"></path>
+                <path d="M 360,32 L 360,48" fill="none" stroke="black"></path>
+                <path d="M 440,48 L 440,64" fill="none" stroke="black"></path>
+                <path d="M 40,48 L 112,48" fill="none" stroke="black"></path>
+                <path d="M 280,48 L 432,48" fill="none" stroke="black"></path>
+                <path d="M 200,62 L 216,62" fill="none" stroke="black"></path>
+                <path d="M 200,66 L 216,66" fill="none" stroke="black"></path>
+                <path d="M 384,64 L 480,64" fill="none" stroke="black"></path>
+                <path d="M 32,48 L 60,104" fill="none" stroke="black"></path>
+                <path d="M 112,48 L 128,80" fill="none" stroke="black"></path>
+                <path d="M 272,48 L 300,104" fill="none" stroke="black"></path>
+                <path d="M 480,64 L 488,80" fill="none" stroke="black"></path>
+                <path d="M 4,104 L 32,48" fill="none" stroke="black"></path>
+                <path d="M 244,104 L 272,48" fill="none" stroke="black"></path>
+                <path d="M 376,80 L 384,64" fill="none" stroke="black"></path>
+                <path d="M 4,104 L 60,104" fill="none" stroke="black"></path>
+                <path d="M 244,104 L 300,104" fill="none" stroke="black"></path>
+                <polygon class="arrowhead" points="224,64 212,58.4 212,69.6" fill="black" transform="rotate(0,216,64)"></polygon>
+                <circle cx="32" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="72" cy="32" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="272" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="360" cy="32" r="6" class="opendot" fill="white" stroke="black"></circle>
+                <circle cx="440" cy="48" r="6" class="opendot" fill="white" stroke="black"></circle>
                 <g class="text">
-                  <text x="28" y="36">Epoch:</text>
-                  <text x="136" y="36">n</text>
-                  <text x="376" y="36">n+1</text>
-                  <text x="16" y="68">Log</text>
-                  <text x="56" y="68">tree:</text>
-                  <text x="168" y="132">[T_n;</text>
-                  <text x="216" y="132">PT_n]</text>
-                  <text x="360" y="132">[T_n;</text>
-                  <text x="408" y="132">PT_n]</text>
-                  <text x="480" y="132">[T_n+1;</text>
-                  <text x="544" y="132">PT_n+1]</text>
+                  <text x="104" y="100">(T_n,</text>
+                  <text x="152" y="100">PT_n)</text>
+                  <text x="344" y="100">(T_n,</text>
+                  <text x="392" y="100">PT_n)</text>
+                  <text x="464" y="100">(T_n+1,</text>
+                  <text x="528" y="100">PT_n+1)</text>
                 </g>
               </svg><a href="#section-3.4-4.1.1" class="pilcrow">¶</a>
 </div>
 </div>
 <figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
-<a href="#name-an-example-evolution-of-the" class="selfRef">An example evolution of the combined tree structure. At every epoch, a new leaf is added to a log tree containing the timestamp T_n and the new prefix tree root hash PT_n.</a>
+<a href="#name-an-example-evolution-of-the" class="selfRef">An example evolution of the combined tree structure. Every new log entry added contains the timestamp T_n of when it was created and the new prefix tree root hash PT_n.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -1854,37 +1874,32 @@ entry" refers to a leaf of the log tree).<a href="#section-3.4-3" class="pilcrow
 <p id="section-4-1">As users interact with the Transparency Log over time, they will see many
 different root hashes as the contents of the log changes. It's necessary for
 users to guarantee that the root hashes they observe are consistent with respect
-to a few important properties:<a href="#section-4-1" class="pilcrow">¶</a></p>
+to two important properties:<a href="#section-4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4-2.1">
           <p id="section-4-2.1.1">If root hash B is shown after root hash A, then root hash B contains all the
-same log entries as A (with some new ones potentially added).<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
+same log entries as A with any new log entries added to the rightmost edge of
+A.<a href="#section-4-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="section-4-2.2">
-          <p id="section-4-2.2.1">If the rightmost log entry of the tree with root hash A has timestamp
-T_a, and the rightmost log entry of the tree with root hash B has timestamp
-T_b, then T_b is greater than or equal to T_a.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-4-2.2.2.1">
-              <p id="section-4-2.2.2.1.1">Furthermore, all log entries between the rightmost log entry of A and the
-rightmost log entry of B have monotonically increasing timestamps.<a href="#section-4-2.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+          <p id="section-4-2.2.1">All log entries in the range starting from the rightmost log entry of A and
+ending at the rightmost log entry of B, have monotonically increasing
+timestamps.<a href="#section-4-2.2.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 <p id="section-4-3">The first property is necessary to ensure that the Transparency Log never
 removes a log entry after showing it to a user, as this would allow the
-Transparency Log to remove evidence of its own misbehavior. The second two
-properties ensure that all users have a consistent view of when each portion of
-the tree was created. Disagreement on when portions of the tree were created is
-functionally a fork and it introduces the same security issues. This is because,
-as will be discussed in later sections, users rely on log entry timestamps to
-decide whether to continue monitoring certain labels, or which portions of the
-tree to skip when searching.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">Proving the first property, that the log tree is append-only, can be done with a
-typical consistency proof. Proving the latter two properties, that newly added
-log entries have monotonically increasing timestamps, requires establishing
-some additional structure on the log's contents.<a href="#section-4-4" class="pilcrow">¶</a></p>
+Transparency Log to remove evidence of its own misbehavior. The second property
+ensures that all users have a consistent view of when each portion of the tree
+was created. As will be discussed in later sections, users rely on log entry
+timestamps to decide whether to continue monitoring certain labels and which
+portions of the tree to skip when searching. Disagreement on when portions of
+the tree were created can cause users to disagree on the value of a
+label-version pair, introducing the same security issues as a fork.<a href="#section-4-3" class="pilcrow">¶</a></p>
+<p id="section-4-4">Proving the first property, that the log tree is append-only, can be done by
+providing a consistency proof from the log tree. Proving the second property,
+that newly added log entries have monotonically increasing timestamps, requires
+establishing some additional structure on the log's contents.<a href="#section-4-4" class="pilcrow">¶</a></p>
 <div id="implicit-binary-search-tree">
 <section id="section-4.1">
         <h3 id="name-implicit-binary-search-tree">
@@ -1892,9 +1907,7 @@ some additional structure on the log's contents.<a href="#section-4-4" class="pi
         </h3>
 <p id="section-4.1-1">Intuitively, the leaves of the log tree can be considered a flat array
 representation of a binary tree. This structure is similar to the log tree, but
-distinguished by the fact that not all parent nodes have two children. In this
-representation, "leaf" log entries are stored in even-numbered indices, while
-"intermediate" log entries are stored in odd-numbered indices:<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+distinguished by the fact that not all parent nodes have two children.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
 <span id="name-a-binary-tree-constructed-f"></span><figure id="figure-8">
           <div id="section-4.1-2.1">
             <div class="alignLeft art-svg artwork" id="section-4.1-2.1.1">
@@ -1955,30 +1968,35 @@ representation, "leaf" log entries are stored in even-numbered indices, while
 <figcaption><a href="#figure-8" class="selfRef">Figure 8</a>:
 <a href="#name-a-binary-tree-constructed-f" class="selfRef">A binary tree constructed from 14 entries in a log</a>
           </figcaption></figure>
-<p id="section-4.1-3">The index of the root log entry is the greatest power of two, minus one, that is
-less than the size of the log. The index of a log entry's left child is the log
-entry's index minus the greatest power of two that doesn't take the result of the computation out
-of bounds. Similarly, the index of a log entry's right child is the entry's
-index plus the greatest power of two that doesn't take the result of the computation out of bounds.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
+<p id="section-4.1-3">The implicit binary search tree containing <code>n</code> entries can be defined
+inductively. The index of the root log entry in the implicit binary search tree
+is the greatest power of two, minus one, that is less than the size of the
+implicit binary search tree. That is <code>i_root = 2^floor(log2(n)) - 1</code>. The left
+subtree is the implicit binary search tree of size <code>i_root</code>, i.e., the implicit
+binary search tree for all elements with a smaller index than the root. The
+right subtree is the implicit binary search tree of size <code>n-i_root-1</code>, but
+offset with <code>i_root+1</code>. Initially, these will be all indices larger than the
+root.<a href="#section-4.1-3" class="pilcrow">¶</a></p>
 <p id="section-4.1-4">Users ensure that log entry timestamps are monotonic by enforcing that the
 structure of this search tree holds. That is, users check that any timestamp
 they observe in the root's left subtree is less than or equal to the root's
 timestamp, and that any timestamp they observe in the root's right subtree is
-greater than or equal to the root's timestamp (and so on recursively). Following
-this tree structure ensures that users can quickly detect misbehavior while
-minimizing the number of log entries that need to be checked. For example, in a
-log with 50 entries, instead of having the root be the typical "middle" entry of
-<code>50/2 = 25</code>, it would be entry <code>31</code>. The next entry to check to the root's right
-would be <code>31 + 16 = 47</code>. As more entries are added to the log, users will
-consistently revisit entries 31 and 47, while they may never revisit entry 25
-after even a single new entry is added to the log.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
-<p id="section-4.1-5">Because we are often looking at the rightmost log entry, it is frequently useful
+greater than or equal to the root's timestamp, and so on recursively. Following
+this tree structure ensures that users can detect misbehavior quickly while
+minimizing the number of log entries that need to be checked.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
+<p id="section-4.1-5">As an example, consider a log with 50 entries. Instead of having the root be the
+typical "middle" entry of <code>50/2 = 25</code>, the root would be entry 31. As new log
+entries are added to the tree's right edge, all users that interact with the
+Transparency Log will require log entries to the right of entry 31 to have
+timestamps that are greater than or equal to that of entry 31, regardless of how
+much or how little the tree grows.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+<p id="section-4.1-6">Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the <strong>frontier</strong> of the log. The frontier consists of the root log
 entry, followed by the entries produced by repeatedly moving right until
 reaching the last entry of the log. Using the same example of a log with 50
-entries, the frontier would be entries: 31, 47, 49.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
-<p id="section-4.1-6">Example code for efficiently navigating the implicit binary search tree is
-provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">Appendix A</a>.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+entries, the frontier would be entries: <code>31, 47, 49</code>.<a href="#section-4.1-6" class="pilcrow">¶</a></p>
+<p id="section-4.1-7">Example code for efficiently navigating the implicit binary search tree is
+provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">Appendix A</a>.<a href="#section-4.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="update-algorithm">
@@ -1990,32 +2008,28 @@ provided in <a href="#appendix-implicit-search-tree" class="auto internal xref">
 observed:<a href="#section-4.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-4.2-2">
 <li id="section-4.2-2.1">
-            <p id="section-4.2-2.1.1">The "size" of the log tree, defined as the number of log entries (leaves) it
-contains.<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.1.1">The size of the log tree (that is, the number of leaves it contained).<a href="#section-4.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.2">
-            <p id="section-4.2-2.2.1">The root hashes of the "full subtrees" of the log tree. The full subtrees are
-the balanced subtrees which are as large as possible. That is, they do not
-have another balanced subtree as their parent. This allows the Transparency
-Log to provide more space-efficient consistency and inclusion proofs than if
-just the root hash was retained.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.2.1">The head values of the log tree's <strong>full subtrees</strong>. The full subtrees are
+the balanced subtrees which are as large as possible, meaning that they do
+not have another balanced subtree as their parent.<a href="#section-4.2-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-4.2-2.3">
-            <p id="section-4.2-2.3.1">The timestamps of the log entries along the frontier. This will be used to
-ensure that subsequent log entry timestamps are correct.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-2.3.1">The timestamps of the log entries along the frontier.<a href="#section-4.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-4.2-3">When users make queries to the Transparency Log, they advertise the size of the
-last tree head they've observed. If the Transparency Log responds with an
+last tree head they observed. If the Transparency Log responds with an
 updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
 following:<a href="#section-4.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-4.2-4.1">
-            <p id="section-4.2-4.1.1">Starting with the log entry that was advertised by the user, compute its
-direct path in the new implicit binary search tree.
-Provide the log entry timestamp for each element of the direct path that's to
-the right of the advertised log entry.<a href="#section-4.2-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-4.2-4.1.1">In the new implicit binary search tree, compute the direct path of the log
+entry with index <code>size-1</code>, where <code>size</code> is the tree size advertised by the
+user. Provide the timestamp of each log entry in the direct path whose index
+is greater than or equal to <code>size</code>.<a href="#section-4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-4.2">
             <p id="section-4.2-4.2.1">Exactly one of these log entries will lie on the new tree's frontier. From
@@ -2024,13 +2038,15 @@ log entry's right child, the right child's right child, and so on. Provide
 the timestamps for these log entries as well.<a href="#section-4.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-4.2-5">Users verify that each timestamp is greater than or equal to the last. While
-this only requires users to verify a logarithmic number of the newly added log
-entries' timestamps, it guarantees that two users with overlapping views of the
-tree will detect any violations. Note that retaining only the rightmost log
-entry's timestamp would be sufficient for this purpose, but users retain the
-timestamps of all log entries along the frontier. The additional timestamps are
-retained to make later parts of the protocol more efficient.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
+<p id="section-4.2-5">Users verify that the first timestamp is greater than or equal to the timestamp
+of the rightmost log entry they retained, and that each subsequent timestamp is
+greater than or equal to the one prior. While this only requires users to verify
+a logarithmic number of the newly added log entries' timestamps, it guarantees
+that two users with overlapping views of the tree will detect any violations.
+While retaining only the rightmost log entry's timestamp would be sufficient for
+this purpose, users retain the timestamps of all log entries along the frontier.
+The additional timestamps are retained to make later parts of the protocol more
+efficient.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
 <p id="section-4.2-6">Additionally, the Transparency Log defines two durations: how far ahead and how
 far behind the current time the rightmost log entry's timestamp may be. Users
 verify this against their local clock.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
@@ -2050,58 +2066,62 @@ is greater than or equal to the last, as above.<a href="#section-4.2-7" class="p
 <p id="section-5-1">When searching the combined tree structure described in <a href="#combined-tree" class="auto internal xref">Section 3.4</a>, users
 perform a binary search for the first log entry where the prefix tree at that
 entry contains the desired label-version pair. Users reuse the implicit binary
-search tree from <a href="#implicit-binary-search-tree" class="auto internal xref">Section 4.1</a> for this purpose to ensure that
-all users will check the same or similar entries when searching for the same
-label. This allows for efficient client-side monitoring of the Transparency Log.<a href="#section-5-1" class="pilcrow">¶</a></p>
+search tree from <a href="#implicit-binary-search-tree" class="auto internal xref">Section 4.1</a> for this purpose. This ensures
+that all users will check the same or similar entries when searching for the
+same label, allowing for efficient user monitoring of the Transparency Log.<a href="#section-5-1" class="pilcrow">¶</a></p>
 <div id="binary-ladder">
 <section id="section-5.1">
         <h3 id="name-binary-ladder">
 <a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-binary-ladder" class="section-name selfRef">Binary Ladder</a>
         </h3>
-<p id="section-5.1-1">To perform a binary search, at each log entry the search needs to determine
-whether it should move left or right. That is, it needs to determine, out of the
-set of label-version pairs stored in the prefix tree, whether the highest
-version of a label that's present at a given log entry is greater than, equal
-to, or less than the target version.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
+<p id="section-5.1-1">To perform a binary search, users need to be able to inspect individual log
+entries and determine whether their search should continue to the left of the
+current log entry or the right. Specifically, they need to be able to determine
+if the greatest version of their label that was present in some version of the
+prefix tree was greater than, equal to, or less than their target version.<a href="#section-5.1-1" class="pilcrow">¶</a></p>
 <p id="section-5.1-2">A <strong>binary ladder</strong> is a series of lookups in a single log entry's prefix tree
-that determines the highest version of a label that exists, and it proceeds as
+that determines the greatest version of a label that exists. It proceeds as
 follows:<a href="#section-5.1-2" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-5.1-3">
 <li id="section-5.1-3.1">
             <p id="section-5.1-3.1.1">First, version <code>x</code> of the label is looked up, where <code>x</code> is a consecutively
 higher power of two minus one (0, 1, 3, 7, ...). This is repeated until the
-first proof of non-inclusion is produced.<a href="#section-5.1-3.1.1" class="pilcrow">¶</a></p>
+first non-inclusion proof is produced.<a href="#section-5.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.1-3.2">
-            <p id="section-5.1-3.2.1">Once the first proof of non-inclusion is produced, a binary search is
-conducted between the highest version that was proved to be included, and the
-version that was proved to not be included. Each step of the binary search
-produces either a proof of inclusion or non-inclusion, which guides the
-search left or right, until it terminates.<a href="#section-5.1-3.2.1" class="pilcrow">¶</a></p>
+            <p id="section-5.1-3.2.1">Once the first non-inclusion proof is produced, a binary search is conducted
+between the greatest version that was proved to be included, and the version
+that was proved to not be included. Each step of the binary search produces
+either an inclusion or non-inclusion proof, which guides the search left or
+right until it terminates.<a href="#section-5.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-5.1-4">However, for the purpose of searching for a specific version of a
-label, this is optimized in the two ways discussed below:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
-<p id="section-5.1-5">First, the series of lookups ends after the first proof of inclusion for a
-version greater than or equal to the target version, or the first proof of
-non-inclusion for a version less than the target version. This is because users
-are only interested in whether the highest version of a label that exists, as of
-a particular log entry, is greater than or less than their target version -- not
-its exact value.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
-<p id="section-5.1-6">Second, the Transparency Log omits proofs of inclusion for any versions of the
-label where another proof of inclusion for the same version was already provided
-in the same query response for a log entry to the left. Similarly, the
-Transparency Log also omits proofs of non-inclusion for any versions of the
-label where another proof of non-inclusion for the same version was already
-provided in the same query response for a log entry to the right. These proofs
-are unnecessary to conduct the user's search and omitting them does not affect
-the protocol's security.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
-<p id="section-5.1-7">As an example, if the highest version of a label is 6, a binary ladder would
-proceed as follows: proofs of inclusion for versions 0, 1, 3, terminated by a
-proof of non-inclusion for version 7. It would then conclude with proofs of
-inclusion for versions 5 and 6, as this uniquely identifies 6 as the highest
-version available. However, any of these proofs may be omitted in a particular
-query response due to the two rules just stated.<a href="#section-5.1-7" class="pilcrow">¶</a></p>
+<p id="section-5.1-4">However, this description implies that the series of lookups is interactive,
+which it is not. Binary ladders are always executed with
+respect to a specific <strong>target version</strong> which may or may not be the actual
+greatest version of the label. This allows for two optimizations:<a href="#section-5.1-4" class="pilcrow">¶</a></p>
+<p id="section-5.1-5">First, the series of lookups ends after the first inclusion proof for a version
+greater than or equal to the target version, or the first non-inclusion proof
+for a version less than the target version. This is because, when searching for
+a specific version of a label, users are only interested in whether the greatest
+version of a label that existed as of a particular log entry is greater than or
+less than their target version -- not its exact value.<a href="#section-5.1-5" class="pilcrow">¶</a></p>
+<p id="section-5.1-6">Second, the Transparency Log omits inclusion proofs for any versions of the
+label where another inclusion proof for the same version was already provided in
+the same query response for a log entry to the left. Similarly, the Transparency
+Log omits non-inclusion proofs for any versions of the label where another
+non-inclusion proof for the same version was already provided in the same query
+response for a log entry to the right. Providing these proofs is unnecessary
+since the only possible outcome they could have on the user's binary search
+would be to cause it to fail.<a href="#section-5.1-6" class="pilcrow">¶</a></p>
+<p id="section-5.1-7">As an example, if a user was searching for version 6 of a label, the longest
+possible binary ladder would be: inclusion proofs for versions 0, 1, 3, a
+non-inclusion proof for version 7, then followed by inclusion proofs for
+versions 5 and 6. This would uniquely identify version 6 as the greatest that
+exists in the prefix tree. However, in the context of a specific query response,
+the series may be terminated early if the greatest version in the prefix tree is
+not 6, and any of the lookups may be omitted depending on the output of previous
+binary ladders from other log entries.<a href="#section-5.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="maximum-lifetime">
@@ -2110,7 +2130,7 @@ query response due to the two rules just stated.<a href="#section-5.1-7" class="
 <a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-maximum-lifetime" class="section-name selfRef">Maximum Lifetime</a>
         </h3>
 <p id="section-5.2-1">A Transparency Log operator <span class="bcp14">MAY</span> define a maximum lifetime for log entries. If
-defined, it <span class="bcp14">MUST</span> be greater than zero seconds. Whether a log entry has surpassed
+defined, it <span class="bcp14">MUST</span> be greater than zero milliseconds. Whether a log entry has surpassed
 its maximum lifetime is determined by subtracting the timestamp of the rightmost
 log entry from the timestamp of the log entry in question and checking if the
 result is greater than or equal to the defined duration.<a href="#section-5.2-1" class="pilcrow">¶</a></p>
@@ -2134,9 +2154,9 @@ portion of the tree), it aborts; to the right (into the unexpired portion of the
 tree), it continues.<a href="#section-5.2-4" class="pilcrow">¶</a></p>
 <p id="section-5.2-5">This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
-lifetime need to be retained. Specifically, only a logarithmic number of log
-entries that have passed their maximum lifetime will still be needed by users;
-the rest can be discarded. Pruning is explained in more detail in TODO.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
+lifetime need to be retained. Specifically, users will still need only a
+logarithmic number of log entries that have passed their maximum lifetime,
+meaning the rest can be discarded. Pruning is explained in more detail in TODO.<a href="#section-5.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="fv-algorithm">
@@ -2165,19 +2185,20 @@ maximum lifetime by definition.<a href="#section-5.3-2.2.1" class="pilcrow">¶</
 </li>
           <li id="section-5.3-2.3">
             <p id="section-5.3-2.3.1">Obtain a binary ladder from the current log entry for the target version.
-Accounting for any proofs of inclusion or non-inclusion which were omitted,
+Accounting for any inclusion or non-inclusion proofs which were omitted,
 verify that the binary ladder terminates in a way that is consistent with
-previously-inspected log entries. Specifically, verify that it indicates a
+previously inspected log entries. Specifically, verify that it indicates a
 maximum version greater than or equal to any log entries to the left, and
 less than or equal to any log entries to the right.<a href="#section-5.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.3-2.4">
-            <p id="section-5.3-2.4.1">If the binary ladder was terminated early due to a proof of non-inclusion for a version less than the target version,
-recurse to the log entry's right child. Otherwise, check if the log entry has
-surpassed its maximum lifetime. If so, abort the search with an error
-indicating that the desired version of the label has expired and is no longer
-available. If not, recurse to the log entry's left child. If, in either case,
-recursion isn't possible because the search is at a leaf node:<a href="#section-5.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-5.3-2.4.1">If the binary ladder was terminated early due to a non-inclusion proof for a
+version less than the target version, recurse to the log entry's right child.
+Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
+abort the search with an error indicating that the desired version of the
+label has expired and is no longer available. If not, recurse to the log
+entry's left child. If, in either case, recursion isn't possible because the
+search is at a leaf node:<a href="#section-5.3-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.3-2.5">
             <p id="section-5.3-2.5.1">This largely concludes the search. However, there are some additional
@@ -2192,15 +2213,17 @@ abort the search and return an error to the user.<a href="#section-5.3-2.5.1" cl
             <p id="section-5.3-2.6.1">It's also possible at this point that a commitment to the contents of the
 desired label-version pair has not been provided by the Transparency Log.
 This can happen, for example, if multiple versions of a label were inserted
-in a single epoch and the binary ladder was terminated early due to a proof of inclusion for a version greater than the target version. If this
-has happened, obtain a search proof for the target label-version pair from
-the prefix tree in the first log entry to contain it (identified in step 5).<a href="#section-5.3-2.6.1" class="pilcrow">¶</a></p>
+in the same log entry and the binary ladder was terminated early due to an
+inclusion proof for a version greater than the target version. If this has
+happened, obtain a search proof for the target label-version pair from the
+prefix tree in the first log entry to contain it (identified in step 5).<a href="#section-5.3-2.6.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-5.3-2.7">
             <p id="section-5.3-2.7.1">Finally, if the binary search failed to find a log entry containing the
-desired label-version pair, or if the search proof in step 6 returned a proof
-of non-inclusion, return an error to the user indicating that the version of
-the label does not exist. Otherwise, terminate the search successfully.<a href="#section-5.3-2.7.1" class="pilcrow">¶</a></p>
+desired label-version pair, or if the search proof from step 6 proves
+non-inclusion rather than inclusion, return an error to the user indicating
+that the version of the label does not exist. Otherwise, terminate the search
+successfully.<a href="#section-5.3-2.7.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-5.3-3">The most important goal of this algorithm is correctly identifying the first log
@@ -2209,11 +2232,9 @@ doing this is to make monitoring more efficient for the label owner. If a label
 has a large number of versions, it can become prohibitively expensive for its
 owner to repeatedly check that every single version is represented correctly in
 multiple log entries. Instead, the label owner can check that the version was
-created correctly in the one epoch where it was first added and then enforce
-that binary searches for that version will always converge back to that same log
+created correctly in the one log entry where it was first added and then enforce
+that binary searches for that version always converge back to that same log
 entry.<a href="#section-5.3-3" class="pilcrow">¶</a></p>
-<p id="section-5.3-4">Once users successfully complete the search and the specified verification, they
-move on to opening the target label-version pair's commitment.<a href="#section-5.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2228,9 +2249,9 @@ find a specific version of a label may change. New intermediate nodes may be
 established between the search root and the log entry, or a new search root may be
 created. The goal of monitoring a label is to efficiently ensure that, when
 these new parent nodes are created, they're created correctly such that searches
-for the same versions continue converging to the same entries in the log.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<p id="section-6-2">Monitoring is performed both by the users that own a label (meaning they are the
-authoritative source for the label's content) and the users that lookup a label.
+for the same versions of a label continue converging to the same entries in the log.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">Monitoring is performed both by the users that own a label, meaning they are the
+authoritative source for the label's content, and the users that lookup a label.
 Owners monitor their labels to ensure that past (expected) versions of a label
 are still correctly stored in the log and that no new (unexpected) versions have
 been added. Users that looked up a label may sometimes need to monitor it
@@ -2243,12 +2264,12 @@ Transparency Log.<a href="#section-6-2" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-6.1-1">Label owners <span class="bcp14">MUST</span> monitor their labels regularly, ensuring that past versions of
 the label are still correctly represented in the log and that any new versions
-of the label are permissible (alerting the user if not). Service Providers
+of the label are permissible (alerting the user if not). Transparency Logs
 define a duration, referred to as the <strong>Reasonable Monitoring
 Window</strong> (RMW), which is the frequency with which the Transparency Log generally
 expects label owners to perform monitoring. The log entry maximum lifetime, if
 defined, <span class="bcp14">MUST</span> be greater than the RMW.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
-<p id="section-6.1-2"><strong>Distinguished</strong> log entries are chosen (according to the algorithm below) such that there is roughly one per
+<p id="section-6.1-2"><strong>Distinguished</strong> log entries are chosen according to the algorithm below such that there is roughly one per
 every interval of the RMW. If a user looks up a label, either through a
 fixed-version or greatest-version search, and finds that the first log entry
 containing their desired label-version pair is to the right of the rightmost
@@ -2258,13 +2279,13 @@ new distinguished log entry is established to its right and the two log entries
 are verified to be consistent. The purpose of this monitoring is to ensure that
 the label-version pair is not removed or obscured by the Transparency Log before
 the label owner has had an opportunity to detect it.<a href="#section-6.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.1-3">However, if a user looks up a label and finds that the first log entry
+<p id="section-6.1-3">If a user looks up a label and finds that the first log entry
 containing the label-version pair is either a distinguished log entry or to the
 left of any distinguished log entry, they are not required to monitor it
 afterwards. The only state that would be retained from the query would be the
 tree head, as discussed in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
 <p id="section-6.1-4">"Regular" monitoring <span class="bcp14">SHOULD</span> be performed at least as frequently as the RMW and
-<span class="bcp14">MUST</span> (if at all possible) happen more frequently than the log entry maximum
+<span class="bcp14">MUST</span>, if at all possible, happen more frequently than the log entry maximum
 lifetime.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2297,16 +2318,16 @@ by executing this algorithm with: the given log entry's right child, the
 timestamp of the given log entry, and the given right timestamp.<a href="#section-6.2-2.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.2-3">While the algorithm is recursive, it is initially called with these parameters: the
+<p id="section-6.2-3">The algorithm is initialized with these parameters: the
 root node in the implicit binary search tree, the timestamp 0, and the timestamp
 of the rightmost log entry. Note that step 2 is specifically "less than" and not
 "less than or equal to"; this ensures correct behavior when the RMW is zero.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">This process for choosing distinguished log entries ensures that they are
-<strong>regularly spaced</strong>. Having irregularly-spaced distinguished log entries risks
+<strong>regularly spaced</strong>. Having irregularly spaced distinguished log entries risks
 either overwhelming label owners with a large number of them, or delaying
 consensus between users by having arbitrarily few. Distinguished log entries
 must reliably occur at roughly the same interval as the Reasonable Monitoring
-Window regardless of variations in the tree's growth rate or other factors.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+Window regardless of variations in the tree's growth rate.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <p id="section-6.2-5">This process also ensures that distinguished log entries are <strong>stable</strong>. Once a
 log entry is chosen to be distinguished, it will never stop being distinguished.
 This is important because it means that, if a user looks up a label and checks
@@ -2320,26 +2341,26 @@ inspection by the label owner by losing its distinguished status.<a href="#secti
 <a href="#section-6.3" class="section-number selfRef">6.3. </a><a href="#name-lower-bound-binary-ladder" class="section-name selfRef">Lower-Bound Binary Ladder</a>
         </h3>
 <p id="section-6.3-1">Similar to the algorithm for searching the tree, the algorithm for monitoring
-the tree requires a way to prove that the highest version of a label stored in a
-particular log entry is greater than or equal to a target version. Since we
-already know that the target version exists, we only need to prove that there
+the tree requires a way to prove that the greatest version of a label stored in a
+particular log entry's prefix tree is greater than or equal to a target version. Since users
+already know that the target version exists, the Transparency Log only needs to prove that there
 has not been an unexpected downgrade. As such, the steps of the binary ladder
 for monitoring, called a <strong>lower-bound binary ladder</strong>, are slightly different
 than for search:<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.3-2">
 <li id="section-6.3-2.1">
-            <p id="section-6.3-2.1.1">First, version <code>x</code> of the label is looked up, where <code>x</code> is consecutively higher
-powers of two minus one (0, 1, 3, 7, ...). This is repeated until <code>x</code> is the
+            <p id="section-6.3-2.1.1">First, version <code>x</code> of the label is looked up, where <code>x</code> is a consecutively higher
+power of two minus one (0, 1, 3, 7, ...). This is repeated until <code>x</code> is the
 largest such value less than or equal to the target version.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
-            <p id="section-6.3-2.2.1">Second, the largest <code>x</code> that was looked up is retained, and consecutively
-smaller powers of two are added to it until it equals the target version.
+            <p id="section-6.3-2.2.1">Second, the largest <code>x</code> that was looked up is retained and consecutively
+smaller powers of two are added to such that the final result equals the target version.
 Each time a power of two is added, this version of the label is looked up.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-6.3-3">This could be equivalently computed as a search binary ladder, excluding lookups
-for any versions greater than the target.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">This could be equivalently computed as a search binary ladder with any lookups
+for versions greater than the target version excluded.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="m-algorithm">
@@ -2348,8 +2369,8 @@ for any versions greater than the target.<a href="#section-6.3-3" class="pilcrow
 <a href="#section-6.4" class="section-number selfRef">6.4. </a><a href="#name-algorithm-3" class="section-name selfRef">Algorithm</a>
         </h3>
 <p id="section-6.4-1">To monitor a given label, users maintain a small amount of state: a map from a
-position in the log to a version counter. The version counter is the highest
-version of the label that's been proven to exist at that log position. Users
+position in the log to a version counter. The version counter is the greatest
+version of the label that's been proved to exist at that log position. Users
 initially populate this map by setting the position of the first log entry to
 contain the label-version pair they've looked up to map to that version. A map
 may track several different versions of a label simultaneously if a user has
@@ -2366,7 +2387,7 @@ the position-version pair in the map and move on to the next map entry.<a href="
             <p id="section-6.4-3.2.1">Compute the ordered list of log entries to inspect:<a href="#section-6.4-3.2.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.4-3.2.2">
 <li id="section-6.4-3.2.2.1">
-                <p id="section-6.4-3.2.2.1.1">Initiate the list by setting it to be the log entry's direct path in the
+                <p id="section-6.4-3.2.2.1.1">Initialize the list by setting it to be the log entry's direct path in the
 implicit binary search tree based on the current tree size.<a href="#section-6.4-3.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-6.4-3.2.2.2">
@@ -2394,8 +2415,8 @@ from the map and move on to the next map entry.<a href="#section-6.4-3.4.2.1.1" 
               <li id="section-6.4-3.4.2.2">
                 <p id="section-6.4-3.4.2.2.1">Receive and verify a lower-bound binary ladder from this log entry for the
 version currently in the map. This proves that, at the indicated log
-entry, the highest version present is greater than or equal to the
-previously-observed version.<a href="#section-6.4-3.4.2.2.1" class="pilcrow">¶</a></p>
+entry, the greatest version present is greater than or equal to the
+previously observed version.<a href="#section-6.4-3.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-6.4-3.4.2.3">
                 <p id="section-6.4-3.4.2.3.1">If the above check fails, return an error to the user. Otherwise, remove
@@ -2413,13 +2434,15 @@ entries lying on the log's frontier.<a href="#section-6.4-4" class="pilcrow">¶<
 intermediate/root nodes are established and verifying that they're constructed
 correctly. Once a distinguished log entry is reached and successfully verified,
 monitoring is no longer necessary and the relevant entry is removed from the
-map. Note that users can often execute this process with the output of Search or
-Update operations for a label without waiting to make explicit Monitor queries.
-It is also worth noting that the work required to monitor several versions of
-the same label scales sublinearly due to the fact that the direct paths of the
-different versions will often intersect. Intersections reduce the total number
-of entries in the map and therefore the amount of work that will be needed to
-monitor the label from then on.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
+map.<a href="#section-6.4-5" class="pilcrow">¶</a></p>
+<p id="section-6.4-6">Users will often be able to execute the monitoring process, at least partially,
+with the output of a fixed-version or greatest-version search for the label.
+This may reduce the need for monitoring-specific requests. It is also worth
+noting that the work required to monitor several versions of the same label
+scales sublinearly because the direct paths of the different versions will often
+intersect. Intersections reduce the total number of entries in the map and
+therefore the amount of work that will be needed to monitor the label from then
+on.<a href="#section-6.4-6" class="pilcrow">¶</a></p>
 <div id="owner-algorithm">
 <section id="section-6.4.1">
           <h4 id="name-owner-algorithm">
@@ -2427,27 +2450,27 @@ monitor the label from then on.<a href="#section-6.4-5" class="pilcrow">¶</a></
           </h4>
 <p id="section-6.4.1-1">If the user owns the label being monitored, they will additionally need to
 retain the rightmost distinguished log entry where they've verified that the
-most recent version of the label is correct. Users advertise this log entry's
+greatest version of the label is correct. Users advertise this log entry's
 position in their Monitor request. For a number of subsequent distinguished log
 entries, the Transparency Log states the greatest version of the label that the
 log entry's prefix tree contains and provides a search-style binary ladder, as
-described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>, to prove it. No lookups are omitted from the
+described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>, to prove that this is correct. No lookups are omitted from the
 binary ladder according to the rules described in <a href="#binary-ladder" class="auto internal xref">Section 5.1</a>. However,
-lookups for any versions of the label that were already provided in a
-lower-bound binary ladder from the same log entry <em>are</em> omitted.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
+lookups for any versions of the label that were provided in the same query response in a
+lower-bound binary ladder for the same log entry <em>are</em> omitted.<a href="#section-6.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.4.1-2">Users verify that the version has not unexpectedly increased or decreased, and
-that the binary ladder terminates in way that's consistent with the provided
+that the binary ladder terminates in a way that's consistent with the provided
 version being the greatest that exists. Importantly, users also verify that they
 receive a binary ladder for the distinguished log entry immediately following
 the one they've advertised, the distinguished log entry immediately following
 that one, and so on. The Transparency Log provides whichever intermediate
 timestamps are necessary to demonstrate that this is the case. To avoid
-overloading itself, the Transparency Log has the option to limit the number of
+excessive load, the Transparency Log <span class="bcp14">SHOULD</span> limit the number of
 distinguished log entries it provides binary ladders for in a single response.<a href="#section-6.4.1-2" class="pilcrow">¶</a></p>
-<p id="section-6.4.1-3">If the user is monitoring the label for the first time since it was created,
-they advertise the first distinguished log entry to the left of the first log
-entry to contain the label. The Transparency Log provides binary ladders for
-subsequent distinguised log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.4.1-3">If a user is monitoring the label for the first time since it was created, they
+advertise the first log entry to contain the label even if it is not known to be
+distinguished. The Transparency Log provides binary ladders for subsequent
+distinguished log entries.<a href="#section-6.4.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2461,7 +2484,7 @@ subsequent distinguised log entries.<a href="#section-6.4.1-3" class="pilcrow">�
       </h2>
 <p id="section-7-1">Users often wish to search for the "most recent" version, or the greatest
 version, of a label. Unlike searches for a specific version, label owners
-regularly verify that their most recent version is correctly represented in the
+regularly verify that the greatest version is correctly represented in the
 log. This enables a simpler, more efficient approach to searching.<a href="#section-7-1" class="pilcrow">¶</a></p>
 <p id="section-7-2"><a href="#reasonable-monitoring-window" class="auto internal xref">Section 6.1</a> and <a href="#distinguished-log-entries" class="auto internal xref">Section 6.2</a> define the
 concept of a distinguished log entry, which is any log entry that label owners
@@ -2469,22 +2492,19 @@ are required to check for correctness. As a result, users can start their search
 at the rightmost distinguished log entry and only consider new versions which
 have been created since then. The rightmost distinguished log entry will always
 be on the frontier of the log and will never be past its maximum lifetime.<a href="#section-7-2" class="pilcrow">¶</a></p>
-<p id="section-7-3">To perform a greatest-version search, the Transparency Log provides the greatest
-version of the label that exists. It then provides a binary ladder, with the
-greatest version as the target, from the rightmost distinguished log entry. If
-there is no distinguished log entry yet, the binary ladder is provided from the root instead.
-From this log entry, the Transparency Log then proceeds down the remainder of
-the frontier: the starting log entry's right child, the right child's right
-child, and so on until reaching the last log entry. From each of these log
-entries, a binary ladder targeting the label's greatest version is provided.<a href="#section-7-3" class="pilcrow">¶</a></p>
-<p id="section-7-4">As in <a href="#fixed-version-searches" class="auto internal xref">Section 5</a>, users verify that the log entry timestamps and
-the binary ladders from each log entry each represent a monotonically-increasing
+<p id="section-7-3">To perform a greatest-version search, the Transparency Log first provides the
+greatest version of the label that exists as of the rightmost log entry. This is
+followed by a series of binary ladders each targeting this version: The first is
+from either the rightmost distinguished log entry, or the root if there is no
+distinguished log entry. Subsequent binary ladders are then provided from this
+log entry's right child, its right child's right child, and so on until the
+rightmost log entry is reached.<a href="#section-7-3" class="pilcrow">¶</a></p>
+<p id="section-7-4">As in <a href="#fixed-version-searches" class="auto internal xref">Section 5</a>, users verify that the binary ladders from each
+log entry, and the log enties' timestamps, represent a monotonically increasing
 series. Users additionally verify that the binary ladder from the rightmost log
-entry terminates in a way that is consistent with the target version being the
-greatest that exists. If this verification is successful, users move on to
-opening the commitment for whichever label-version pair was identified as the
-greatest.<a href="#section-7-4" class="pilcrow">¶</a></p>
-<p id="section-7-5">If the starting log entry was not distinguished or if the starting log entry did
+entry terminates in a way that is consistent with the claimed greatest version actually being the
+greatest that exists.<a href="#section-7-4" class="pilcrow">¶</a></p>
+<p id="section-7-5">Note that if the starting log entry was not distinguished or if the starting log entry did
 not contain the greatest version of the label, the user may be obligated to
 monitor the label in the future, per <a href="#reasonable-monitoring-window" class="auto internal xref">Section 6.1</a>.<a href="#section-7-5" class="pilcrow">¶</a></p>
 </section>
@@ -2494,7 +2514,7 @@ monitor the label in the future, per <a href="#reasonable-monitoring-window" cla
       <h2 id="name-ciphersuites">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-ciphersuites" class="section-name selfRef">Ciphersuites</a>
       </h2>
-<p id="section-8-1">Each Transparency Log uses a single fixed ciphersuite, chosen when the log is
+<p id="section-8-1">Each Transparency Log uses a single fixed ciphersuite, chosen when it is
 initially created, that specifies the following primitives and parameters to be used for
 cryptographic computations:<a href="#section-8-1" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -2514,7 +2534,7 @@ cryptographic computations:<a href="#section-8-1" class="pilcrow">¶</a></p>
           <p id="section-8-2.5.1"><code>Kc</code>: A fixed string of bytes used in the computation of commitments<a href="#section-8-2.5.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-8-3">The hash algorithm is used for computing the intermediate and root values of
+<p id="section-8-3">The hash algorithm is used to calculate intermediate and root values of
 hash trees. The signature algorithm is used for signatures from both the service
 operator and the third party, if one is present. The VRF is used for preserving
 the privacy of labels. One of the VRF algorithms from <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span> must be
@@ -2533,8 +2553,8 @@ defined in <a href="#kt-ciphersuites" class="auto internal xref">Section 13.1</a
         <h3 id="name-tree-head-signature">
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-tree-head-signature" class="section-name selfRef">Tree Head Signature</a>
         </h3>
-<p id="section-9.1-1">The head of a Transparency Log, which represents the log's most recent state, is
-represented as:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-1">The head of a Transparency Log, which represents its most recent state, is
+encoded as:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.1-2">
 <pre>
 struct {
@@ -2543,10 +2563,10 @@ struct {
 } TreeHead;
 </pre><a href="#section-9.1-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.1-3">where <code>tree_size</code> counts the number of leaves of the log tree. If the
-Transparency Log is deployed with Third-party Management, then the public key
+<p id="section-9.1-3">where <code>tree_size</code> is the number of log entries. If the
+Transparency Log is deployed with Third-Party Management, then the public key
 used to verify the signature belongs to the third-party manager; otherwise the
-public key used belongs to the service operator.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+public key used belongs to the Service Operator.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
 <p id="section-9.1-4">The signature itself is computed over a <code>TreeHeadTBS</code> structure which
 incorporates the log's current state as well as long-term log configuration:<a href="#section-9.1-4" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.1-5">
@@ -2574,7 +2594,7 @@ struct {
   };
 
   uint64 max_ahead;
-  unit64 max_behind;
+  uint64 max_behind;
   uint64 reasonable_monitoring_window;
   optional&lt;uint64&gt; maximum_lifetime;
 } Configuration;
@@ -2582,7 +2602,7 @@ struct {
 struct {
   Configuration config;
   uint64 tree_size;
-  opaque root&lt;Hash.Nh&gt;;
+  opaque root[Hash.Nh];
 } TreeHeadTBS;
 </pre><a href="#section-9.1-5" class="pilcrow">¶</a>
 </div>
@@ -2601,9 +2621,10 @@ stored in the <code>maximum_lifetime</code> field.<a href="#section-9.1-6" class
         <h3 id="name-update-format">
 <a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-update-format" class="section-name selfRef">Update Format</a>
         </h3>
-<p id="section-9.2-1">The updates committed to by the prefix tree contain the new value of a label,
-along with additional information depending on the deployment mode of the
-Transparency Log. They are serialized as follows:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.2-1">The leaves of the prefix tree contain commitments which open to the value of a
+label-version pair, potentially with some additional information depending on
+the deployment mode of the Transparency Log. The contents of these commitments
+is serialized as follows:<a href="#section-9.2-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.2-2">
 <pre>
 struct {
@@ -2619,9 +2640,9 @@ struct {
 } UpdateValue;
 </pre><a href="#section-9.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.2-3">The <code>value</code> field contains the new value associated with the label.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
-<p id="section-9.2-4">In the event that third-party management is used, the <code>prefix</code> field contains a
-signature from the service operator, using the public key from
+<p id="section-9.2-3">The <code>value</code> field contains the value associated with the label-version pair.<a href="#section-9.2-3" class="pilcrow">¶</a></p>
+<p id="section-9.2-4">In the event that Third-Party Management is used, the <code>prefix</code> field contains a
+signature from the Service Operator, using the public key from
 <code>Configuration.leaf_public_key</code>, over the following structure:<a href="#section-9.2-4" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.2-5">
 <pre>
@@ -2632,8 +2653,7 @@ struct {
 } UpdateTBS;
 </pre><a href="#section-9.2-5" class="pilcrow">¶</a>
 </div>
-<p id="section-9.2-6">The <code>label</code> field contains the label being updated, <code>version</code> contains the new
-version, and <code>value</code> contains the same contents as <code>UpdateValue.value</code>. Clients
+<p id="section-9.2-6">The <code>value</code> contains the same contents as <code>UpdateValue.value</code>. Users
 <span class="bcp14">MUST</span> successfully verify this signature before consuming <code>UpdateValue.value</code>.<a href="#section-9.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2642,11 +2662,9 @@ version, and <code>value</code> contains the same contents as <code>UpdateValue.
         <h3 id="name-commitment">
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-commitment" class="section-name selfRef">Commitment</a>
         </h3>
-<p id="section-9.3-1">As discussed in <a href="#combined-tree" class="auto internal xref">Section 3.4</a>, commitments are stored in the leaves of the
-prefix tree rather than raw <code>UpdateValue</code> structures. Commitments are computed
-with HMAC <span>[<a href="#RFC2104" class="cite xref">RFC2104</a>]</span>, using the hash function specified by the ciphersuite. To
-produce a new commitment, the application generates a random <code>Nc</code>-byte value
-called <code>opening</code> and computes:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-1">Commitments are computed with HMAC <span>[<a href="#RFC2104" class="cite xref">RFC2104</a>]</span> using the hash function
+specified by the ciphersuite. To produce a new commitment, the application
+generates a random <code>Nc</code>-byte value called <code>opening</code> and computes:<a href="#section-9.3-1" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-9.3-2">
 <pre>
 commitment = HMAC(Kc, CommitmentValue)
@@ -2657,20 +2675,20 @@ is specified as:<a href="#section-9.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.3-4">
 <pre>
 struct {
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   opaque label&lt;0..2^8-1&gt;;
   UpdateValue update;
 } CommitmentValue;
 </pre><a href="#section-9.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-9.3-5">The <code>label</code> field of CommitmentValue contains the label being updated and the
-<code>update</code> field contains the new value for the label. The output value
-<code>commitment</code> may be published, while <code>opening</code> should only be revealed to users
-that are authorized to receive the label's contents.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
-<p id="section-9.3-6">The Transparency Log <span class="bcp14">MAY</span> generate <code>opening</code> in a programmatic way. However, it
-<span class="bcp14">SHOULD</span> ensure that <code>opening</code> can later be deleted and not feasibly recovered.
-This preserves the Transparency Log's ability to delete certain information in
-compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
+<p id="section-9.3-5">The output value <code>commitment</code> may be published, while <code>opening</code> should only be
+revealed to users that are authorized to receive the label's contents.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
+<p id="section-9.3-6">The Transparency Log <span class="bcp14">MAY</span> generate <code>opening</code> in a non-random way, such as
+deriving it from a secret key, as long as the result is indistinguishable from
+random to other participants. The Transparency Log <span class="bcp14">SHOULD</span> ensure that individual
+<code>opening</code> values can later be deleted in a way where they can not feasibly be
+recovered. This preserves the Transparency Log's ability to delete certain
+information in compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="verifiable-random-function">
@@ -2678,9 +2696,10 @@ compliance with privacy laws.<a href="#section-9.3-6" class="pilcrow">¶</a></p>
         <h3 id="name-verifiable-random-function">
 <a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-verifiable-random-function" class="section-name selfRef">Verifiable Random Function</a>
         </h3>
-<p id="section-9.4-1">Each label-version pair created will have a unique
-representation in the prefix tree. This is computed by providing the combined
-label and version as inputs to the VRF:<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-1">Each label-version pair corresponds to a unique search key in the prefix tree.
+This search key is the output of executing the VRF, with the private key
+corresponding to <code>Configuration.vrf_public_key</code>, on the combined label and
+version:<a href="#section-9.4-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.4-2">
 <pre>
 struct {
@@ -2689,8 +2708,6 @@ struct {
 } VrfInput;
 </pre><a href="#section-9.4-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.4-3">The VRF's output evaluated on <code>VrfInput</code> is the concrete value inserted into the
-prefix tree.<a href="#section-9.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="crypto-log-tree">
@@ -2698,24 +2715,21 @@ prefix tree.<a href="#section-9.4-3" class="pilcrow">¶</a></p>
         <h3 id="name-log-tree-2">
 <a href="#section-9.5" class="section-number selfRef">9.5. </a><a href="#name-log-tree-2" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-9.5-1">The leaf and parent nodes of a log tree are serialized as:<a href="#section-9.5-1" class="pilcrow">¶</a></p>
+<p id="section-9.5-1">The value of a leaf node in the log tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:<a href="#section-9.5-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-9.5-2">
 <pre>
 struct {
   uint64 timestamp;
-  opaque prefix_tree&lt;Hash.Nh&gt;;
+  opaque prefix_tree[Hash.Nh];
 } LogLeaf;
-
-struct {
-  opaque value&lt;Hash.Nh&gt;;
-} LogParent;
 </pre><a href="#section-9.5-2" class="pilcrow">¶</a>
 </div>
 <p id="section-9.5-3">The <code>timestamp</code> field contains the timestamp that the leaf was created in
-milliseconds since the Unix epoch. The <code>prefix_tree</code> field contains the new root
-hash of the prefix tree after inserting any new desired entries.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
-<p id="section-9.5-4">The value of a parent node is computed by hashing together the values of its
-left and right children:<a href="#section-9.5-4" class="pilcrow">¶</a></p>
+milliseconds since the Unix epoch. The <code>prefix_tree</code> field contains the updated
+root hash of the prefix tree after making any desired modifications.<a href="#section-9.5-3" class="pilcrow">¶</a></p>
+<p id="section-9.5-4">The value of a parent node in the log tree is computed by hashing together the
+values of its left and right children:<a href="#section-9.5-4" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-9.5-5">
 <pre>
 parent.value = Hash(hashContent(parent.leftChild) ||
@@ -2723,15 +2737,9 @@ parent.value = Hash(hashContent(parent.leftChild) ||
 
 hashContent(node):
   if node.type == leafNode:
-    return 0x00 || nodeValue(node)
+    return 0x00 || node.value
   else if node.type == parentNode:
-    return 0x01 || nodeValue(node)
-
-nodeValue(node):
-  if node.type == leafNode:
-    return Hash(node.timestamp || node.prefix_tree)
-  else if node.type == parentNode:
-    return node.value
+    return 0x01 || node.value
 </pre><a href="#section-9.5-5" class="pilcrow">¶</a>
 </div>
 <p id="section-9.5-6">where <code>Hash</code> denotes the ciphersuite hash function.<a href="#section-9.5-6" class="pilcrow">¶</a></p>
@@ -2742,43 +2750,37 @@ nodeValue(node):
         <h3 id="name-prefix-tree-2">
 <a href="#section-9.6" class="section-number selfRef">9.6. </a><a href="#name-prefix-tree-2" class="section-name selfRef">Prefix Tree</a>
         </h3>
-<p id="section-9.6-1">The leaf nodes of a prefix tree are serialized as:<a href="#section-9.6-1" class="pilcrow">¶</a></p>
+<p id="section-9.6-1">The value of a leaf node in the prefix tree is computed as the hash, with the
+ciphersuite hash function, of the following structure:<a href="#section-9.6-1" class="pilcrow">¶</a></p>
 <div class="lang-tls sourcecode" id="section-9.6-2">
 <pre>
 struct {
-    opaque vrf_output&lt;VRF.Nh&gt;;
-    opaque commitment&lt;Hash.Nh&gt;;
+    uint8 prefix = 0x01;
+    opaque vrf_output[VRF.Nh];
+    opaque commitment[Hash.Nh];
 } PrefixLeaf;
 </pre><a href="#section-9.6-2" class="pilcrow">¶</a>
 </div>
-<p id="section-9.6-3">where <code>vrf_output</code> is the VRF output for the label-version pair, <code>VRF.Nh</code> is the
-output size of the ciphersuite VRF in bytes, and <code>commitment</code> is the commitment
-to the corresponding <code>UpdateValue</code> structure.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
-<p id="section-9.6-4">The parent nodes of a prefix tree are serialized as:<a href="#section-9.6-4" class="pilcrow">¶</a></p>
+<p id="section-9.6-3">The <code>vrf_output</code> field contains the VRF output for the label-version pair.
+<code>VRF.Nh</code> denotes the output size of the ciphersuite VRF in bytes. The
+<code>commitment</code> field contains the commitment to the corresponding <code>UpdateValue</code>
+structure.<a href="#section-9.6-3" class="pilcrow">¶</a></p>
+<p id="section-9.6-4">The value of a parent node is computed as the hash, with the ciphersuite hash
+function, of the following structure:<a href="#section-9.6-4" class="pilcrow">¶</a></p>
 <div class="lang-tls sourcecode" id="section-9.6-5">
 <pre>
 struct {
-  opaque value&lt;Hash.Nh&gt;;
+  uint8 prefix = 0x02;
+  uint8 midpoint;
+  opaque left_child[Hash.Nh];
+  opauqe right_child[Hash.Nh];
 } PrefixParent;
 </pre><a href="#section-9.6-5" class="pilcrow">¶</a>
 </div>
-<p id="section-9.6-6">The value of a parent node is computed by hashing together the values of its
-left and right children:<a href="#section-9.6-6" class="pilcrow">¶</a></p>
-<div class="lang-pseudocode sourcecode" id="section-9.6-7">
-<pre>
-parent.value = Hash(0x01 ||
-                   nodeValue(parent.leftChild) ||
-                   nodeValue(parent.rightChild))
-
-nodeValue(node):
-  if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh
-  else if node.type == leafNode:
-    return Hash(0x00 || node.vrf_output || node.commitment)
-  else if node.type == parentNode:
-    return node.value
-</pre><a href="#section-9.6-7" class="pilcrow">¶</a>
-</div>
+<p id="section-9.6-6">The <code>midpoint</code> field contains the midpoint of the node. The <code>left_child</code> and
+<code>right_child</code> fields contain the values of the left and right children of the
+parent node respectively, or an all-zero value if the corresponding child does
+not exist.<a href="#section-9.6-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2793,29 +2795,50 @@ nodeValue(node):
         <h3 id="name-log-tree-3">
 <a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-log-tree-3" class="section-name selfRef">Log Tree</a>
         </h3>
-<p id="section-10.1-1">The inclusion of some leaf in a tree head, or consistency between two tree
-heads, is proven by providing the smallest set of intermediate nodes from the
-log tree that allows the user to compute the tree's root hash from the leaf or
-other intermediate node values they already have. Such a proof is encoded as:<a href="#section-10.1-1" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-10.1-2">
+<p id="section-10.1-1">In the interest of efficiency, KT combines multiple inclusion proofs and
+consistency proofs into a single batch proof. Recalling from the discussion in
+<a href="#log-tree" class="auto internal xref">Section 3.2</a>,<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10.1-2.1">
+            <p id="section-10.1-2.1.1">When a user requests an inclusion proof for a leaf of the log tree, the
+Transparency Log provides the minimum set of head values from balanced subtrees
+that would allow the user to compute the root hash from the leaf's value.<a href="#section-10.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.1-2.2">
+            <p id="section-10.1-2.2.1">When a user requests a consistency proof, the user is expected to have
+retained the head values of the full subtrees of the previous version of the
+log. The Transparency Log provides the minimum set of head values from
+balanced subtrees that would allow the user to compute the root hash from
+their retained values.<a href="#section-10.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-10.1-3">These two proof types are composed together as such: considering the leaf values
+which will be proved included, and any node values the user is understood to
+have retained, the Transparency Log provides the minimum set of head values from
+balanced subtrees that would allow the user to compute the root hash from the
+leaf and retained values. This proof is encoded as follows:<a href="#section-10.1-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-10.1-4">
 <pre>
-opaque NodeValue&lt;Hash.Nh&gt;;
+opaque NodeValue[Hash.Nh];
 
 struct {
   NodeValue elements&lt;0..2^16-1&gt;;
 } InclusionProof;
-</pre><a href="#section-10.1-2" class="pilcrow">¶</a>
+</pre><a href="#section-10.1-4" class="pilcrow">¶</a>
 </div>
-<p id="section-10.1-3">Each <code>NodeValue</code> is a uniform size, computed by passing the relevant <code>LogLeaf</code>
-or <code>LogParent</code> structures through the <code>nodeValue</code> function in
-<a href="#crypto-log-tree" class="auto internal xref">Section 9.5</a>. The contents of the <code>elements</code> array is kept in
-left-to-right order: if a node is present in the root's left subtree, its value
-must be listed before any values provided from nodes that are in the root's
-right subtree, and so on recursively.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
-<p id="section-10.1-4">Additionally, each <code>NodeValue</code> corresponds to a balanced subtree of the log tree. If
-an intermediate node's value needs to be provided to satisfy the verifier, but
-the node is a non-balanced subtree, the values of the node's descendant full
-subtrees are provided instead.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
+<p id="section-10.1-5">The contents of the <code>elements</code> array is in left-to-right order: if a node is
+present in the root's left subtree then its value is listed before the values of
+any nodes in the root's right subtree, and so on recursively.<a href="#section-10.1-5" class="pilcrow">¶</a></p>
+<p id="section-10.1-6">Batching together inclusion and consistency proofs creates an edge case that
+requires special care: when a user has requested a consistency proof, and also
+requested inclusion proofs for leaves located in one or more of the subtrees
+that the user has retained the head of. When this happens, the portion of the
+batch proof that shows inclusion for the leaves in these subtrees will itself be
+sufficient to recompute the retained head values. This makes the retained values
+redundant for the purpose of computing the new root hash, which could result in
+the retained values being disregarded in a naive implementation. To avoid
+accepting invalid proofs, users <span class="bcp14">MUST</span> verify that the computed value for the head
+of any such subtree matches the retained value.<a href="#section-10.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="prefix-tree-2">
@@ -2824,7 +2847,7 @@ subtrees are provided instead.<a href="#section-10.1-4" class="pilcrow">¶</a></
 <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-prefix-tree-3" class="section-name selfRef">Prefix Tree</a>
         </h3>
 <p id="section-10.2-1">A proof from a prefix tree authenticates that a search was done correctly for a
-given search key. Such a proof is encoded as:<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+given set of search keys. Such a proof is encoded as:<a href="#section-10.2-1" class="pilcrow">¶</a></p>
 <div class="lang-tls sourcecode" id="section-10.2-2">
 <pre>
 enum {
@@ -2832,19 +2855,22 @@ enum {
   inclusion(1),
   nonInclusionLeaf(2),
   nonInclusionParent(3),
+  (255)
 } PrefixSearchResultType;
 
 struct {
   PrefixSearchResultType result_type;
   select (PrefixSearchResult.result_type) {
     case nonInclusionLeaf:
-      PrefixLeaf leaf;
+      opaque vrf_output[VRF.Nh];
+      opaque commitment[Hash.Nh];
   };
   uint8 depth;
 } PrefixSearchResult;
 
 struct {
   PrefixSearchResult results&lt;0..2^8-1&gt;;
+  opaque midpoints&lt;0..2^8-1&gt;;
   NodeValue elements&lt;0..2^16-1&gt;;
 } PrefixProof;
 </pre><a href="#section-10.2-2" class="pilcrow">¶</a>
@@ -2867,16 +2893,23 @@ case, the terminal node's value is provided since it can not be inferred.<a href
         </ul>
 <p id="section-10.2-5">The <code>depth</code> field indicates the depth of the terminal node of the search, and is
 provided to assist proof verification.<a href="#section-10.2-5" class="pilcrow">¶</a></p>
-<p id="section-10.2-6">The <code>elements</code> array consists of the fewest node values that can be hashed
+<p id="section-10.2-6">The <code>midpoints</code> array contains the midpoint of each intermediate node that would
+be needed to compute the root value. It is provided in the order that a
+depth-first left-to-right search through the prefix tree would encounter the
+midpoint values. Specifically, the midpoint value of the root node is always
+first, and the midpoints of any intermediate nodes in the root's left subtree
+are always provided before the midpoints of any intermediate nodes in the root's
+right subtree, and so on recursively.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
+<p id="section-10.2-7">The <code>elements</code> array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
 <code>elements</code> array is kept in left-to-right order: if a node is present in the
 root's left subtree, its value must be listed before any values provided from
 nodes that are in the root's right subtree, and so on recursively. In the event
 that a node is not present, an all-zero byte string of length <code>Hash.Nh</code> is
-listed instead.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
-<p id="section-10.2-7">The proof is verified by hashing together the provided elements, in the
+listed instead.<a href="#section-10.2-7" class="pilcrow">¶</a></p>
+<p id="section-10.2-8">The proof is verified by hashing together the provided midpoints and node values, in the
 left/right arrangement dictated by the bits of the search keys, and checking
-that the result equals the root value of the prefix tree.<a href="#section-10.2-7" class="pilcrow">¶</a></p>
+that the result equals the root value of the prefix tree.<a href="#section-10.2-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="proof-combined-tree">
@@ -2885,13 +2918,13 @@ that the result equals the root value of the prefix tree.<a href="#section-10.2-
 <a href="#section-10.3" class="section-number selfRef">10.3. </a><a href="#name-combined-tree-2" class="section-name selfRef">Combined Tree</a>
         </h3>
 <p id="section-10.3-1">As users execute the algorithms for searching, monitoring, or updating their
-view of the tree, they inspect a series of leaves in the log tree. For some of
-these leaves, only the timestamp of the log entry is needed. For other leaves,
+view of the tree, they inspect a series of log entries. For some of
+these, only the timestamp of the log entry is needed. For others,
 both the timestamp and a <code>PrefixProof</code> from the log entry's prefix tree are
 needed.<a href="#section-10.3-1" class="pilcrow">¶</a></p>
 <p id="section-10.3-2">This subsection defines a general structure, called a <code>CombinedTreeProof</code>, that
 contains the minimum set of timestamps and <code>PrefixProof</code> structures that a user
-needs for their execution of these algorithms. For the purpose of this protocol,
+needs for their execution of these algorithms. For the purposes of this protocol,
 the user always executes the algorithm to update their view of the tree,
 described in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>, followed immediately by one of the
 algorithms to search or monitor the current tree.<a href="#section-10.3-2" class="pilcrow">¶</a></p>
@@ -2905,27 +2938,26 @@ struct {
 } CombinedTreeProof;
 </pre><a href="#section-10.3-4" class="pilcrow">¶</a>
 </div>
-<p id="section-10.3-5">The elements of the <code>timestamps</code> field are the timestamps of log entries, and
-the elements of the <code>prefix_proofs</code> field are search proofs from the prefix
-trees at particular log entries. There is no explicit indication as to which log
+<p id="section-10.3-5">The elements of the <code>timestamps</code> field are the timestamps of log entries.
+The elements of the <code>prefix_proofs</code> field are search proofs from the prefix
+trees at specific log entries. There is no explicit indication as to which log
 entry the elements correspond to, as they are provided in the order that the
 algorithm the user is executing would request them. The elements of the
 <code>prefix_roots</code> field are, in left-to-right order, the prefix tree root
 hashes for any log entries whose timestamp was provided in <code>timestamps</code> but a
 search proof was not provided in <code>prefix_proofs</code>.<a href="#section-10.3-5" class="pilcrow">¶</a></p>
-<p id="section-10.3-6">If a log entry's timestamp is referenced multiple times, it is only added to
-<code>timestamps</code> the first time. Additionally, when a user advertises a
-previously-observed tree size in their request, log entry timestamps that the
-user is expected to have retained are excluded from <code>timestamps</code>.<a href="#section-10.3-6" class="pilcrow">¶</a></p>
-<p id="section-10.3-7">The <code>prefix_proofs</code> array differs from the <code>timestamps</code> array in two important
-ways. First, it is possible for multiple <code>PrefixProof</code> structures from the same log entry to appear in the
-<code>prefix_proofs</code> array if the same log entry is referenced multiple times. Users <span class="bcp14">MUST</span> verify that all
+<p id="section-10.3-6">If a log entry's timestamp is referenced multiple times by algorithms in the
+same <code>CombinedTreeProof</code>, it is only added to the <code>timestamps</code> array the first
+time. Additionally, when a user advertises a previously observed tree size in
+their request, log entry timestamps that the user is expected to have retained
+are always omitted from <code>timestamps</code>. This may result in there being elements of
+<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries whose
+timestamps are not included in <code>timestamps</code><a href="#section-10.3-6" class="pilcrow">¶</a></p>
+<p id="section-10.3-7">If different algorithms in the same <code>CombinedTreeProof</code> require a search proof
+from the same log entry, the <code>prefix_proofs</code> array will contain multiple
+<code>PrefixProof</code> structures for the same log entry. Users <span class="bcp14">MUST</span> verify that all
 <code>PrefixProof</code> structures corresponding to the same log entry compute the same
-prefix tree root hash. Second, while every log entry with a timestamp in
-<code>timestamps</code> will also be referenced in either <code>prefix_proofs</code> or
-<code>prefix_roots</code>, the inverse is not true. There may be elements of
-<code>prefix_proofs</code> or <code>prefix_roots</code> that correspond to log entries that are not in
-<code>timestamps</code> if the user is expected to have retained the log entry's timestamp.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
+prefix tree root hash.<a href="#section-10.3-7" class="pilcrow">¶</a></p>
 <p id="section-10.3-8">Users processing a <code>CombinedTreeProof</code> <span class="bcp14">MUST</span> verify that each field contains
 exactly the expected number of entries -- no more and no less.<a href="#section-10.3-8" class="pilcrow">¶</a></p>
 <div id="updating-view">
@@ -3052,13 +3084,12 @@ identify the starting log entry. Users verify the proof as described in
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-user-operations" class="section-name selfRef">User Operations</a>
       </h2>
 <p id="section-11-1">The basic user operations are organized as a request-response protocol between a
-user and the Transparency Log operator.<a href="#section-11-1" class="pilcrow">¶</a></p>
+user and the Transparency Log.<a href="#section-11-1" class="pilcrow">¶</a></p>
 <p id="section-11-2">Users <span class="bcp14">MUST</span> retain the most recent <code>TreeHead</code> they've successfully
 verified as part of any query response, and populate the <code>last</code> field of any
 query request with the <code>tree_size</code> from this <code>TreeHead</code>. This ensures that all
 operations performed by the user return consistent results.<a href="#section-11-2" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-11-3">
-<pre>
+<p id="section-11-3">~~~ tls-presentation 
 struct {
   TreeHead tree_head;
   select (Configuration.mode) {
@@ -3066,8 +3097,7 @@ struct {
       AuditorTreeHead auditor_tree_head;
   };
 } FullTreeHead;
-</pre><a href="#section-11-3" class="pilcrow">¶</a>
-</div>
+~~~<a href="#section-11-3" class="pilcrow">¶</a></p>
 <p id="section-11-4">Modifications to a user's state <span class="bcp14">MUST</span> only be persisted once the query response
 has been fully verified. Queries that fail full verification <span class="bcp14">MUST NOT</span> modify the
 user's protocol state in any way.<a href="#section-11-4" class="pilcrow">¶</a></p>
@@ -3083,7 +3113,7 @@ most recent one.<a href="#section-11.1-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-11.1-2">
 <pre>
 struct {
-  optional&lt;uint32&gt; last;
+  optional&lt;uint64&gt; last;
 
   opaque label&lt;0..2^8-1&gt;;
   optional&lt;uint32&gt; version;
@@ -3094,8 +3124,8 @@ struct {
 <div class="lang-tls-presentation sourcecode" id="section-11.1-4">
 <pre>
 struct {
-  opaque proof&lt;VRF.Np&gt;;
-  opaque commitment&lt;Hash.Nh&gt;;
+  opaque proof[VRF.Np];
+  opaque commitment[Hash.Nh];
 } BinaryLadderStep;
 
 struct {
@@ -3106,7 +3136,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   UpdateValue value;
 } SearchResponse;
 </pre><a href="#section-11.1-4" class="pilcrow">¶</a>
@@ -3122,12 +3152,12 @@ greatest-version search for the requested label, depending on whether <code>vers
 was provided in <code>SearchRequest</code> or not. If searching for the greatest version of
 the label, this version is provided in <code>SearchResponse.version</code>; otherwise, the
 field is empty.<a href="#section-11.1-6" class="pilcrow">¶</a></p>
-<p id="section-11.1-7">The <code>inclusion</code> field contains a proof of inclusion for all of the log tree
+<p id="section-11.1-7">The <code>inclusion</code> field contains an inclusion proof for all of the log tree
 leaves where either a search proof was provided in
 <code>search.prefix_proofs</code> or the prefix tree root hash was provided
 directly in <code>search.prefix_roots</code>. If the user advertised a
-previously-observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
-as a proof of consistency.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
+previously observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
+as a consistency proof.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
 <p id="section-11.1-8">Users verify a search response by following these steps:<a href="#section-11.1-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-11.1-9">
 <li id="section-11.1-9.1">
@@ -3139,7 +3169,7 @@ as a proof of consistency.<a href="#section-11.1-7" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-9.3">
             <p id="section-11.1-9.3.1">Compute a candidate root value for the tree from the proof in <code>inclusion</code>,
-the hashes of log entries used in <code>search</code>, and any previously-retained full
+the hashes of log entries used in <code>search</code>, and any previously retained full
 subtrees of the log tree.<a href="#section-11.1-9.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.1-9.4">
@@ -3165,7 +3195,7 @@ Transparency Log containing the new label and value to store.<a href="#section-1
 <div class="lang-tls-presentation sourcecode" id="section-11.2-2">
 <pre>
 struct {
-  optional&lt;uint32&gt; last;
+  optional&lt;uint64&gt; last;
 
   opaque label&lt;0..2^8-1&gt;;
   opaque value&lt;0..2^32-1&gt;;
@@ -3185,7 +3215,7 @@ struct {
   CombinedTreeProof search;
   InclusionProof inclusion;
 
-  opaque opening&lt;Nc&gt;;
+  opaque opening[Nc];
   UpdatePrefix prefix;
 } UpdateResponse;
 </pre><a href="#section-11.2-4" class="pilcrow">¶</a>
@@ -3217,7 +3247,7 @@ struct {
 } MonitorLabel;
 
 struct {
-  optional&lt;uint32&gt; last;
+  optional&lt;uint64&gt; last;
   MonitorLabel labels&lt;0..2^8-1&gt;;
 } MonitorRequest;
 </pre><a href="#section-11.3-2" class="pilcrow">¶</a>
@@ -3278,12 +3308,12 @@ to match <code>FullTreeHead.tree_head.size</code> followed by monitoring each la
 was present has a corresponding entry in <code>label_versions</code> containing the
 greatest version of the label present in a number of subsequent distinguished
 log entries.<a href="#section-11.3-9" class="pilcrow">¶</a></p>
-<p id="section-11.3-10">The <code>inclusion</code> field contains a proof of inclusion for all of the log tree
+<p id="section-11.3-10">The <code>inclusion</code> field contains an inclusion proof for all of the log tree
 leaves where either a search proof was provided in
 <code>CombinedTreeProof.prefix_proofs</code> or the prefix tree root hash was provided
 directly in <code>CombinedTreeProof.prefix_roots</code>. If the user advertised a
-previously-observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
-as a proof of consistency.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
+previously observed tree size in <code>last</code>, the proof in <code>inclusion</code> also functions
+as a consistency proof.<a href="#section-11.3-10" class="pilcrow">¶</a></p>
 <p id="section-11.3-11">Users verify a MonitorResponse by following these steps:<a href="#section-11.3-11" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-11.3-12">
 <li id="section-11.3-12.1">
@@ -3298,7 +3328,7 @@ field is not empty.<a href="#section-11.3-12.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.3-12.3">
             <p id="section-11.3-12.3.1">Compute a candidate root value for the tree from the proof in <code>inclusion</code>,
-the hashes of log entries used in <code>search</code>, and any previously-retained full
+the hashes of log entries used in <code>search</code>, and any previously retained full
 subtrees of the log tree.<a href="#section-11.3-12.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-11.3-12.4">
@@ -3306,7 +3336,7 @@ subtrees of the log tree.<a href="#section-11.3-12.3.1" class="pilcrow">¶</a></
 </li>
         </ol>
 <p id="section-11.3-13">Some information is omitted from MonitorResponse in the interest of efficiency,
-due to the fact that the user would have already seen and verified it as part of
+because the user would have already seen and verified it as part of
 conducting other queries. In particular, VRF proofs for different versions of
 each label are not provided, given that these can be cached from the
 original Search or Update query.<a href="#section-11.3-13" class="pilcrow">¶</a></p>
@@ -3369,7 +3399,7 @@ uint16 CipherSuite;
 <a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
-<dt id="I-D.ietf-keytrans-architecture">[I-D.ietf-keytrans-architecture]</dt>
+<dt id="ARCH">[ARCH]</dt>
         <dd>
 <span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-03</span>, <time datetime="2025-02-25" class="refDate">25 February 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-03</a>&gt;</span>. </dd>
 <dd class="break"></dd>
