@@ -288,31 +288,45 @@ correctly.
 
 Each leaf node in a prefix tree represents a specific mapping from search key to
 value, while each parent node represents some prefix which all search keys in
-the subtree headed by that node have in common. The subtree headed by a parent's
-left child contains all search keys that share its prefix followed by an
-additional 0 bit, while the subtree headed by a parent's right child contains
-all search keys that share its prefix followed by an additional 1 bit.
+the subtree headed by that node have in common. The prefix that a parent node
+represents is based on the its **midpoint** and the **first unspecified
+byte** of the search key.
 
-The root node, in particular, represents the empty string as a prefix. The
-root's left child contains all search keys that begin with a 0 bit, while the right
-child contains all search keys that begin with a 1 bit.
+The first unspecified byte of a search key is the first byte that has not been
+uniquely identified in the course of searching the tree. Initially, this will be
+the leftmost byte of the search key. The midpoint of a parent node is a byte
+value, chosen by the Transparency Log, that bisects the possible values for the
+first unspecified byte: If a search key's first unspecified byte is less than
+the midpoint, this indicates that the search key is stored in the parent's left
+child. If a search key's first unspecified byte is greater than or equal to the
+midpoint, then the search key is stored in the parent's right child.
+
+As a user navigates the prefix tree, each parent node's midpoint will restrict
+the possible values for the first unspecified byte. Once there is only one
+possible value remaining, all search keys stored in the subtree are assumed to
+have this prefix. The next byte of the search key then becomes the first
+unspecified byte.
 
 A prefix tree can be searched by starting at the root node and moving to the
-left child if the first bit of a search key is 0, or the right child if the first bit
-is 1. This is then repeated for the second bit, third bit, and so on until the
-search either terminates at a leaf node (which may or may not be for the desired
-value), or a parent node that lacks the desired child.
+left child if the first byte of the search key less than the root's midpoint, or
+the right child if the first byte is greater than or equal to the root's
+midpoint. This is then repeated recursively. If a series of parent node
+midpoints uniquely identifies the search key's first byte, the search continues
+by comparing subsequent parent node midpoints against the search key's second
+byte, and so on. This continues until the search either terminates at a leaf
+node (which may or may not be for the desired value), or a parent node that
+lacks the desired child.
 
 ~~~ aasvg
-                     X
+                  [10000]
                      |
-             .-------+-----.
-            /               \
-            0                1
+              .------+------.
+             /               \
+            |             [11000]
             |                |
             |             .--+-.
             |            /      \
-            0           0        |
+         [00100]     [10100]     |
            / \         / \       |
           /   \       /   \      |
 Key:   00010 00101 10001 10111 11011
@@ -320,42 +334,50 @@ Value:     A     B     C     D     E
 ~~~
 {: title="A prefix tree containing five entries."}
 
-New key-value pairs are added to the tree by searching it according to the same process.
-If the search terminates at a parent without a left or right child, a new leaf
-is simply added as the parent's missing child. If the search terminates at a
-leaf for the wrong search key, one or more intermediate nodes are added until the new
-leaf and the existing leaf would no longer reside in the same place. That is,
-until we reach the first bit that differs between the new search key and the existing
-search key.
+New key-value pairs are added to the tree by searching it according to the same
+process. If the search terminates at a parent without a left or right child, a
+new leaf is simply added as the parent's missing child. If the search terminates
+at a leaf for the wrong search key, one or more intermediate nodes are added
+until the new leaf and the existing leaf would no longer reside in the same
+place. That is, until reaching the first byte that differs between the new
+search key and the existing search key.
+
+Note that the tree may become unbalanced if many key-value pairs are inserted
+into the same subtree. This has the effect of making search paths unnecessarily
+long and inefficient to traverse. For this reason, the Transparency Log has
+complete discretion in choosing parent node midpoints. A parent node's midpoint
+may be changed at any time, corresponding to some transfer of leaves between the
+parent's left and right subtrees, to improve the balance of the tree.
 
 ~~~ aasvg
-                          X
-                          |
-                   .------+------.
-                  /               \
-                 0                 1
-                 |                 |
-              .--+-.            .--+-.
-             /      \          /      \
-            0        |        0        |
-           / \       |       / \       |
-          /   \      |      /   \      |
-Index: 00010 00101 01101 10001 10111 11011
+                     [10000]
+                        |
+              .---------+--------.
+             /                    \
+         [00100]               [11000]
+            |                     |
+           .+---.               .-+--.
+          /      \             /      \
+         |     [00110]     [10100]     |
+         |       / \         / \       |
+         |      /   \       /   \      |
+Key:   00010 00101 01101 10001 10111 11011
 Value:     A     B     F     C     D     E
 ~~~
 {: title="The previous prefix tree after adding the key-value pair: 01101 -> F."}
 
-The value of a leaf node is the encoded key-value pair, while the value of a
-parent node is the hash of the combined values of its left and right children
-(or a stand-in value when one of the children doesn't exist).
+The value of a leaf node is the hash of the encoded key-value pair, while the
+value of a parent node is the hash of its midpoint and the combined values of
+its left and right children (or a stand-in value when one of the children
+doesn't exist).
 
-A proof of membership is given by providing the leaf value, along with the
-value of each copath entry along the search path. A proof of non-membership
-is given by providing an abridged proof of membership that follows the
-path for the intended search key, but ends either at a stand-in node or a leaf for a
-different search key. In either case, the proof is verified by hashing together the
-leaf with the copath hash values and checking that the result equals the root
-hash value of the tree.
+A proof of membership is given by providing the leaf value, the value of each
+copath entry along the search path, and the midpoint of each parent node. A
+proof of non-membership is given by providing an abridged proof of membership
+that follows the path for the intended search key, but ends either at a stand-in
+node or a leaf for a different search key. In either case, the proof is verified
+by hashing together the leaf, the copath hash values, and the midpoints and
+checking that the result equals the root hash value of the tree.
 
 ## Combined Tree
 
@@ -1121,6 +1143,7 @@ ciphersuite hash function, of the following structure:
 
 ~~~ tls
 struct {
+    uint8 prefix = 0x01;
     opaque vrf_output[VRF.Nh];
     opaque commitment[Hash.Nh];
 } PrefixLeaf;
@@ -1131,21 +1154,22 @@ The `vrf_output` field contains the VRF output for the label-version pair.
 `commitment` field contains the commitment to the corresponding `UpdateValue`
 structure.
 
-The value of a parent node in the prefix tree is computed by hashing together
-the values of its left and right children:
+The value of a parent node is computed as the hash, with the ciphersuite hash
+function, of the following structure:
 
-~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
-
-hashContent(node):
-  if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh+1
-  else if node.type == leafNode:
-    return 0x01 || node.value
-  else if node.type == parentNode:
-    return 0x02 || node.value
+~~~ tls
+struct {
+  uint8 prefix = 0x02;
+  uint8 midpoint;
+  opaque left_child[Hash.Nh];
+  opauqe right_child[Hash.Nh];
+} PrefixParent;
 ~~~
+
+The `midpoint` field contains the midpoint of the node. The `left_child` and
+`right_child` fields contain the values of the left and right children of the
+parent node respectively, or an all-zero value if the corresponding child does
+not exist.
 
 
 # Tree Proofs
@@ -1197,7 +1221,7 @@ of any such subtree matches the retained value.
 ## Prefix Tree
 
 A proof from a prefix tree authenticates that a search was done correctly for a
-given search key. Such a proof is encoded as:
+given set of search keys. Such a proof is encoded as:
 
 ~~~ tls
 enum {
@@ -1212,13 +1236,15 @@ struct {
   PrefixSearchResultType result_type;
   select (PrefixSearchResult.result_type) {
     case nonInclusionLeaf:
-      PrefixLeaf leaf;
+      opaque vrf_output[VRF.Nh];
+      opaque commitment[Hash.Nh];
   };
   uint8 depth;
 } PrefixSearchResult;
 
 struct {
   PrefixSearchResult results<0..2^8-1>;
+  opaque midpoints<0..2^8-1>;
   NodeValue elements<0..2^16-1>;
 } PrefixProof;
 ~~~
@@ -1236,6 +1262,14 @@ what the terminal node of the search for that value was:
 The `depth` field indicates the depth of the terminal node of the search, and is
 provided to assist proof verification.
 
+The `midpoints` array contains the midpoint of each intermediate node that would
+be needed to compute the root value. It is provided in the order that a
+depth-first left-to-right search through the prefix tree would encounter the
+midpoint values. Specifically, the midpoint value of the root node is always
+first, and the midpoints of any intermediate nodes in the root's left subtree
+are always provided before the midpoints of any intermediate nodes in the root's
+right subtree, and so on recursively.
+
 The `elements` array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
 `elements` array is kept in left-to-right order: if a node is present in the
@@ -1244,7 +1278,7 @@ nodes that are in the root's right subtree, and so on recursively. In the event
 that a node is not present, an all-zero byte string of length `Hash.Nh` is
 listed instead.
 
-The proof is verified by hashing together the provided elements, in the
+The proof is verified by hashing together the provided midpoints and node values, in the
 left/right arrangement dictated by the bits of the search keys, and checking
 that the result equals the root value of the prefix tree.
 
