@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-03-30T01:04:36.726178+00:00",
+  "timestamp": "2025-04-01T01:07:26.307294+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2016,6 +2016,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 32,
+      "id": "PR_kwDOLrnaA86QtR6W",
+      "title": "Describe balanced prefix tree",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/32",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-03-30T23:36:46Z",
+      "updatedAt": "2025-03-30T23:36:47Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/balanced-pt",
+      "headRefOid": "a420db401a5ab3c4ced45fc362093f9c5778c83d",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
