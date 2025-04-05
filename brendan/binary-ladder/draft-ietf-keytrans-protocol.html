@@ -16,18 +16,18 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.28.0" name="generator">
+<meta content="xml2rfc 3.28.1" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.0
+  xml2rfc 3.28.1
     Python 3.12.9
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
     lxml 5.3.0
-    platformdirs 4.3.6
+    platformdirs 4.3.7
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.3
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">March 2025</td>
+<td class="right">April 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 25 September 2025</td>
+<td class="center">Expires 7 October 2025</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-03-24" class="published">24 March 2025</time>
+<time datetime="2025-04-05" class="published">5 April 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-09-25">25 September 2025</time></dd>
+<dd class="expires"><time datetime="2025-10-07">7 October 2025</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 25 September 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 October 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1341,7 +1341,10 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.16.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implicit-binary-search-tree-2" class="internal xref">Implicit Binary Search Tree</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
-            <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-5" class="internal xref">Binary Ladder</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
+            <p id="section-toc.1-1.18.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -3565,8 +3568,101 @@ def right(x, n):
 </div>
 </section>
 </div>
-<div id="authors-addresses">
+<div id="binary-ladder-1">
 <section id="appendix-B">
+      <h2 id="name-binary-ladder-5">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-binary-ladder-5" class="section-name selfRef">Binary Ladder</a>
+      </h2>
+<p id="appendix-B-1">The following Python code demonstrates efficient algorithms for computing the
+versions of a label to include in a binary ladder:<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<div class="breakable lang-python sourcecode" id="appendix-B-2">
+<pre>
+# Returns the set of versions that would be looked up to establish that n was
+# the greatest version of a label that existed.
+def base_binary_ladder(n):
+    out = []
+
+    # Output powers of two minus one until reaching a value greater than n.
+    while True:
+        value = (1 &lt;&lt; len(out)) - 1
+        out.append(value)
+        if value &gt; n:
+            break
+
+    # Binary search between the established lower and upper bounds.
+    lower_bound = out[-2]
+    upper_bound = out[-1]
+
+    while lower_bound+1 &lt; upper_bound:
+        value = (lower_bound + upper_bound) // 2
+        out.append(value)
+        if value &lt;= n:
+            lower_bound = value
+        else:
+            upper_bound = value
+
+    return out
+
+# Returns the set of versions that would be looked up in a binary ladder for a
+# fixed-version search where the target version is t and the greatest version of
+# the label that exists in a given version of the prefix tree is n.
+def fixed_version_binary_ladder(
+    t, n,
+    left_inclusion = [], right_non_inclusion = []
+):
+    def would_end(v):
+        # (Proof of inclusion for a version greater than or equal to t) OR
+        # (Proof of non-inclusion for a version less than t)
+        return (v &lt;= n and v &gt;= t) or (v &gt; n and v &lt; t)
+
+    def would_be_duplicate(v):
+        return (v &lt;= n and v in left_inclusion) or \
+               (v &gt; n and v in right_non_inclusion)
+
+    out = base_binary_ladder(n)
+    end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
+    filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
+
+    return filtered_out
+
+# Returns the set of versions that would be looked up in a binary ladder for a
+# monitoring query where the monitored version of the label is t.
+def monitor_binary_ladder(t, left_inclusion = []):
+    out = base_binary_ladder(t)
+    filtered_out = [v for v in out if v &lt;= t and v not in left_inclusion]
+
+    return filtered_out
+
+# Returns the set of versions that would be looked up in a binary ladder for a
+# greatest-version search where the greatest version of a label that exists
+# globally is t but the greatest version of the label in a given version of the
+# prefix tree is n.
+def greatest_version_binary_ladder(
+    t, n, distinguished,
+    left_inclusion = [], right_non_inclusion = [], same_entry = []
+):
+    def would_end(v):
+        # Proof of non-inclusion for a version less than t
+        return (v &gt; n and v &lt; t)
+
+    def would_be_duplicate(v):
+        if distinguished:
+            return (v &lt;= n and v in left_inclusion) or \
+                   (v &gt; n and v in right_non_inclusion)
+        else:
+            return v in same_entry
+
+    out = base_binary_ladder(t)
+    end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
+    filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
+
+    return filtered_out
+</pre><a href="#appendix-B-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-C">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>

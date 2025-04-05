@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 25 September 2025                                 24 March 2025
+Expires: 7 October 2025                                     5 April 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 25 September 2025.
+   This Internet-Draft will expire on 7 October 2025.
 
 Copyright Notice
 
@@ -124,6 +124,7 @@ Table of Contents
      15.1.  Normative References
      15.2.  Informative References
    Appendix A.  Implicit Binary Search Tree
+   Appendix B.  Binary Ladder
    Authors' Addresses
 
 1.  Introduction
@@ -1944,6 +1945,92 @@ Appendix A.  Implicit Binary Search Tree
        while x >= n:
            x = left(x)
        return x
+
+Appendix B.  Binary Ladder
+
+   The following Python code demonstrates efficient algorithms for
+   computing the versions of a label to include in a binary ladder:
+
+   # Returns the set of versions that would be looked up to establish that n was
+   # the greatest version of a label that existed.
+   def base_binary_ladder(n):
+       out = []
+
+       # Output powers of two minus one until reaching a value greater than n.
+       while True:
+           value = (1 << len(out)) - 1
+           out.append(value)
+           if value > n:
+               break
+
+       # Binary search between the established lower and upper bounds.
+       lower_bound = out[-2]
+       upper_bound = out[-1]
+
+       while lower_bound+1 < upper_bound:
+           value = (lower_bound + upper_bound) // 2
+           out.append(value)
+           if value <= n:
+               lower_bound = value
+           else:
+               upper_bound = value
+
+       return out
+
+   # Returns the set of versions that would be looked up in a binary ladder for a
+   # fixed-version search where the target version is t and the greatest version of
+   # the label that exists in a given version of the prefix tree is n.
+   def fixed_version_binary_ladder(
+       t, n,
+       left_inclusion = [], right_non_inclusion = []
+   ):
+       def would_end(v):
+           # (Proof of inclusion for a version greater than or equal to t) OR
+           # (Proof of non-inclusion for a version less than t)
+           return (v <= n and v >= t) or (v > n and v < t)
+
+       def would_be_duplicate(v):
+           return (v <= n and v in left_inclusion) or \
+                  (v > n and v in right_non_inclusion)
+
+       out = base_binary_ladder(n)
+       end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
+       filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
+
+       return filtered_out
+
+   # Returns the set of versions that would be looked up in a binary ladder for a
+   # monitoring query where the monitored version of the label is t.
+   def monitor_binary_ladder(t, left_inclusion = []):
+       out = base_binary_ladder(t)
+       filtered_out = [v for v in out if v <= t and v not in left_inclusion]
+
+       return filtered_out
+
+   # Returns the set of versions that would be looked up in a binary ladder for a
+   # greatest-version search where the greatest version of a label that exists
+   # globally is t but the greatest version of the label in a given version of the
+   # prefix tree is n.
+   def greatest_version_binary_ladder(
+       t, n, distinguished,
+       left_inclusion = [], right_non_inclusion = [], same_entry = []
+   ):
+       def would_end(v):
+           # Proof of non-inclusion for a version less than t
+           return (v > n and v < t)
+
+       def would_be_duplicate(v):
+           if distinguished:
+               return (v <= n and v in left_inclusion) or \
+                      (v > n and v in right_non_inclusion)
+           else:
+               return v in same_entry
+
+       out = base_binary_ladder(t)
+       end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
+       filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
+
+       return filtered_out
 
 Authors' Addresses
 
