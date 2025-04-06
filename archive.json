@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-01T01:07:26.307294+00:00",
+  "timestamp": "2025-04-06T01:04:03.750068+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -1982,25 +1982,35 @@
       "id": "PR_kwDOLrnaA86P5_z4",
       "title": "Be more explicit about binary ladder contents",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/31",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This PR:\r\n- Adds a new top-level section on binary ladders\r\n- Adds a subsection to each algorithm (fixed-version / greatest-version search, monitor) explaining the specific binary ladder for this algorithm\r\n- Avoids sending unnecessary lookups in monitor algorithm\r\n- Avoids not sending necessary lookups in greatest-version search algorithm\r\n\r\n@felixlinker Let me know your thoughts / if this addresses the same concerns as #23 ",
       "createdAt": "2025-03-24T17:11:41Z",
-      "updatedAt": "2025-03-26T14:43:35Z",
+      "updatedAt": "2025-04-05T02:55:27Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/binary-ladder",
-      "headRefOid": "2dc3a67471bb71feb7b47cbe09bb44dc71536f54",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
-      "comments": [],
+      "headRefOid": "3428996a60639c487cb7a344d317a47e7042a80f",
+      "closedAt": "2025-04-05T02:55:27Z",
+      "mergedAt": "2025-04-05T02:55:27Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "0f1de4a8be2bb914849b3f9cef318471bdcd678a"
+      },
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Added algorithms for the binary ladders",
+          "createdAt": "2025-04-05T02:55:20Z",
+          "updatedAt": "2025-04-05T02:55:20Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOLrnaA86h-i5u",
