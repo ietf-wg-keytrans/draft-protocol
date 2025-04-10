@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-06T01:04:03.750068+00:00",
+  "timestamp": "2025-04-10T01:00:23.771983+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -224,7 +224,7 @@
       "labels": [],
       "body": "Two questions on the binary ladder for fixed version searches as described [here](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-5.1-4).\n\n1. Presume highest version is 7 and 6 is queried. It is stated: \"the series of lookups ends after the first proof of inclusion for a\nversion greater than or equal to the target version.\" Does this mean 6 is not proven to be included in the prefix tree? It sounds like that, but it seems odd.\n2. It is stated that proofs of inclusion can be omitted should they have been provided for log tree entries younger than the one at hand. Why is this optimization not possible for proofs of a highest version?",
       "createdAt": "2025-03-04T10:40:50Z",
-      "updatedAt": "2025-03-11T12:21:23Z",
+      "updatedAt": "2025-04-08T11:52:58Z",
       "closedAt": null,
       "comments": [
         {
@@ -240,6 +240,13 @@
           "body": "Okay, your edits made it clearer. I read it as: \"There are two flavors of a binary ladder and we can optimize one of them in two ways.\" I was wondering why the second optimization couldn't apply to the greatest-version search. But now I see that the optimizations apply generally.",
           "createdAt": "2025-03-11T12:21:22Z",
           "updatedAt": "2025-03-11T12:21:22Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "For future reference: I think this issue was addressed by #31 but I have to double-check.",
+          "createdAt": "2025-04-08T11:52:56Z",
+          "updatedAt": "2025-04-08T11:52:56Z"
         }
       ]
     },
@@ -2039,7 +2046,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-03-30T23:36:46Z",
-      "updatedAt": "2025-03-30T23:36:47Z",
+      "updatedAt": "2025-04-08T12:10:04Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
@@ -2051,7 +2058,46 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86j5Uvq",
+          "commit": {
+            "abbreviatedOid": "a420db4"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "I like it!\r\n\r\nI added some editorial feedback.",
+          "createdAt": "2025-04-08T11:57:55Z",
+          "updatedAt": "2025-04-08T12:10:04Z",
+          "comments": [
+            {
+              "originalPosition": 13,
+              "body": "```suggestion\r\nrepresents is based on its **midpoint** and the **first unspecified\r\n```",
+              "createdAt": "2025-04-08T11:57:55Z",
+              "updatedAt": "2025-04-08T12:10:04Z"
+            },
+            {
+              "originalPosition": 17,
+              "body": "\"Initially, ...\" - Initially when compared to what point in time?",
+              "createdAt": "2025-04-08T12:01:28Z",
+              "updatedAt": "2025-04-08T12:10:04Z"
+            },
+            {
+              "originalPosition": 19,
+              "body": "```suggestion\r\nvalue chosen by the Transparency Log such that it bisects the possible values for the\r\n```\r\n\r\n\"Chosen by the transparency log\" sounds like the log can choose arbitrary values. Is this phrasing more accurate?",
+              "createdAt": "2025-04-08T12:06:17Z",
+              "updatedAt": "2025-04-08T12:10:04Z"
+            },
+            {
+              "originalPosition": 14,
+              "body": "The sentence doesn't \"type check\" for me. A prefix tree's inner node does not represent a single search key, right? It represents a set of search keys. It doesn't work for me to say \"what a parent node is based on *the* search key.\"",
+              "createdAt": "2025-04-08T12:07:37Z",
+              "updatedAt": "2025-04-08T12:10:04Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
