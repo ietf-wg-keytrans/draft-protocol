@@ -289,11 +289,11 @@ correctly.
 Each leaf node in a prefix tree represents a specific mapping from search key to
 value, while each parent node represents some prefix which all search keys in
 the subtree headed by that node have in common. The prefix that a parent node
-represents is based on the its **midpoint** and the **first unspecified
+represents is based on its **midpoint** and the **first unspecified
 byte** of the search key.
 
 The first unspecified byte of a search key is the first byte that has not been
-uniquely identified in the course of searching the tree. Initially, this will be
+uniquely identified in the course of searching the tree. Initially in a search, this will be
 the leftmost byte of the search key. The midpoint of a parent node is a byte
 value, chosen by the Transparency Log, that bisects the possible values for the
 first unspecified byte: If a search key's first unspecified byte is less than
