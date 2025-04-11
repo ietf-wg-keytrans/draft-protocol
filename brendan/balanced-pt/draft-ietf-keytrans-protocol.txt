@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 1 October 2025                                    30 March 2025
+Expires: 13 October 2025                                   11 April 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 October 2025.
+   This Internet-Draft will expire on 13 October 2025.
 
 Copyright Notice
 
@@ -343,19 +343,19 @@ Table of Contents
    Each leaf node in a prefix tree represents a specific mapping from
    search key to value, while each parent node represents some prefix
    which all search keys in the subtree headed by that node have in
-   common.  The prefix that a parent node represents is based on the its
+   common.  The prefix that a parent node represents is based on its
    *midpoint* and the *first unspecified byte* of the search key.
 
    The first unspecified byte of a search key is the first byte that has
    not been uniquely identified in the course of searching the tree.
-   Initially, this will be the leftmost byte of the search key.  The
-   midpoint of a parent node is a byte value, chosen by the Transparency
-   Log, that bisects the possible values for the first unspecified byte:
-   If a search key's first unspecified byte is less than the midpoint,
-   this indicates that the search key is stored in the parent's left
-   child.  If a search key's first unspecified byte is greater than or
-   equal to the midpoint, then the search key is stored in the parent's
-   right child.
+   Initially in a search, this will be the leftmost byte of the search
+   key.  The midpoint of a parent node is a byte value, chosen by the
+   Transparency Log, that bisects the possible values for the first
+   unspecified byte: If a search key's first unspecified byte is less
+   than the midpoint, this indicates that the search key is stored in
+   the parent's left child.  If a search key's first unspecified byte is
+   greater than or equal to the midpoint, then the search key is stored
+   in the parent's right child.
 
    As a user navigates the prefix tree, each parent node's midpoint will
    restrict the possible values for the first unspecified byte.  Once
