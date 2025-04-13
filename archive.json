@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-10T01:00:23.771983+00:00",
+  "timestamp": "2025-04-13T02:29:41.345301+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2046,13 +2046,13 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-03-30T23:36:46Z",
-      "updatedAt": "2025-04-08T12:10:04Z",
+      "updatedAt": "2025-04-11T00:03:14Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "dc6993c5107a7c76ff963188c9cce9ebf2adff3e",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/balanced-pt",
-      "headRefOid": "a420db401a5ab3c4ced45fc362093f9c5778c83d",
+      "headRefOid": "9e02e6c9361eaed7e7aac3b8a9ada7561d57994b",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2094,6 +2094,26 @@
               "body": "The sentence doesn't \"type check\" for me. A prefix tree's inner node does not represent a single search key, right? It represents a set of search keys. It doesn't work for me to say \"what a parent node is based on *the* search key.\"",
               "createdAt": "2025-04-08T12:07:37Z",
               "updatedAt": "2025-04-08T12:10:04Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86kcFbg",
+          "commit": {
+            "abbreviatedOid": "a420db4"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-10T23:58:13Z",
+          "updatedAt": "2025-04-10T23:58:13Z",
+          "comments": [
+            {
+              "originalPosition": 19,
+              "body": "It can in fact choose arbitrary values. So an evil Transparency Log can make search paths longer",
+              "createdAt": "2025-04-10T23:58:13Z",
+              "updatedAt": "2025-04-10T23:58:13Z"
             }
           ]
         }
