@@ -1421,7 +1421,7 @@ identify the starting log entry. Users verify the proof as described in
 
 ### Proofs for Third-Party Auditing
 
-In third-party auditing, clients can rely on the assumption that the prefix tree
+In third-party auditing, users can rely on the assumption that the prefix tree
 is monitored to be append-only. Therefore, they need not execute the binary
 ladder but the proof can directly jump to the index identified by the prefix
 tree leaf.
