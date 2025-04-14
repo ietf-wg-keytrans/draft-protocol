@@ -275,7 +275,8 @@ values that the verifier retained.
 
 Index:  0     1     2     3     4     5     6
 ~~~
-{: title="Illustration of a consistency proof. The verifier is expected to
+{: title="Illustration of a consistency proof between a log with 4 and  with 6
+leaves respectively. The verifier is expected to
 already have the values (X), so the prover provides the verifier with the values
 of the nodes marked [X]. By combining these, the verifier is able to compute the
 new root value of the log."}
