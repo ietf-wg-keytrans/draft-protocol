@@ -1211,12 +1211,12 @@ In the interest of efficiency, KT combines multiple inclusion proofs and
 consistency proofs into a single batch proof. Recalling from the discussion in
 {{log-tree}},
 
-- When a user requests an inclusion proof for a leaf of the log tree, the
-  Transparency Log provides the minimum set of head values from balanced subtrees
+- Whenever the Transparency Log serves an inclusion proof for a leaf of the log tree,
+  it provides the minimum set of head values from balanced subtrees
   that would allow the user to compute the root hash from the leaf's value.
-- When a user requests a consistency proof, the user is expected to have
+- Whenever the Transparency Log serves a consistency proof, the user is expected to have
   retained the head values of the full subtrees of the previous version of the
-  log. The Transparency Log provides the minimum set of head values from
+  log. The Log provides the minimum set of head values from
   balanced subtrees that would allow the user to compute the root hash from
   their retained values.
 
