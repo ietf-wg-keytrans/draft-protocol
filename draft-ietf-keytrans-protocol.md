@@ -662,7 +662,7 @@ recurses to left or right children, each time starting back at step 1.
    maximum version greater than or equal to any log entries to the left, and
    less than or equal to any log entries to the right.
 4. If the binary ladder was terminated early due to a non-inclusion proof for a
-   version less than the target version, recurse to the log entry's right child.
+   version less than or equal the target version, recurse to the log entry's right child.
    Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
    abort the search with an error indicating that the desired version of the
    label has expired and is no longer available. If not, recurse to the log
@@ -901,7 +901,7 @@ version, of a label. Unlike searches for a specific version, label owners
 regularly verify that the greatest version is correctly represented in the
 log. This enables a simpler, more efficient approach to searching.
 
-{{reasonable-monitoring-window}} and {{distinguished-log-entries}} define the
+{{distinguished-log-entries}} defines the
 concept of a distinguished log entry, which is any log entry that label owners
 are required to check for correctness. As a result, users can start their search
 at the rightmost distinguished log entry and only consider new versions which
@@ -914,7 +914,7 @@ One special consideration for a greatest-version search is that the Transparency
 Log must prove that it is revealing the absolute greatest version of a label
 that exists, referred to as the **target version**. This differs from the binary
 ladders described for fixed-version searches ({{fv-binary-ladder}}) and
-monitoring ({{monitor-binary-ladder}}), which aim only to prove only a lower
+monitoring ({{monitor-binary-ladder}}), which only aim to prove only a lower
 bound on the greatest version.
 
 Binary ladders provided for the purpose of a greatest-version search follow the
@@ -944,19 +944,59 @@ non-distinguished log entry:
 
 ## Algorithm
 
-To perform a greatest-version search, the Transparency Log first provides the
-greatest version of the label that exists as of the rightmost log entry. This is
-followed by a series of binary ladders each targeting this version: The first is
-from either the rightmost distinguished log entry, or the root if there is no
-distinguished log entry. Subsequent binary ladders are then provided from this
-log entry's right child, its right child's right child, and so on until the
-rightmost log entry is reached.
+The algorithm for performing a greatest-version search (a search for the
+greatest version of a label) is described below as two recursive algorithms.
 
-As in {{fixed-version-searches}}, users verify that the binary ladders from each
-log entry, and the log enties' timestamps, represent a monotonically increasing
-series. Users additionally verify that the binary ladder from the rightmost log
-entry terminates in a way that is consistent with the claimed greatest version
-actually being the greatest that exists.
+The first algorithm starts at the rightmost distinguished log entry, or the root
+of the implicit binary search tree if there are no distinguished log entries,
+and then recurses down the remainder of the frontier, each time starting back at
+step 1:
+
+1. Verify that the log entry's timestamp is consistent with the timestamps of
+   all ancestor log entries. That is, verify the log entry's timestamp is
+   greater than or equal to that of its parent.
+2. Obtain a binary ladder from the current log entry for the target version.
+   Accounting for any inclusion or non-inclusion proofs which were omitted,
+   verify that the binary ladder terminates in a way that is consistent with
+   previously inspected log entries. Specifically, verify that it indicates a
+   maximum version greater than or equal to that of its parent log entry.
+3. If this is the rightmost log entry, verify that the binary ladder terminates
+   in a way that is consistent with the target version being the greatest that
+   exists. This means that it does not terminate early, all lookups for versions
+   less than or equal to the target version produce inclusion proofs, and all
+   lookups for versions greater than the target version produce non-inclusion
+   proofs.
+4. If this is the rightmost log entry, move on to the steps described below. If
+   not, recurse to the current log entry's right child.
+
+If the algorithm above was able to start at a distinguished log entry, and this
+log entry contained the target label-version pair, this indicates that the
+label-version pair was inserted outside of the Reasonable Monitoring Window. As
+such, the user can assume that the label's greatest version was found and that
+the associated commitment to the label-version pair's value is correct, and
+terminate its search successfully.
+
+If the algorithm was not able to start at a distinguished log entry, or the
+starting log entry did not contain the target label-version pair, this indicates
+that the label-version pair was inserted recently (within the Reasonable
+Monitoring Window) and that the user must perform a binary search for the first
+log entry to contain the label-version pair (similar to a fixed-version search).
+
+The second algorithm performs this binary search by starting at the left child,
+if it exists, of the first frontier log entry that contains the target
+label-version pair, as identified by the first algorithm. It then recurses to
+left or right children, each time starting back at step 1:
+
+1. Verify that the log entry's timestamp is consistent with the timestamps of
+   all ancestor log entries.
+2. Obtain a binary ladder from the current log entry for the target version.
+   Verify that the binary ladder terminates in a way that is consistent with
+   previously inspected log entries.
+3. If the binary ladder was terminated early due to a non-inclusion proof for a
+   version less than or equal the target version, recurse to the log entry's
+   right child. If not, recurse to the log entry's left child. If, in either
+   case, recursion isn't possible because the search is at a leaf node, then
+   terminate the search successfully.
 
 Note that if the starting log entry was not distinguished or if the starting log
 entry did not contain the greatest version of the label, the user may be
