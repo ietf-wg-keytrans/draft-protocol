@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-13T02:29:41.345301+00:00",
+  "timestamp": "2025-04-15T01:02:20.830462+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -345,6 +345,38 @@
           "updatedAt": "2025-03-14T07:16:18Z"
         }
       ]
+    },
+    {
+      "number": 33,
+      "id": "I_kwDOLrnaA86yYn1F",
+      "title": "Updating view: Client cannot verify all provided timestamps",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/33",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "A couple of observations first:\n- [4.2](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-algorithm) and [11.3.1](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-11.3.1) only specify timepoints and a proof of consistency to be sent to a client to update their view of the tree.\n- [11.3.4](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-greatest-version-search) specifies that prefix proofs are provided for all children of the oldest distinguished log entry (or root) in the implicit binary search tree are provided, and [12.1](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#name-search) specifies that inclusion proofs are provided for all prefix proofs.\n\nThus, it seems to me that the server could lie about the timepoints of all distinguished log entries that lie on the path between the old implicit binary search tree's root and the new, oldest distinguished log entry (exclusive for both nodes).\n\nIt doesn't seem to me that this is a problem because the server should not be able to convince clients that different log entries are distinguished. The algorithm in [7.2](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-7.2) should be robust enough as the server must prove inclusion of the oldest distinguished log entry to clients.\n\nHowever, if the server can lie: Why even include these timestamps? ",
+      "createdAt": "2025-04-14T11:39:51Z",
+      "updatedAt": "2025-04-14T11:41:26Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 34,
+      "id": "I_kwDOLrnaA86yYtai",
+      "title": "Proofs of consistency underspecified",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/34",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "I suspect that consistency proofs should be constructed just as in https://www.rfc-editor.org/rfc/rfc6962#section-2.1.2, however, this is not explicit.",
+      "createdAt": "2025-04-14T11:48:36Z",
+      "updatedAt": "2025-04-14T11:48:36Z",
+      "closedAt": null,
+      "comments": []
     }
   ],
   "pulls": [
@@ -1838,21 +1870,21 @@
       "id": "PR_kwDOLrnaA86OLCgL",
       "title": "Rework binary ladder and search algorithms",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/23",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "felixlinker",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "A number of changes concerning #20 and #22.\r\n\r\nI don't think the PR is fully ready set. In particular:\r\n- Consistency with other parts of the draft must be checked. In particular, \"Tree Proofs\" and \"User Operations\" may need to change.\r\n- I do not specify anymore really what the log server does, only what the client does. This may be okay. We could specify server behavior together with the datatypes.\r\n\r\nMy changes were motivated by the following.\r\n\r\n- I now give the binary ladder its own section. It didn't sit right with me that it was defined as part of the specific-version search, although it is used in the greatest-version search too.\r\n- Descriptions are now more algorithmic, i.e., less ambiguous. I think this is critical. Working this out wasn't trivial for me and we should reduce ambiguity.\r\n- The binary ladder is now an algorithm that is intended to be executed by clients. Thus, it doesn't make sense to say \"the server provides a binary ladder.\" I think we should adjust phrasing in the other parts of the spec to say that \"the server provides all inputs necessary to perform a binary ladder.\"\r\n\r\nLet me know what you think of the PR's direction!",
       "createdAt": "2025-03-11T14:05:56Z",
-      "updatedAt": "2025-03-19T07:27:42Z",
+      "updatedAt": "2025-04-14T08:21:17Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "a4861ed31eb377326690ed84eed17cf3aceb7c2a",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "binary-ladder",
       "headRefOid": "01c4dead616cee1075561c49118038bf82ce0913",
-      "closedAt": null,
+      "closedAt": "2025-04-14T08:21:17Z",
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
@@ -1891,6 +1923,13 @@
           "body": "@Bren2010 Thought a bit more about this. What do you think about leaving the original sections mostly as is, but providing an \"Algorithms\" section (somewhere around current sections 9-11) that is more formal? Then people can have both the introduction as is and more clearly specified algorithms.\r\n\r\nI would disambiguate the term \"binary ladder\" still though as its used with slightly different meanings over the document.",
           "createdAt": "2025-03-19T07:27:41Z",
           "updatedAt": "2025-03-19T07:27:41Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Closed in favor of #31 ",
+          "createdAt": "2025-04-14T08:21:17Z",
+          "updatedAt": "2025-04-14T08:21:17Z"
         }
       ],
       "reviews": []
@@ -1907,7 +1946,7 @@
       "labels": [],
       "body": "I think changing the order this way would simplify implementation as clients can directly infer which results targets which index. This spares implementations from sorting `SearchResponse.binary_ladder`. Instead, they can just zip the two arrays (speaking functionally).",
       "createdAt": "2025-03-12T12:39:01Z",
-      "updatedAt": "2025-03-21T23:01:36Z",
+      "updatedAt": "2025-04-14T16:51:09Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
@@ -1939,6 +1978,13 @@
           "body": "It's correct, but it is also definitely sorting :) When you do your depth-first left-to-right search, could you not pull the PrefixProof.results entries in similar to how you pull PrefixProof.elements entries in?",
           "createdAt": "2025-03-21T23:01:35Z",
           "updatedAt": "2025-03-21T23:01:35Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "I agree that this would be sorting. I see how there can be a DFS-traversal algorithm that in linear (in the number of leaves and co-path nodes) builds the prefix tree. I know take twice that time for the sake of ease of implementation. Not sure what is to be preferred. No strong opinion anymore :)",
+          "createdAt": "2025-04-14T16:51:07Z",
+          "updatedAt": "2025-04-14T16:51:07Z"
         }
       ],
       "reviews": []
@@ -2118,6 +2164,32 @@
           ]
         }
       ]
+    },
+    {
+      "number": 35,
+      "id": "PR_kwDOLrnaA86ShGcX",
+      "title": "Editorial changes",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/35",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Should be self-explanatory :) Happy to answer questions!",
+      "createdAt": "2025-04-14T16:49:28Z",
+      "updatedAt": "2025-04-14T16:49:28Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "0f1de4a8be2bb914849b3f9cef318471bdcd678a",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "felixlinker/editorial",
+      "headRefOid": "5424a8a3da39c8acc13d197391d68b752b1eff5a",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
