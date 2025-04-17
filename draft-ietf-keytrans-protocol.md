@@ -726,7 +726,7 @@ Window** (RMW), which is the frequency with which the Transparency Log generally
 expects label owners to perform monitoring. The log entry maximum lifetime, if
 defined, MUST be greater than the RMW.
 
-**Distinguished** log entries are chosen according to the algorithm below such that there is roughly one per
+**Distinguished** log entries are chosen according to the algorithm below, such that there is roughly one per
 every interval of the RMW. If a user looks up a label, either through a
 fixed-version or greatest-version search, and finds that the first log entry
 containing their desired label-version pair is to the right of the rightmost
@@ -837,17 +837,23 @@ entry:
 3. If the computed list is empty, leave the position-version pair in the map
    and move on to the next map entry.
 4. For each log entry in the computed list, from left to right:
-   1. Check if this log entry already has an entry in the map with a greater
-      version. If so, this version of the label no longer needs to be monitored.
-      Remove the current position-version pair (the one with the lesser version)
-      from the map and move on to the next map entry.
-   2. Receive and verify a binary ladder from this log entry, where the target version is the
-      version currently in the map. This proves that, at the indicated log
-      entry, the greatest version present is greater than or equal to the
-      previously observed version.
-   3. If the above check fails, return an error to the user. Otherwise, remove
-      the current position-version pair from the map and replace it with a new
-      one, with the position of the log entry the binary ladder came from.
+   1. Check if a binary ladder from this log entry was already provided in the
+      same query response. If so:
+      1. If the previously provided binary ladder had a greater target version
+         than the current map entry, then this version of the label no longer
+         needs to be monitored. Remove the current position-version pair (the
+         one with the lesser version) from the map and move on to the next map
+         entry.
+      2. If it had a version less than or equal to that of the current map
+         entry, terminate and return an error to the user.
+   2. Receive and verify a binary ladder from this log entry, where the target
+      version is the version currently in the map. This proves that, at the
+      indicated log entry, the greatest version present is greater than or equal
+      to the previously observed version.
+   3. If the above check fails, terminate and return an error to the user.
+      Otherwise, remove the current position-version pair from the map and
+      replace it with a new one, with the position of the log entry the binary
+      ladder came from.
 
 Once the map entries are updated according to this process, the final step of
 monitoring is to remove all mappings where the position corresponds to a
@@ -899,7 +905,7 @@ distinguished log entries.
 Users often wish to search for the "most recent" version, or the greatest
 version, of a label. Unlike searches for a specific version, label owners
 regularly verify that the greatest version is correctly represented in the
-log. This enables a simpler, more efficient approach to searching.
+log. This enables a more efficient approach to searching.
 
 {{distinguished-log-entries}} defines the
 concept of a distinguished log entry, which is any log entry that label owners
@@ -999,8 +1005,8 @@ left or right children, each time starting back at step 1:
    terminate the search successfully.
 
 Note that if the starting log entry was not distinguished or if the starting log
-entry did not contain the greatest version of the label, the user may be
-obligated to monitor the label in the future, per
+entry did not contain the greatest version of the label, then the user may be
+obligated to monitor the label in the future per
 {{reasonable-monitoring-window}}.
 
 
