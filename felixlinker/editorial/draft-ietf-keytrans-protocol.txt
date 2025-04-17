@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 16 October 2025                                   14 April 2025
+Expires: 19 October 2025                                   17 April 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 16 October 2025.
+   This Internet-Draft will expire on 19 October 2025.
 
 Copyright Notice
 
@@ -1355,9 +1355,10 @@ Table of Contents
 
    *  Whenever the Transparency Log serves a consistency proof, the user
       is expected to have retained the head values of the full subtrees
-      of the previous version of the log.  The Log provides the minimum
-      set of head values from balanced subtrees that would allow the
-      user to compute the root hash from their retained values.
+      of the previous version of the log.  The Transparency Log provides
+      the minimum set of head values from balanced subtrees that would
+      allow the user to compute the root hash from their retained
+      values.
 
    These two proof types are composed together as such: considering the
    leaf values which will be proved included, and any node values the
