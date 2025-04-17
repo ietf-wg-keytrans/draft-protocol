@@ -1335,7 +1335,9 @@ indicates what the terminal node of the search for that value was:
 - `nonInclusionParent` for a parent node that lacks the desired child.
 
 The `depth` field indicates the depth of the terminal node of the search, and is
-provided to assist proof verification.
+provided to assist proof verification. The root node of the prefix tree
+corresponds to a depth of 0, the root's children correspond to a depth of 1, and
+so on recursively.
 
 The `elements` array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
