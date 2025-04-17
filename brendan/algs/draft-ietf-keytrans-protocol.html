@@ -3021,7 +3021,9 @@ case, the terminal node's value is provided since it can not be inferred.<a href
 </li>
         </ul>
 <p id="section-11.2-5">The <code>depth</code> field indicates the depth of the terminal node of the search, and is
-provided to assist proof verification.<a href="#section-11.2-5" class="pilcrow">¶</a></p>
+provided to assist proof verification. The root node of the prefix tree
+corresponds to a depth of 0, the root's children correspond to a depth of 1, and
+so on recursively.<a href="#section-11.2-5" class="pilcrow">¶</a></p>
 <p id="section-11.2-6">The <code>elements</code> array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
 <code>elements</code> array is kept in left-to-right order: if a node is present in the
