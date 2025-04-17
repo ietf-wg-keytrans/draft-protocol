@@ -1652,7 +1652,7 @@ values that the verifier retained.<a href="#section-3.2-11" class="pilcrow">¶</
 </div>
 </div>
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
-<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
+<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof between a log with 4 and with 6 leaves respectively. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -2866,12 +2866,12 @@ consistency proofs into a single batch proof. Recalling from the discussion in
 <a href="#log-tree" class="auto internal xref">Section 3.2</a>,<a href="#section-11.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.1-2.1">
-            <p id="section-11.1-2.1.1">When a user requests an inclusion proof for a leaf of the log tree, the
-Transparency Log provides the minimum set of head values from balanced subtrees
+            <p id="section-11.1-2.1.1">Whenever the Transparency Log serves an inclusion proof for a leaf of the log tree,
+it provides the minimum set of head values from balanced subtrees
 that would allow the user to compute the root hash from the leaf's value.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-11.1-2.2">
-            <p id="section-11.1-2.2.1">When a user requests a consistency proof, the user is expected to have
+            <p id="section-11.1-2.2.1">Whenever the Transparency Log serves a consistency proof, the user is expected to have
 retained the head values of the full subtrees of the previous version of the
 log. The Transparency Log provides the minimum set of head values from
 balanced subtrees that would allow the user to compute the root hash from
