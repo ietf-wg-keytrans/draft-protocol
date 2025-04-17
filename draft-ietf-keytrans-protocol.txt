@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 7 October 2025                                     5 April 2025
+Expires: 19 October 2025                                   17 April 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 October 2025.
+   This Internet-Draft will expire on 19 October 2025.
 
 Copyright Notice
 
@@ -1418,10 +1418,10 @@ Table of Contents
    } PrefixProof;
 
    The results field contains the search result for each individual
-   value.  It is sorted lexicographically by search key (which is always
-   a VRF output in this protocol).  The result_type field of each
-   PrefixSearchResult struct indicates what the terminal node of the
-   search for that value was:
+   value.  Every index corresponds to the respectively indexed binary
+   ladder step targeting the queried version.  The result_type field of
+   each PrefixSearchResult struct indicates what the terminal node of
+   the search for that value was:
 
    *  inclusion for a leaf node matching the requested value.
 
