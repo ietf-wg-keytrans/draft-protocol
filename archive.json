@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-15T01:02:20.830462+00:00",
+  "timestamp": "2025-04-17T01:01:32.900351+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -377,6 +377,30 @@
       "updatedAt": "2025-04-14T11:48:36Z",
       "closedAt": null,
       "comments": []
+    },
+    {
+      "number": 36,
+      "id": "I_kwDOLrnaA86yoeNb",
+      "title": "Unclear what exactly is contained in SearchResponse.binary_ladder",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/36",
+      "state": "CLOSED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "In [12.1](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#section-12.1), it is written:\n\n> The `binary_ladder` field contains these structures in the same order that the versions are output by the algorithm in [Section 5](https://ietf-wg-keytrans.github.io/draft-protocol/draft-ietf-keytrans-protocol.html#binary-ladder).\n\nThis suggests that also information regarding prefix tree leaves for proof of non-inclusion are stored in this field, but I don't think this is the case. I think that because (a) non-inclusion leaf information change per leaf, and (b) it is provided as part of a `PrefixSearchResult`.\n\nThus, I guess that `binary_ladder` only contains information for labels which are proven to be included in the binary ladder, right? That should be clarified.",
+      "createdAt": "2025-04-15T16:12:17Z",
+      "updatedAt": "2025-04-15T16:27:11Z",
+      "closedAt": "2025-04-15T16:27:10Z",
+      "comments": [
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Nvm. I was being stupid.",
+          "createdAt": "2025-04-15T16:27:10Z",
+          "updatedAt": "2025-04-15T16:27:10Z"
+        }
+      ]
     }
   ],
   "pulls": [
