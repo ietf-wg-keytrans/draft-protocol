@@ -275,7 +275,7 @@ values that the verifier retained.
 
 Index:  0     1     2     3     4     5     6
 ~~~
-{: title="Illustration of a consistency proof between a log with 4 and  with 6
+{: title="Illustration of a consistency proof between a log with 4 and with 6
 leaves respectively. The verifier is expected to
 already have the values (X), so the prover provides the verifier with the values
 of the nodes marked [X]. By combining these, the verifier is able to compute the
@@ -1216,7 +1216,7 @@ consistency proofs into a single batch proof. Recalling from the discussion in
   that would allow the user to compute the root hash from the leaf's value.
 - Whenever the Transparency Log serves a consistency proof, the user is expected to have
   retained the head values of the full subtrees of the previous version of the
-  log. The Log provides the minimum set of head values from
+  log. The Transparency Log provides the minimum set of head values from
   balanced subtrees that would allow the user to compute the root hash from
   their retained values.
 
