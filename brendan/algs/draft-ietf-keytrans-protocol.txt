@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 19 October 2025                                   17 April 2025
+Expires: 20 October 2025                                   18 April 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 October 2025.
+   This Internet-Draft will expire on 20 October 2025.
 
 Copyright Notice
 
@@ -332,11 +332,11 @@ Table of Contents
 
    Index:  0     1     2     3     4     5     6
 
-      Figure 4: Illustration of a consistency proof.  The verifier is
-      expected to already have the values (X), so the prover provides
-         the verifier with the values of the nodes marked [X].  By
-       combining these, the verifier is able to compute the new root
-                             value of the log.
+      Figure 4: Illustration of a consistency proof between a log with
+       4 and with 6 leaves respectively.  The verifier is expected to
+      already have the values (X), so the prover provides the verifier
+     with the values of the nodes marked [X].  By combining these, the
+         verifier is able to compute the new root value of the log.
 
 3.3.  Prefix Tree
 
@@ -767,12 +767,12 @@ Table of Contents
 
    5.  This largely concludes the search.  However, there are some
        additional technicalities to address.  First, it's possible for
-       the binary search to conclude successfully even if the label-
-       version pair that the user is interested in has expired.  Out of
+       the binary search to conclude even if the label-version pair that
+       the user is interested in doesn't exist or is expired.  Out of
        the log entries touched by the binary search, identify which log
-       entry was first to contain the desired label-version pair.  If it
-       is a log entry that is past its maximum lifetime, abort the
-       search and return an error to the user.
+       entry was first to contain the desired label-version pair.  If
+       there is no such log entry, or if it is past its maximum
+       lifetime, abort the search and return an error to the user.
 
    6.  It's also possible at this point that a commitment to the
        contents of the desired label-version pair has not been provided
@@ -782,13 +782,8 @@ Table of Contents
        proof for a version greater than the target version.  If this has
        happened, obtain a search proof for the target label-version pair
        from the prefix tree in the first log entry to contain it
-       (identified in step 5).
-
-   7.  Finally, if the binary search failed to find a log entry
-       containing the desired label-version pair, or if the search proof
-       from step 6 proves non-inclusion rather than inclusion, return an
-       error to the user indicating that the version of the label does
-       not exist.  Otherwise, terminate the search successfully.
+       (identified in step 5).  If the search proof shows non-inclusion
+       rather than inclusion, return an error to the user.
 
    The most important goal of this algorithm is correctly identifying
    the first log entry that contains the target label-version pair.  The
@@ -1407,16 +1402,17 @@ Table of Contents
    and consistency proofs into a single batch proof.  Recalling from the
    discussion in Section 3.2,
 
-   *  When a user requests an inclusion proof for a leaf of the log
-      tree, the Transparency Log provides the minimum set of head values
-      from balanced subtrees that would allow the user to compute the
-      root hash from the leaf's value.
+   *  Whenever the Transparency Log serves an inclusion proof for a leaf
+      of the log tree, it provides the minimum set of head values from
+      balanced subtrees that would allow the user to compute the root
+      hash from the leaf's value.
 
-   *  When a user requests a consistency proof, the user is expected to
-      have retained the head values of the full subtrees of the previous
-      version of the log.  The Transparency Log provides the minimum set
-      of head values from balanced subtrees that would allow the user to
-      compute the root hash from their retained values.
+   *  Whenever the Transparency Log serves a consistency proof, the user
+      is expected to have retained the head values of the full subtrees
+      of the previous version of the log.  The Transparency Log provides
+      the minimum set of head values from balanced subtrees that would
+      allow the user to compute the root hash from their retained
+      values.
 
    These two proof types are composed together as such: considering the
    leaf values which will be proved included, and any node values the
@@ -1477,10 +1473,10 @@ Table of Contents
    } PrefixProof;
 
    The results field contains the search result for each individual
-   value.  It is sorted lexicographically by search key (which is always
-   a VRF output in this protocol).  The result_type field of each
-   PrefixSearchResult struct indicates what the terminal node of the
-   search for that value was:
+   value.  Every index corresponds to the respectively indexed binary
+   ladder step targeting the queried version.  The result_type field of
+   each PrefixSearchResult struct indicates what the terminal node of
+   the search for that value was:
 
    *  inclusion for a leaf node matching the requested value.
 
@@ -1522,7 +1518,7 @@ Table of Contents
    algorithms.  For the purposes of this protocol, the user always
    executes the algorithm to update their view of the tree, described in
    Section 4, followed immediately by one of the algorithms to search or
-   monitor the current tree.
+   monitor the tree.
 
    Proofs are encoded as follows:
 
@@ -1530,16 +1526,18 @@ Table of Contents
      uint64 timestamps<0..2^8-1>;
      PrefixProof prefix_proofs<0..2^8-1>;
      NodeValue prefix_roots<0..2^8-1>;
+
+     InclusionProof inclusion;
    } CombinedTreeProof;
 
-   The elements of the timestamps field are the timestamps of log
-   entries.  The elements of the prefix_proofs field are search proofs
-   from the prefix trees at specific log entries.  There is no explicit
-   indication as to which log entry the elements correspond to, as they
-   are provided in the order that the algorithm the user is executing
-   would request them.  The elements of the prefix_roots field are, in
-   left-to-right order, the prefix tree root hashes for any log entries
-   whose timestamp was provided in timestamps but a search proof was not
+   The timestamps field contains the timestamps of specific log entries
+   and the prefix_proofs field contains search proofs from the prefix
+   trees of specific log entries.  There is no explicit indication as to
+   which log entry the elements correspond to, as they are provided in
+   the order that the algorithm the user is executing would request
+   them.  The elements of the prefix_roots field are, in left-to-right
+   order, the prefix tree root hashes for any log entries whose
+   timestamp was provided in timestamps but a search proof was not
    provided in prefix_proofs.
 
    If a log entry's timestamp is referenced multiple times by algorithms
@@ -1557,9 +1555,16 @@ Table of Contents
    Users MUST verify that all PrefixProof structures corresponding to
    the same log entry compute the same prefix tree root hash.
 
-   Users processing a CombinedTreeProof MUST verify that each field
-   contains exactly the expected number of entries -- no more and no
-   less.
+   Users processing a CombinedTreeProof MUST verify that the timestamps,
+   prefix_proofs, and prefix_roots fields contain exactly the expected
+   number of entries -- no more and no less.
+
+   Finally, the inclusion field contains an inclusion proof for all of
+   the log tree leaves where either a search proof was provided in
+   prefix_proofs or the prefix tree root hash was provided directly in
+   prefix_roots.  If the user advertised a previously observed tree size
+   in their request, the proof in inclusion also functions as a
+   consistency proof.
 
 11.3.1.  Updating View
 
@@ -1634,11 +1639,11 @@ Table of Contents
    label, the following is provided:
 
    *  For each log entry along the frontier, starting from the log entry
-      identified in Section 8: a PrefixProof corresponding to a binary
-      ladder (Section 8.1).
+      identified in Section 8: a binary ladder (Section 8.1) targeting
+      the greatest version of the label that exists in the log overall.
 
    Note that the log entry timestamps are already provided as part of
-   updating the user's view of the tree, and that no additional
+   updating the user's view of the tree and that no additional
    timestamps are necessary to identify the starting log entry.  Users
    verify the proof as described in Section 8.
 
@@ -1648,8 +1653,8 @@ Table of Contents
    protocol between a user and the Transparency Log.
 
    Users MUST retain the most recent TreeHead they've successfully
-   verified as part of any query response, and populate the last field
-   of any query request with the tree_size from this TreeHead.  This
+   verified as part of any query response and populate the last field of
+   any query request with the tree_size from this TreeHead.  This
    ensures that all operations performed by the user return consistent
    results.
 
@@ -1689,7 +1694,6 @@ Table of Contents
      optional<uint32> version;
      BinaryLadderStep binary_ladder<0..2^8-1>;
      CombinedTreeProof search;
-     InclusionProof inclusion;
 
      opaque opening[Nc];
      UpdateValue value;
@@ -1709,13 +1713,6 @@ Table of Contents
    If searching for the greatest version of the label, this version is
    provided in SearchResponse.version; otherwise, the field is empty.
 
-   The inclusion field contains an inclusion proof for all of the log
-   tree leaves where either a search proof was provided in
-   search.prefix_proofs or the prefix tree root hash was provided
-   directly in search.prefix_roots.  If the user advertised a previously
-   observed tree size in last, the proof in inclusion also functions as
-   a consistency proof.
-
    Users verify a search response by following these steps:
 
    1.  Compute the VRF output for each version of the label from the
@@ -1724,8 +1721,8 @@ Table of Contents
    2.  Verify the proof in search as described in Section 11.3.
 
    3.  Compute a candidate root value for the tree from the proof in
-       inclusion, the hashes of log entries used in search, and any
-       previously retained full subtrees of the log tree.
+       search.inclusion and any previously retained full subtrees of the
+       log tree.
 
    4.  With the candidate root value for the tree, verify FullTreeHead.
 
@@ -1760,7 +1757,6 @@ Table of Contents
 
      BinaryLadderStep binary_ladder<0..2^8-1>;
      CombinedTreeProof search;
-     InclusionProof inclusion;
 
      opaque opening[Nc];
      UpdatePrefix prefix;
@@ -1841,7 +1837,6 @@ Table of Contents
      FullTreeHead full_tree_head;
      MonitorLabelVersions label_versions<0..2^8-1>;
      CombinedTreeProof monitor;
-     InclusionProof inclusion;
    } MonitorResponse;
 
    The monitor field contains the output of updating the user's view of
@@ -1850,13 +1845,6 @@ Table of Contents
    structure where rightmost was present has a corresponding entry in
    label_versions containing the greatest version of the label present
    in a number of subsequent distinguished log entries.
-
-   The inclusion field contains an inclusion proof for all of the log
-   tree leaves where either a search proof was provided in
-   CombinedTreeProof.prefix_proofs or the prefix tree root hash was
-   provided directly in CombinedTreeProof.prefix_roots.  If the user
-   advertised a previously observed tree size in last, the proof in
-   inclusion also functions as a consistency proof.
 
    Users verify a MonitorResponse by following these steps:
 
@@ -1869,8 +1857,8 @@ Table of Contents
    2.  Verify the proof in monitor as described in Section 11.3.
 
    3.  Compute a candidate root value for the tree from the proof in
-       inclusion, the hashes of log entries used in search, and any
-       previously retained full subtrees of the log tree.
+       monitor.inclusion and any previously retained full subtrees of
+       the log tree.
 
    4.  With the candidate root value for the tree, verify FullTreeHead.
 
