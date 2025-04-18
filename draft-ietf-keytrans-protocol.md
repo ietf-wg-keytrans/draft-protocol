@@ -670,23 +670,20 @@ recurses to left or right children, each time starting back at step 1.
    search is at a leaf node:
 5. This largely concludes the search. However, there are some additional
    technicalities to address. First, it's possible for the binary search to
-   conclude successfully even if the label-version pair that the user is
-   interested in has expired. Out of the log entries touched by the binary
+   conclude even if the label-version pair that the user is interested in
+   doesn't exist or is expired. Out of the log entries touched by the binary
    search, identify which log entry was first to contain the desired
-   label-version pair. If it is a log entry that is past its maximum lifetime,
-   abort the search and return an error to the user.
+   label-version pair. If there is no such log entry, or if it is past its
+   maximum lifetime, abort the search and return an error to the user.
 6. It's also possible at this point that a commitment to the contents of the
    desired label-version pair has not been provided by the Transparency Log.
    This can happen, for example, if multiple versions of a label were inserted
    in the same log entry and the binary ladder was terminated early due to an
    inclusion proof for a version greater than the target version. If this has
    happened, obtain a search proof for the target label-version pair from the
-   prefix tree in the first log entry to contain it (identified in step 5).
-7. Finally, if the binary search failed to find a log entry containing the
-   desired label-version pair, or if the search proof from step 6 proves
-   non-inclusion rather than inclusion, return an error to the user indicating
-   that the version of the label does not exist. Otherwise, terminate the search
-   successfully.
+   prefix tree in the first log entry to contain it (identified in step 5). If
+   the search proof shows non-inclusion rather than inclusion, return an error
+   to the user.
 
 The most important goal of this algorithm is correctly identifying the first log
 entry that contains the target label-version pair. The purpose of
@@ -1364,7 +1361,7 @@ contains the minimum set of timestamps and `PrefixProof` structures that a user
 needs for their execution of these algorithms. For the purposes of this protocol,
 the user always executes the algorithm to update their view of the tree,
 described in {{updating-views-of-the-tree}}, followed immediately by one of the
-algorithms to search or monitor the current tree.
+algorithms to search or monitor the tree.
 
 Proofs are encoded as follows:
 
@@ -1373,17 +1370,19 @@ struct {
   uint64 timestamps<0..2^8-1>;
   PrefixProof prefix_proofs<0..2^8-1>;
   NodeValue prefix_roots<0..2^8-1>;
+
+  InclusionProof inclusion;
 } CombinedTreeProof;
 ~~~
 
-The elements of the `timestamps` field are the timestamps of log entries.
-The elements of the `prefix_proofs` field are search proofs from the prefix
-trees at specific log entries. There is no explicit indication as to which log
-entry the elements correspond to, as they are provided in the order that the
-algorithm the user is executing would request them. The elements of the
-`prefix_roots` field are, in left-to-right order, the prefix tree root
-hashes for any log entries whose timestamp was provided in `timestamps` but a
-search proof was not provided in `prefix_proofs`.
+The `timestamps` field contains the timestamps of specific log entries and the
+`prefix_proofs` field contains search proofs from the prefix trees of specific
+log entries. There is no explicit indication as to which log entry the elements
+correspond to, as they are provided in the order that the algorithm the user is
+executing would request them. The elements of the `prefix_roots` field are, in
+left-to-right order, the prefix tree root hashes for any log entries whose
+timestamp was provided in `timestamps` but a search proof was not provided in
+`prefix_proofs`.
 
 If a log entry's timestamp is referenced multiple times by algorithms in the
 same `CombinedTreeProof`, it is only added to the `timestamps` array the first
@@ -1399,8 +1398,15 @@ from the same log entry, the `prefix_proofs` array will contain multiple
 `PrefixProof` structures corresponding to the same log entry compute the same
 prefix tree root hash.
 
-Users processing a `CombinedTreeProof` MUST verify that each field contains
-exactly the expected number of entries -- no more and no less.
+Users processing a `CombinedTreeProof` MUST verify that the `timestamps`,
+`prefix_proofs`, and `prefix_roots` fields contain exactly the expected number
+of entries -- no more and no less.
+
+Finally, the `inclusion` field contains an inclusion proof for all of the log
+tree leaves where either a search proof was provided in `prefix_proofs` or the
+prefix tree root hash was provided directly in `prefix_roots`. If the user
+advertised a previously observed tree size in their request, the proof in
+`inclusion` also functions as a consistency proof.
 
 ### Updating View
 
@@ -1426,11 +1432,12 @@ following is provided:
     the right child's timestamp.
   - If it is not the case that the log entry has surpassed its maximum lifetime,
     is on the frontier, and the log entry's right child has also surpassed its
-    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder ({{fv-binary-ladder}}) in
-    the log entry's prefix tree is provided.
-- If the `PrefixProof` from the first log entry containing the target label-version
-  pair didn't include a lookup for the target version, provide a second `PrefixProof` from this
-  log entry specifically looking up the target version.
+    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder
+    ({{fv-binary-ladder}}) in the log entry's prefix tree is provided.
+- If the `PrefixProof` from the first log entry containing the target
+  label-version pair didn't include a lookup for the target version, provide a
+  second `PrefixProof` from this log entry specifically looking up the target
+  version.
 
 Users verify the output as specified in {{fv-algorithm}}.
 
@@ -1443,13 +1450,14 @@ For a user to monitor a label in the combined tree, the following is provided:
     determine where the monitoring algorithm would first reach a distinguished
     log entry. This may either be the log entry in the user's monitoring map, or
     some other log entry from the list computed in step 2 of {{m-algorithm}}.
-  - Where necessary for the algorithm in {{m-algorithm}}, a binary
-    ladder ({{monitor-binary-ladder}}) targeting the version in the user's monitoring map.
+  - Where necessary for the algorithm in {{m-algorithm}}, a binary ladder
+    ({{monitor-binary-ladder}}) targeting the version in the user's monitoring
+    map.
 - If the user owns the label:
   - The timestamps needed by the algorithm in {{distinguished-log-entries}} to
     conduct a depth-first search for each subsequent distinguished log entry.
-  - For each distinguished log entry, a binary ladder ({{gv-binary-ladder}}) targeting the greatest
-    version of the label that the log entry contains.
+  - For each distinguished log entry, a binary ladder ({{gv-binary-ladder}})
+    targeting the greatest version of the label that the log entry contains.
 
 ### Greatest-Version Search
 
@@ -1457,11 +1465,11 @@ For a user to search the combined tree for the greatest version of a label, the
 following is provided:
 
 - For each log entry along the frontier, starting from the log entry identified
-  in {{greatest-version-searches}}: a `PrefixProof` corresponding to a binary
-  ladder ({{gv-binary-ladder}}).
+  in {{greatest-version-searches}}: a binary ladder ({{gv-binary-ladder}})
+  targeting the greatest version of the label that exists in the log overall.
 
 Note that the log entry timestamps are already provided as part of updating the
-user's view of the tree, and that no additional timestamps are necessary to
+user's view of the tree and that no additional timestamps are necessary to
 identify the starting log entry. Users verify the proof as described in
 {{greatest-version-searches}}.
 
@@ -1510,7 +1518,7 @@ The basic user operations are organized as a request-response protocol between a
 user and the Transparency Log.
 
 Users MUST retain the most recent `TreeHead` they've successfully
-verified as part of any query response, and populate the `last` field of any
+verified as part of any query response and populate the `last` field of any
 query request with the `tree_size` from this `TreeHead`. This ensures that all
 operations performed by the user return consistent results.
 
@@ -1560,7 +1568,6 @@ struct {
   optional<uint32> version;
   BinaryLadderStep binary_ladder<0..2^8-1>;
   CombinedTreeProof search;
-  InclusionProof inclusion;
 
   opaque opening[Nc];
   UpdateValue value;
@@ -1580,21 +1587,13 @@ was provided in `SearchRequest` or not. If searching for the greatest version of
 the label, this version is provided in `SearchResponse.version`; otherwise, the
 field is empty.
 
-The `inclusion` field contains an inclusion proof for all of the log tree
-leaves where either a search proof was provided in
-`search.prefix_proofs` or the prefix tree root hash was provided
-directly in `search.prefix_roots`. If the user advertised a
-previously observed tree size in `last`, the proof in `inclusion` also functions
-as a consistency proof.
-
 Users verify a search response by following these steps:
 
 1. Compute the VRF output for each version of the label from the proofs in
    `binary_ladder`.
 2. Verify the proof in `search` as described in {{proof-combined-tree}}.
-3. Compute a candidate root value for the tree from the proof in `inclusion`,
-   the hashes of log entries used in `search`, and any previously retained full
-   subtrees of the log tree.
+3. Compute a candidate root value for the tree from the proof in
+   `search.inclusion` and any previously retained full subtrees of the log tree.
 4. With the candidate root value for the tree, verify `FullTreeHead`.
 5. Verify that the commitment to the target version of the label opens to
    `SearchResponse.value` with opening `SearchResponse.opening`.
@@ -1628,7 +1627,6 @@ struct {
 
   BinaryLadderStep binary_ladder<0..2^8-1>;
   CombinedTreeProof search;
-  InclusionProof inclusion;
 
   opaque opening[Nc];
   UpdatePrefix prefix;
@@ -1709,7 +1707,6 @@ struct {
   FullTreeHead full_tree_head;
   MonitorLabelVersions label_versions<0..2^8-1>;
   CombinedTreeProof monitor;
-  InclusionProof inclusion;
 } MonitorResponse;
 ~~~
 
@@ -1720,13 +1717,6 @@ was present has a corresponding entry in `label_versions` containing the
 greatest version of the label present in a number of subsequent distinguished
 log entries.
 
-The `inclusion` field contains an inclusion proof for all of the log tree
-leaves where either a search proof was provided in
-`CombinedTreeProof.prefix_proofs` or the prefix tree root hash was provided
-directly in `CombinedTreeProof.prefix_roots`. If the user advertised a
-previously observed tree size in `last`, the proof in `inclusion` also functions
-as a consistency proof.
-
 Users verify a MonitorResponse by following these steps:
 
 1. Verify that the number of entries in `label_versions` is equal to the number
@@ -1735,9 +1725,9 @@ Users verify a MonitorResponse by following these steps:
    log entry, verify that the corresponding MonitorLabelVersion's `versions`
    field is not empty.
 2. Verify the proof in `monitor` as described in {{proof-combined-tree}}.
-3. Compute a candidate root value for the tree from the proof in `inclusion`,
-   the hashes of log entries used in `search`, and any previously retained full
-   subtrees of the log tree.
+3. Compute a candidate root value for the tree from the proof in
+   `monitor.inclusion` and any previously retained full subtrees of the log
+   tree.
 4. With the candidate root value for the tree, verify `FullTreeHead`.
 
 Some information is omitted from MonitorResponse in the interest of efficiency,
