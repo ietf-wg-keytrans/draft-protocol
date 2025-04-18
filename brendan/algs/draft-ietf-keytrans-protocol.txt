@@ -977,7 +977,7 @@ Table of Contents
                current map entry, terminate and return an error to the
                user.
 
-       2.  Receive and verify a binary ladder from this log entry, where
+       2.  Receive and verify a binary ladder from this log entry where
            the target version is the version currently in the map.  This
            proves that, at the indicated log entry, the greatest version
            present is greater than or equal to the previously observed
@@ -985,8 +985,8 @@ Table of Contents
 
        3.  If the above check fails, terminate and return an error to
            the user.  Otherwise, remove the current position-version
-           pair from the map and replace it with a new one, with the
-           position of the log entry the binary ladder came from.
+           pair from the map and replace it with a new one for the
+           position of the log entry that the binary ladder came from.
 
    Once the map entries are updated according to this process, the final
    step of monitoring is to remove all mappings where the position
@@ -1040,8 +1040,8 @@ Table of Contents
    Users often wish to search for the "most recent" version, or the
    greatest version, of a label.  Unlike searches for a specific
    version, label owners regularly verify that the greatest version is
-   correctly represented in the log.  This enables a more efficient
-   approach to searching.
+   correctly represented in the log.  This enables a simpler, more
+   efficient approach to searching.
 
    Section 7.2 defines the concept of a distinguished log entry, which
    is any log entry that label owners are required to check for
@@ -1095,11 +1095,9 @@ Table of Contents
 8.2.  Algorithm
 
    The algorithm for performing a greatest-version search (a search for
-   the greatest version of a label) is described below as two recursive
-   algorithms.
-
-   The first algorithm starts at the rightmost distinguished log entry,
-   or the root of the implicit binary search tree if there are no
+   the greatest version of a label) is described below as a recursive
+   algorithm.  It starts at the rightmost distinguished log entry, or
+   the root of the implicit binary search tree if there are no
    distinguished log entries, and then recurses down the remainder of
    the frontier, each time starting back at step 1:
 
@@ -1114,7 +1112,7 @@ Table of Contents
        Specifically, verify that it indicates a maximum version greater
        than or equal to that of its parent log entry.
 
-   3.  If this is the rightmost log entry, verify that the binary ladder
+   3.  If this is the rightmost log entry, verify the binary ladder
        terminates in a way that is consistent with the target version
        being the greatest that exists.  This means that it does not
        terminate early, all lookups for versions less than or equal to
@@ -1122,48 +1120,12 @@ Table of Contents
        versions greater than the target version produce non-inclusion
        proofs.
 
-   4.  If this is the rightmost log entry, move on to the steps
-       described below.  If not, recurse to the current log entry's
-       right child.
+   4.  If this is not the rightmost log entry, recurse to the current
+       log entry's right child.
 
-   If the algorithm above was able to start at a distinguished log
-   entry, and this log entry contained the target label-version pair,
-   this indicates that the label-version pair was inserted outside of
-   the Reasonable Monitoring Window.  As such, the user can assume that
-   the label's greatest version was found and that the associated
-   commitment to the label-version pair's value is correct, and
-   terminate its search successfully.
-
-   If the algorithm was not able to start at a distinguished log entry,
-   or the starting log entry did not contain the target label-version
-   pair, this indicates that the label-version pair was inserted
-   recently (within the Reasonable Monitoring Window) and that the user
-   must perform a binary search for the first log entry to contain the
-   label-version pair (similar to a fixed-version search).
-
-   The second algorithm performs this binary search by starting at the
-   left child, if it exists, of the first frontier log entry that
-   contains the target label-version pair, as identified by the first
-   algorithm.  It then recurses to left or right children, each time
-   starting back at step 1:
-
-   1.  Verify that the log entry's timestamp is consistent with the
-       timestamps of all ancestor log entries.
-
-   2.  Obtain a binary ladder from the current log entry for the target
-       version.  Verify that the binary ladder terminates in a way that
-       is consistent with previously inspected log entries.
-
-   3.  If the binary ladder was terminated early due to a non-inclusion
-       proof for a version less than or equal the target version,
-       recurse to the log entry's right child.  If not, recurse to the
-       log entry's left child.  If, in either case, recursion isn't
-       possible because the search is at a leaf node, then terminate the
-       search successfully.
-
-   Note that if the starting log entry was not distinguished or if the
-   starting log entry did not contain the greatest version of the label,
-   then the user may be obligated to monitor the label in the future per
+   If the starting log entry was not distinguished or if the starting
+   log entry did not contain the greatest version of the label, note
+   that the user may be obligated to monitor the label in the future per
    Section 7.1.
 
 9.  Ciphersuites
