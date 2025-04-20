@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-17T01:01:32.900351+00:00",
+  "timestamp": "2025-04-20T01:05:41.918426+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -399,6 +399,46 @@
           "body": "Nvm. I was being stupid.",
           "createdAt": "2025-04-15T16:27:10Z",
           "updatedAt": "2025-04-15T16:27:10Z"
+        }
+      ]
+    },
+    {
+      "number": 37,
+      "id": "I_kwDOLrnaA86y7eqP",
+      "title": "Is PrefixSearchResult.depth zero- or one-based?",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/37",
+      "state": "OPEN",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "Title says it all. Is a tree's root at depth zero or at depth one?",
+      "createdAt": "2025-04-17T09:23:59Z",
+      "updatedAt": "2025-04-17T09:23:59Z",
+      "closedAt": null,
+      "comments": []
+    },
+    {
+      "number": 38,
+      "id": "I_kwDOLrnaA86y7rMM",
+      "title": "Define distinguished log entries on frontier only",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/38",
+      "state": "CLOSED",
+      "author": "felixlinker",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "It seems to me that distinguished log entries are only relevant when they occur on a log's frontier. Is that correct?\n\nIf it is, it could simplify the algorithm and definition to only compute distinguished log entries on the frontier.",
+      "createdAt": "2025-04-17T09:44:41Z",
+      "updatedAt": "2025-04-17T19:20:15Z",
+      "closedAt": "2025-04-17T19:20:15Z",
+      "comments": [
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "No, all distinguished log entries matter because label owners have to check that all distinguished log entries correctly represent the label's greatest version. If a label owner is offline for a long period of time, when they come back they basically have to do a depth-first search to find all the distinguished log entries they missed.",
+          "createdAt": "2025-04-17T18:19:52Z",
+          "updatedAt": "2025-04-17T18:19:52Z"
         }
       ]
     }
@@ -1963,24 +2003,26 @@
       "id": "PR_kwDOLrnaA86OVqRS",
       "title": "Change order of PrefixProof.results",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/26",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "felixlinker",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "I think changing the order this way would simplify implementation as clients can directly infer which results targets which index. This spares implementations from sorting `SearchResponse.binary_ladder`. Instead, they can just zip the two arrays (speaking functionally).",
       "createdAt": "2025-03-12T12:39:01Z",
-      "updatedAt": "2025-04-14T16:51:09Z",
+      "updatedAt": "2025-04-17T18:17:51Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "8d661713e4bf1a0cd10c51d1f41fbbc45ad9c32f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "prefix-proof-results",
       "headRefOid": "d704d87c459e73794489c66fde9adffea3626f46",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "closedAt": "2025-04-17T18:17:51Z",
+      "mergedAt": "2025-04-17T18:17:51Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "80dc7cfdc6a3c3bee096ffba33baf2bc5034288b"
+      },
       "comments": [
         {
           "author": "Bren2010",
@@ -2009,9 +2051,30 @@
           "body": "I agree that this would be sorting. I see how there can be a DFS-traversal algorithm that in linear (in the number of leaves and co-path nodes) builds the prefix tree. I know take twice that time for the sake of ease of implementation. Not sure what is to be preferred. No strong opinion anymore :)",
           "createdAt": "2025-04-14T16:51:07Z",
           "updatedAt": "2025-04-14T16:51:07Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "@Bren2010 Okay, made up my mind! For the construction of the prefix tree, order does not matter as you need to sort it one way or the other (as you pointed out). But for checking the proofs after prefix tree construction, it's actually much nicer if it's in the order of the binary ladder. Then you can just zip the entire thing.\r\n\r\nI guess, there's one super clever algorithm that does prefix tree construction and ladder verification in one go, but we aim to keep that separate for verification purposes :)",
+          "createdAt": "2025-04-17T12:28:03Z",
+          "updatedAt": "2025-04-17T12:28:03Z"
         }
       ],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86lf0-U",
+          "commit": {
+            "abbreviatedOid": "d704d87"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-17T18:17:46Z",
+          "updatedAt": "2025-04-17T18:17:46Z",
+          "comments": []
+        }
+      ]
     },
     {
       "number": 30,
@@ -2194,20 +2257,75 @@
       "id": "PR_kwDOLrnaA86ShGcX",
       "title": "Editorial changes",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/35",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "felixlinker",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Should be self-explanatory :) Happy to answer questions!",
       "createdAt": "2025-04-14T16:49:28Z",
-      "updatedAt": "2025-04-14T16:49:28Z",
+      "updatedAt": "2025-04-17T18:27:02Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "0f1de4a8be2bb914849b3f9cef318471bdcd678a",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "felixlinker/editorial",
-      "headRefOid": "5424a8a3da39c8acc13d197391d68b752b1eff5a",
+      "headRefOid": "bbaa3e9c592c0c4dfcfc8ddf5131a03f02460316",
+      "closedAt": "2025-04-17T18:27:02Z",
+      "mergedAt": "2025-04-17T18:27:02Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "7370f25364caefc9aca3bd8c4e2c9fb48ec3d8b2"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86lf4p5",
+          "commit": {
+            "abbreviatedOid": "5424a8a"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-17T18:25:35Z",
+          "updatedAt": "2025-04-17T18:26:34Z",
+          "comments": [
+            {
+              "originalPosition": 5,
+              "body": "```suggestion\r\n{: title=\"Illustration of a consistency proof between a log with 4 and with 6\r\n```",
+              "createdAt": "2025-04-17T18:25:35Z",
+              "updatedAt": "2025-04-17T18:26:34Z"
+            },
+            {
+              "originalPosition": 23,
+              "body": "```suggestion\r\n  log. The Transparency Log provides the minimum set of head values from\r\n```",
+              "createdAt": "2025-04-17T18:26:13Z",
+              "updatedAt": "2025-04-17T18:26:34Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 39,
+      "id": "PR_kwDOLrnaA86TJChp",
+      "title": "Improve algorithm descriptions",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/39",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- More explicitly specify greatest-version search.\r\n- Prevent needing multiple PrefixProofs from the same log entry when monitoring\r\n- Specify prefix tree depth is zero-indexed (closes #37)\r\n- Move InclusionProof into CombinedTreeProof\r\n\r\nNo \"real\" protocol changes, this is mostly editorial",
+      "createdAt": "2025-04-18T16:25:45Z",
+      "updatedAt": "2025-04-18T16:25:46Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "7370f25364caefc9aca3bd8c4e2c9fb48ec3d8b2",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/algs",
+      "headRefOid": "58fae4f0098047b05bdf6848d085c6907e8dfe5b",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
