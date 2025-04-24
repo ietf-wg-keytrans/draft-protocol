@@ -2770,7 +2770,7 @@ struct {
 <p id="section-10.2-6">The <code>config</code> field contains the long-term configuration for the Transparency
 Log. The <code>timestamp</code> and <code>tree_size</code> fields match that of <code>AuditorTreeHead</code>. The
 <code>root</code> field contains the value of the root node of the Log Tree when it had
-<code>AuditorTreeHead.tree_size</code> leaves.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
+<code>tree_size</code> leaves.<a href="#section-10.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="full-tree-head-verification">
@@ -2801,15 +2801,15 @@ struct {
 </pre><a href="#section-10.3-2" class="pilcrow">¶</a>
 </div>
 <p id="section-10.3-3">The <code>head_type</code> field may be set to <code>same</code> if the user advertised a previously
-observed tree size in their request and the Transparency Log wishes to provide
-proof against this same tree head. Otherwise, <code>head_type</code> is set to <code>updated</code>
-and a new, more recent tree head is provided.<a href="#section-10.3-3" class="pilcrow">¶</a></p>
+observed tree size in their request and the Transparency Log wishes to continue
+using this same tree head. Otherwise, <code>head_type</code> is set to <code>updated</code> and a new,
+more recent tree head is provided.<a href="#section-10.3-3" class="pilcrow">¶</a></p>
 <p id="section-10.3-4">Users verify a <code>FullTreeHead</code> with the following steps:<a href="#section-10.3-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-10.3-5">
 <li id="section-10.3-5.1">
             <p id="section-10.3-5.1.1">If <code>head_type</code> is <code>same</code>, verify that the user advertised a previously
-observed tree size and that the rightmost log entry of this tree is within
-the bounds set by <code>max_ahead</code> and <code>max_behind</code>.<a href="#section-10.3-5.1.1" class="pilcrow">¶</a></p>
+observed tree size and that the rightmost log entry of this tree is still
+within the bounds set by <code>max_ahead</code> and <code>max_behind</code>.<a href="#section-10.3-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-10.3-5.2">
             <p id="section-10.3-5.2.1">If <code>head_type</code> is <code>updated</code>:<a href="#section-10.3-5.2.1" class="pilcrow">¶</a></p>
@@ -3178,7 +3178,7 @@ values from the Log Tree that would allow a user to compute:<a href="#section-11
 </li>
           <li class="normal" id="section-11.3-10.2">
             <p id="section-11.3-10.2.1">If an <code>AuditorTreeHead</code> was provided by the Transparency Log, the root value
-of the Transparency Log when it had <code>AuditorTreeHead.tree_size</code> leaves,<a href="#section-11.3-10.2.1" class="pilcrow">¶</a></p>
+of the Log Tree when it had <code>AuditorTreeHead.tree_size</code> leaves,<a href="#section-11.3-10.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-11.3-11">from the following:<a href="#section-11.3-11" class="pilcrow">¶</a></p>
@@ -3190,7 +3190,7 @@ of the Transparency Log when it had <code>AuditorTreeHead.tree_size</code> leave
 </li>
           <li class="normal" id="section-11.3-12.2">
             <p id="section-11.3-12.2.1">If the user advertised a previously observed tree size in their request, any
-intermediate node values the user is expected to have retained based on this.<a href="#section-11.3-12.2.1" class="pilcrow">¶</a></p>
+intermediate node values the user is expected to have retained.<a href="#section-11.3-12.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <div id="updating-view">

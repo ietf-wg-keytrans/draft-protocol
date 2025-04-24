@@ -1271,7 +1271,7 @@ Table of Contents
    The config field contains the long-term configuration for the
    Transparency Log. The timestamp and tree_size fields match that of
    AuditorTreeHead.  The root field contains the value of the root node
-   of the Log Tree when it had AuditorTreeHead.tree_size leaves.
+   of the Log Tree when it had tree_size leaves.
 
 10.3.  Full Tree Head Verification
 
@@ -1297,7 +1297,7 @@ Table of Contents
 
    The head_type field may be set to same if the user advertised a
    previously observed tree size in their request and the Transparency
-   Log wishes to provide proof against this same tree head.  Otherwise,
+   Log wishes to continue using this same tree head.  Otherwise,
    head_type is set to updated and a new, more recent tree head is
    provided.
 
@@ -1305,7 +1305,8 @@ Table of Contents
 
    1.  If head_type is same, verify that the user advertised a
        previously observed tree size and that the rightmost log entry of
-       this tree is within the bounds set by max_ahead and max_behind.
+       this tree is still within the bounds set by max_ahead and
+       max_behind.
 
    2.  If head_type is updated:
 
@@ -1626,8 +1627,8 @@ Table of Contents
    *  The root value of the Log Tree, and
 
    *  If an AuditorTreeHead was provided by the Transparency Log, the
-      root value of the Transparency Log when it had
-      AuditorTreeHead.tree_size leaves,
+      root value of the Log Tree when it had AuditorTreeHead.tree_size
+      leaves,
 
    from the following:
 
@@ -1637,7 +1638,7 @@ Table of Contents
 
    *  If the user advertised a previously observed tree size in their
       request, any intermediate node values the user is expected to have
-      retained based on this.
+      retained.
 
 11.3.1.  Updating View
 
