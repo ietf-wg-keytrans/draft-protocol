@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-20T01:05:41.918426+00:00",
+  "timestamp": "2025-04-24T01:02:11.934995+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2319,7 +2319,7 @@
       "labels": [],
       "body": "- More explicitly specify greatest-version search.\r\n- Prevent needing multiple PrefixProofs from the same log entry when monitoring\r\n- Specify prefix tree depth is zero-indexed (closes #37)\r\n- Move InclusionProof into CombinedTreeProof\r\n\r\nNo \"real\" protocol changes, this is mostly editorial",
       "createdAt": "2025-04-18T16:25:45Z",
-      "updatedAt": "2025-04-18T16:25:46Z",
+      "updatedAt": "2025-04-22T09:03:19Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "7370f25364caefc9aca3bd8c4e2c9fb48ec3d8b2",
@@ -2331,7 +2331,64 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86l5dfs",
+          "commit": {
+            "abbreviatedOid": "58fae4f"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-22T08:35:42Z",
+          "updatedAt": "2025-04-22T09:03:19Z",
+          "comments": [
+            {
+              "originalPosition": 11,
+              "body": "I still have my gripes with this \"this largely concludes the search.\" I think that implementors will wonder how it exactly informs implementation.",
+              "createdAt": "2025-04-22T08:35:42Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 64,
+              "body": "```suggestion\r\n   1. Check if a binary ladder for this log entry was already provided in the\r\n```\r\n\r\nIs \"from\" the preposition we typically use? Seemed off.",
+              "createdAt": "2025-04-22T08:39:23Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 69,
+              "body": "```suggestion\r\n         needs to be monitored. Remove the position-version pair with the\r\n         lesser version from the map and move on to the next map\r\n```",
+              "createdAt": "2025-04-22T08:40:15Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "```suggestion\r\n   Verify that the binary ladder indicates a maximum version greater than or\r\n   equal to that of its parent log entry.\r\n```\r\n\r\nThis text seems simpler and should say the same. I think the \"accounting for any inclusion or non-inclusion proofs\" can be confusing as the connection to the rest of the paragraph is only implicit.",
+              "createdAt": "2025-04-22T08:44:50Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 136,
+              "body": "What should be done in step 3 at the first log entry? Probably, one should verify that indicated version is >= than any previously queried versions. \"Parent\" is an ambiguous reference for the first entry the algorithm checks.",
+              "createdAt": "2025-04-22T08:46:06Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 138,
+              "body": "```suggestion\r\n   way that proves the target version to be the greatest that\r\n```",
+              "createdAt": "2025-04-22T08:47:38Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            },
+            {
+              "originalPosition": 142,
+              "body": "```suggestion\r\n   exists. This means that it correctly targets the greatest version provided in\r\n   the log response (as specified in {{binary-ladder}}) and does not terminate\r\n   early.\r\n```\r\n\r\nI think the previous specification was confusing. It did not reference the original binary ladder section (fine) but did specify some algorithmic steps, which would be insufficient just by themselves. E.g., `0-inclusion, 6-inclusion, 10-non-inclusion` satisfy the checks of inclusion/non-inclusion and some may take it as \"not terminating early.\"\r\n\r\nI think we're better off referencing the binary ladder section and not adding an incomplete list of checks to perform.",
+              "createdAt": "2025-04-22T08:57:08Z",
+              "updatedAt": "2025-04-22T09:03:19Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
