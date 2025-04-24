@@ -969,9 +969,9 @@ obligated to monitor the label in the future per
 {{reasonable-monitoring-window}}.
 
 
-# Ciphersuites
+# Cipher Suites
 
-Each Transparency Log uses a single fixed ciphersuite, chosen when it is
+Each Transparency Log uses a single fixed cipher suite, chosen when it is
 initially created, that specifies the following primitives and parameters to be used for
 cryptographic computations:
 
@@ -987,8 +987,8 @@ operator and the third party, if one is present. The VRF is used for preserving
 the privacy of labels. One of the VRF algorithms from {{!RFC9381}} must be
 used.
 
-Ciphersuites are represented with the CipherSuite type. The ciphersuites are
-defined in {{kt-ciphersuites}}.
+Cipher suites are represented with the CipherSuite type. The cipher suites are
+defined in {{kt-cipher-suites}}.
 
 
 # Cryptographic Computations
@@ -1010,7 +1010,7 @@ Transparency Log is deployed with Third-Party Management, then the public key
 used to verify the signature belongs to the third-party manager; otherwise the
 public key used belongs to the Service Operator.
 
-The signature itself is computed over a `TreeHeadTBS` structure which
+The signature itself is computed over a `TreeHeadTBS` structure, which
 incorporates the log's current state as well as long-term log configuration:
 
 ~~~ tls-presentation
@@ -1033,6 +1033,7 @@ struct {
     case thirdPartyManagement:
       opaque leaf_public_key<0..2^16-1>;
     case thirdPartyAuditing:
+      uint64 max_auditor_lag;
       opaque auditor_public_key<0..2^16-1>;
   };
 
@@ -1049,6 +1050,25 @@ struct {
 } TreeHeadTBS;
 ~~~
 
+The `ciphersuite` field contains the cipher suite for the Transparency Log,
+chosen from the registry in {{kt-cipher-suites}}. The `mode` field specifies
+whether the Transparency Log is deployed in Contact Monitoring mode or with a
+Third-Party Manager or Auditor. The `signature_public_key` field contains the
+public key to use for verifying signatures on the `TreeHeadTBS` structure. The
+`vrf_public_key` field contains the VRF public key to use for evaluating the VRF
+proofs provided in the `BinaryLadderStep.proof` field described in {{search}}.
+
+If the deployment mode specifies a Third-Party Manager, a public key is provided
+in `leaf_public_key`. This public key is used to verify the Service Operator's
+signature on modifications to the Transparency Log, as described in
+{{update-format}}.
+
+If the deployment mode specifies a Third-Party Auditor, the maximum amount of
+time in milliseconds that the auditor may lag behind the most recent version of
+the Transparency Log is provided in `max_auditor_lag`. Additionally, a public
+key for verifying the auditor's signature on views of the Transparency Log is
+provided in `auditor_public_key`.
+
 The `max_ahead` and `max_behind` fields contain the maximum amount of time in
 milliseconds that a tree head may be ahead of or behind the user's local clock
 without being rejected. The `reasonable_monitoring_window` contains the
@@ -1057,7 +1077,88 @@ milliseconds. If the Transparency Log has chosen to define a maximum lifetime
 for log entries, per {{maximum-lifetime}}, this duration in milliseconds is
 stored in the `maximum_lifetime` field.
 
-Finally, `Hash.Nh` is the output size of the ciphersuite hash function in bytes.
+Finally, the `root` field contains the root value of the Log Tree with
+`TreeHead.tree_size` leaves. `Hash.Nh` is the output size of the cipher suite's
+hash function in bytes.
+
+## Auditor Tree Head Signature
+
+In deployment scenarios where a Third-Party Auditor is present, the auditor's
+view of the Transparency Log is presented to users with an `AuditorTreeHead`
+structure:
+
+~~~ tls-presentation
+struct {
+  uint64 timestamp;
+  uint64 tree_size;
+  opaque signature<0..2^16-1>;
+} AuditorTreeHead;
+~~~
+
+Users verify an `AuditorTreeHead` with the following steps:
+
+1. Verify that the timestamp of the rightmost log entry is greater than or equal
+   to `timestamp`, and that the difference between the two is less than or equal
+   to `Configuration.max_auditor_lag`.
+2. Verify that `tree_size` is less than or equal to that of the `TreeHead`
+   provided by the Transparency Log.
+3. Verify `signature` as a signature over the `AuditorTreeHeadTBS` structure:
+
+~~~ tls-presentation
+struct {
+  Configuration config;
+  uint64 timestamp;
+  uint64 tree_size;
+  opaque root[Hash.Nh];
+} AuditorTreeHeadTBS;
+~~~
+
+The `config` field contains the long-term configuration for the Transparency
+Log. The `timestamp` and `tree_size` fields match that of `AuditorTreeHead`. The
+`root` field contains the value of the root node of the Log Tree when it had
+`tree_size` leaves.
+
+## Full Tree Head Verification
+
+Tree heads are presented to users on the wire as follows:
+
+~~~ tls-presentation
+enum {
+  reserved(0),
+  same(1),
+  updated(2),
+} FullTreeHeadType;
+
+struct {
+  FullTreeHeadType head_type;
+  select (FullTreeHead.head_type) {
+    case updated:
+      TreeHead tree_head;
+      select (Configuration.mode) {
+        case thirdPartyAuditing:
+          AuditorTreeHead auditor_tree_head;
+      }
+  }
+} FullTreeHead;
+~~~
+
+The `head_type` field may be set to `same` if the user advertised a previously
+observed tree size in their request and the Transparency Log wishes to continue
+using this same tree head. Otherwise, `head_type` is set to `updated` and a new,
+more recent tree head is provided.
+
+Users verify a `FullTreeHead` with the following steps:
+
+1. If `head_type` is `same`, verify that the user advertised a previously
+   observed tree size and that the rightmost log entry of this tree is still
+   within the bounds set by `max_ahead` and `max_behind`.
+2. If `head_type` is `updated`:
+   1. If the user advertised a previously observed tree size, verify that
+      `TreeHead.tree_size` is greater than the advertised tree size.
+   2. Verify `TreeHead.signature` as a signature over the `TreeHeadTBS`
+      structure.
+   3. If there is a Third-Party Auditor, verify `auditor_tree_head` as described
+      in {{auditor-tree-head-signature}}.
 
 ## Update Format
 
@@ -1100,14 +1201,14 @@ MUST successfully verify this signature before consuming `UpdateValue.value`.
 ## Commitment
 
 Commitments are computed with HMAC {{!RFC2104}} using the hash function
-specified by the ciphersuite. To produce a new commitment, the application
+specified by the cipher suite. To produce a new commitment, the application
 generates a random `Nc`-byte value called `opening` and computes:
 
 ~~~ pseudocode
 commitment = HMAC(Kc, CommitmentValue)
 ~~~
 
-where `Kc` is a string of bytes defined by the ciphersuite and CommitmentValue
+where `Kc` is a string of bytes defined by the cipher suite and CommitmentValue
 is specified as:
 
 ~~~ tls-presentation
@@ -1145,7 +1246,7 @@ struct {
 ## Log Tree {#crypto-log-tree}
 
 The value of a leaf node in the log tree is computed as the hash, with the
-ciphersuite hash function, of the following structure:
+cipher suite hash function, of the following structure:
 
 ~~~ tls-presentation
 struct {
@@ -1172,12 +1273,12 @@ hashContent(node):
     return 0x01 || node.value
 ~~~
 
-where `Hash` denotes the ciphersuite hash function.
+where `Hash` denotes the cipher suite hash function.
 
 ## Prefix Tree
 
 The value of a leaf node in the prefix tree is computed as the hash, with the
-ciphersuite hash function, of the following structure:
+cipher suite hash function, of the following structure:
 
 ~~~ tls
 struct {
@@ -1187,7 +1288,7 @@ struct {
 ~~~
 
 The `vrf_output` field contains the VRF output for the label-version pair.
-`VRF.Nh` denotes the output size of the ciphersuite VRF in bytes. The
+`VRF.Nh` denotes the output size of the cipher suite VRF in bytes. The
 `commitment` field contains the commitment to the corresponding `UpdateValue`
 structure.
 
@@ -1364,11 +1465,20 @@ Users processing a `CombinedTreeProof` MUST verify that the `timestamps`,
 `prefix_proofs`, and `prefix_roots` fields contain exactly the expected number
 of entries -- no more and no less.
 
-Finally, the `inclusion` field contains an inclusion proof for all of the log
-tree leaves where either a search proof was provided in `prefix_proofs` or the
-prefix tree root hash was provided directly in `prefix_roots`. If the user
-advertised a previously observed tree size in their request, the proof in
-`inclusion` also functions as a consistency proof.
+Finally, the `inclusion` field contains the minimum set of intermediate node
+values from the Log Tree that would allow a user to compute:
+
+- The root value of the Log Tree, and
+- If an `AuditorTreeHead` was provided by the Transparency Log, the root value
+  of the Log Tree when it had `AuditorTreeHead.tree_size` leaves,
+
+from the following:
+
+- The values of all leaf nodes where either a search proof was provided in
+  `prefix_proofs` or the prefix tree root hash was provided directly in
+  `prefix_roots`, and
+- If the user advertised a previously observed tree size in their request, any
+  intermediate node values the user is expected to have retained.
 
 ### Updating View
 
@@ -1484,28 +1594,16 @@ verified as part of any query response and populate the `last` field of any
 query request with the `tree_size` from this `TreeHead`. This ensures that all
 operations performed by the user return consistent results.
 
-~~~ tls-presentation <!-- TODO: Specify verification -->
-struct {
-  TreeHead tree_head;
-  select (Configuration.mode) {
-    case thirdPartyAuditing:
-      AuditorTreeHead auditor_tree_head;
-  };
-} FullTreeHead;
-~~~
-
 Modifications to a user's state MUST only be persisted once the query response
 has been fully verified. Queries that fail full verification MUST NOT modify the
 user's protocol state in any way.
 
 ## Search
 
-<!-- TODO: Update to cover different deployment modes -->
-
 Users initiate a Search operation by submitting a SearchRequest to the
 Transparency Log containing the label that they're interested in. Users can
-optionally specify a version of the label that they'd like to receive, if not the
-most recent one.
+optionally specify a version of the label that they'd like to receive, if not
+the greatest one.
 
 ~~~ tls-presentation
 struct {
@@ -1587,6 +1685,7 @@ an UpdateResponse structure:
 struct {
   FullTreeHead full_tree_head;
 
+  uint32 version;
   BinaryLadderStep binary_ladder<0..2^8-1>;
   CombinedTreeProof search;
 
@@ -1595,10 +1694,9 @@ struct {
 } UpdateResponse;
 ~~~
 
-Users verify the UpdateResponse as if it were a SearchResponse for the most
-recent version of `label`. To aid verification, the update response
-provides the `UpdatePrefix` structure necessary to reconstruct the
-`UpdateValue`.
+Users verify the UpdateResponse as if it were a SearchResponse for the greatest
+version of `label`. To aid verification, the update response provides the
+`UpdatePrefix` structure necessary to reconstruct the `UpdateValue`.
 
 <!-- TODO: This could probably be a lot more efficient -->
 
@@ -1709,7 +1807,7 @@ original Search or Update query.
 
 This document requests the creation of the following new IANA registries:
 
-* KT Ciphersuites ({{kt-ciphersuites}})
+* KT Cipher Suites ({{kt-cipher-suites}})
 
 All of these registries should be under a heading of "Key Transparency",
 and assignments are made via the Specification Required policy {{!RFC8126}}. See
@@ -1718,7 +1816,7 @@ and assignments are made via the Specification Required policy {{!RFC8126}}. See
 RFC EDITOR: Please replace XXXX throughout with the RFC number assigned to
 this document
 
-## KT Ciphersuites
+## KT Cipher Suites
 
 ~~~ tls-presentation
 uint16 CipherSuite;
