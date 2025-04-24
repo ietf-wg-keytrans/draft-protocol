@@ -656,8 +656,7 @@ recurses to left or right children, each time starting back at step 1.
    right child always exists, as the rightmost log entry cannot exceed its
    maximum lifetime by definition.
 3. Obtain a binary ladder from the current log entry for the target version.
-   Accounting for any inclusion or non-inclusion proofs which were omitted,
-   verify that the binary ladder terminates in a way that is consistent with
+   Verify that the binary ladder terminates in a way that is consistent with
    previously inspected log entries. Specifically, verify that it indicates a
    maximum version greater than or equal to any log entries to the left, and
    less than or equal to any log entries to the right.
@@ -834,12 +833,12 @@ entry:
 3. If the computed list is empty, leave the position-version pair in the map
    and move on to the next map entry.
 4. For each log entry in the computed list, from left to right:
-   1. Check if a binary ladder from this log entry was already provided in the
+   1. Check if a binary ladder for this log entry was already provided in the
       same query response. If so:
       1. If the previously provided binary ladder had a greater target version
          than the current map entry, then this version of the label no longer
-         needs to be monitored. Remove the current position-version pair (the
-         one with the lesser version) from the map and move on to the next map
+         needs to be monitored. Remove the position-version pair with the
+         the lesser version from the map and move on to the next map
          entry.
       2. If it had a version less than or equal to that of the current map
          entry, terminate and return an error to the user.
@@ -953,21 +952,15 @@ starts at the rightmost distinguished log entry, or the root of the implicit
 binary search tree if there are no distinguished log entries, and then recurses
 down the remainder of the frontier, each time starting back at step 1:
 
-1. Verify that the log entry's timestamp is consistent with the timestamps of
-   all ancestor log entries. That is, verify the log entry's timestamp is
-   greater than or equal to that of its parent.
-2. Obtain a binary ladder from the current log entry for the target version.
-   Accounting for any inclusion or non-inclusion proofs which were omitted,
-   verify that the binary ladder terminates in a way that is consistent with
-   previously inspected log entries. Specifically, verify that it indicates a
+1. Obtain a binary ladder from the current log entry for the target version. If
+   this is not the starting log entry, verify that the binary ladder indicates a
    maximum version greater than or equal to that of its parent log entry.
-3. If this is the rightmost log entry, verify the binary ladder terminates in a
-   way that is consistent with the target version being the greatest that
-   exists. This means that it does not terminate early, all lookups for versions
-   less than or equal to the target version produce inclusion proofs, and all
-   lookups for versions greater than the target version produce non-inclusion
-   proofs.
-4. If this is not the rightmost log entry, recurse to the current log entry's
+2. If this is the rightmost log entry, verify the binary ladder terminates in a
+   way that proves the target version to be the greatest that exists. This means
+   that it does not terminate early, all lookups for versions less than or equal
+   to the target version produce inclusion proofs, and all lookups for versions
+   greater than the target version produce non-inclusion proofs.
+3. If this is not the rightmost log entry, recurse to the current log entry's
    right child.
 
 If the starting log entry was not distinguished or if the starting log entry did
