@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-04-24T01:02:11.934995+00:00",
+  "timestamp": "2025-04-27T01:06:03.137579+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -407,15 +407,15 @@
       "id": "I_kwDOLrnaA86y7eqP",
       "title": "Is PrefixSearchResult.depth zero- or one-based?",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/issues/37",
-      "state": "OPEN",
+      "state": "CLOSED",
       "author": "felixlinker",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "Title says it all. Is a tree's root at depth zero or at depth one?",
       "createdAt": "2025-04-17T09:23:59Z",
-      "updatedAt": "2025-04-17T09:23:59Z",
-      "closedAt": null,
+      "updatedAt": "2025-04-24T22:07:06Z",
+      "closedAt": "2025-04-24T22:07:06Z",
       "comments": []
     },
     {
@@ -2312,24 +2312,26 @@
       "id": "PR_kwDOLrnaA86TJChp",
       "title": "Improve algorithm descriptions",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/39",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "- More explicitly specify greatest-version search.\r\n- Prevent needing multiple PrefixProofs from the same log entry when monitoring\r\n- Specify prefix tree depth is zero-indexed (closes #37)\r\n- Move InclusionProof into CombinedTreeProof\r\n\r\nNo \"real\" protocol changes, this is mostly editorial",
       "createdAt": "2025-04-18T16:25:45Z",
-      "updatedAt": "2025-04-22T09:03:19Z",
+      "updatedAt": "2025-04-24T22:07:05Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "7370f25364caefc9aca3bd8c4e2c9fb48ec3d8b2",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/algs",
-      "headRefOid": "58fae4f0098047b05bdf6848d085c6907e8dfe5b",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "1c2a03903c3c9ba5256a22869a03c3bd50bf0e4a",
+      "closedAt": "2025-04-24T22:07:05Z",
+      "mergedAt": "2025-04-24T22:07:05Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "629f05fa40d825c030b02205f9809683e2233935"
+      },
       "comments": [],
       "reviews": [
         {
@@ -2387,6 +2389,66 @@
               "updatedAt": "2025-04-22T09:03:19Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86mdBFF",
+          "commit": {
+            "abbreviatedOid": "58fae4f"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-04-24T22:04:46Z",
+          "updatedAt": "2025-04-24T22:04:46Z",
+          "comments": [
+            {
+              "originalPosition": 142,
+              "body": "These checks are sufficient though? If we make every expected binary ladder lookup without terminating early, that means every lookup except the last one definitely returned the expected result. We just have to check the last one based on whether it's for a version greater than / equal / less than the target version.",
+              "createdAt": "2025-04-24T22:04:46Z",
+              "updatedAt": "2025-04-24T22:04:46Z"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "number": 40,
+      "id": "PR_kwDOLrnaA86T1kui",
+      "title": "More information on tree heads",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/40",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "- I've been informed that ciphersuite is not a word :/\r\n- Specify FullTreeHead, AuditorTreeHead",
+      "createdAt": "2025-04-24T22:24:35Z",
+      "updatedAt": "2025-04-25T09:03:19Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "629f05fa40d825c030b02205f9809683e2233935",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/tree-head",
+      "headRefOid": "e0cd890aa87d8531e69e1c9440f547f0c2750c93",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86mgOFT",
+          "commit": {
+            "abbreviatedOid": "e0cd890"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-04-25T09:03:19Z",
+          "updatedAt": "2025-04-25T09:03:19Z",
+          "comments": []
         }
       ]
     }
