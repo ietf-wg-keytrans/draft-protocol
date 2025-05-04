@@ -527,7 +527,7 @@ verify this against their local clock.
 For users which have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
 timestamps of the log entries on the frontier. The user verifies each timestamp
-is greater than or equal to the last, as above.
+is greater than or equal to the one prior, as above.
 
 
 # Binary Ladder
@@ -563,6 +563,9 @@ corresponding to the same or different log entries, in a single query response.
 The Transparency Log's query response always contains sufficient information to
 allow users to predict the outcome of each lookup (inclusion or non-inclusion of
 a particular version) in the binary ladder.
+
+Example code for computing the versions of a label that go in a binary ladder is
+provided in {{appendix-binary-ladder}}.
 
 
 # Fixed-Version Searches
@@ -612,7 +615,7 @@ log entry from the timestamp of the log entry in question and checking if the
 result is greater than or equal to the defined duration.
 
 A user executing a search may arrive at a log entry which is past its maximum
-lifetime by either of two ways. The user may have inspected a log entry which is
+lifetime by either of two ways: The user may have inspected a log entry which is
 **not** expired and decided to recurse to the log entry's left child, which is
 expired. Alternatively, the root log entry may be expired, in which case the
 user would've started their search at an expired root log entry.
@@ -636,7 +639,8 @@ This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
 lifetime need to be retained. Specifically, users will still need only a
 logarithmic number of log entries that have passed their maximum lifetime,
-meaning the rest can be discarded. Pruning is explained in more detail in TODO.
+meaning the rest can be discarded. Pruning is explained in more detail in
+{{ARCH}}.
 
 ## Algorithm {#fv-algorithm}
 
@@ -722,20 +726,25 @@ Window** (RMW), which is the frequency with which the Transparency Log generally
 expects label owners to perform monitoring. The log entry maximum lifetime, if
 defined, MUST be greater than the RMW.
 
-**Distinguished** log entries are chosen according to the algorithm below, such that there is roughly one per
-every interval of the RMW. If a user looks up a label, either through a
-fixed-version or greatest-version search, and finds that the first log entry
-containing their desired label-version pair is to the right of the rightmost
-distinguished log entry, they MUST regularly monitor the label-version pair
-until its monitoring path intersects a distinguished log entry. That is, until a
-new distinguished log entry is established to its right and the two log entries
-are verified to be consistent. The purpose of this monitoring is to ensure that
-the label-version pair is not removed or obscured by the Transparency Log before
-the label owner has had an opportunity to detect it.
+**Distinguished** log entries are chosen according to the algorithm below, such
+that there is roughly one per every interval of the RMW. If a user looks up a
+label (either through a fixed-version or greatest-version search) and finds that
+the first log entry that contains the desired label-version pair is to the right
+of the rightmost distinguished log entry, and the Transparency Log is deployed
+in Contact Monitoring mode, the user MUST regularly monitor the label-version
+pair until its monitoring path intersects a distinguished log entry. That is,
+until a new distinguished log entry is established to its right and the two log
+entries are verified to be consistent. The purpose of this monitoring is to
+ensure that the label-version pair is not removed or obscured by the
+Transparency Log before the label owner has had an opportunity to detect it. If
+the Transparency Log is deployed with a Third-Party Auditor or Third-Party
+Manager, this monitoring is not necessary if the third party is honest. However,
+the user MAY still perform it to detect collusion between the Transparency Log
+and the third party.
 
 If a user looks up a label and finds that the first log entry
 containing the label-version pair is either a distinguished log entry or to the
-left of any distinguished log entry, they are not required to monitor it
+left of any distinguished log entry, they do not need to monitor it
 afterwards. The only state that would be retained from the query would be the
 tree head, as discussed in {{updating-views-of-the-tree}}.
 
@@ -916,7 +925,7 @@ One special consideration for a greatest-version search is that the Transparency
 Log must prove that it is revealing the absolute greatest version of a label
 that exists, referred to as the **target version**. This differs from the binary
 ladders described for fixed-version searches ({{fv-binary-ladder}}) and
-monitoring ({{monitor-binary-ladder}}), which only aim to prove only a lower
+monitoring ({{monitor-binary-ladder}}), which only aim to prove a lower
 bound on the greatest version.
 
 Binary ladders provided for the purpose of a greatest-version search follow the
@@ -940,7 +949,7 @@ non-distinguished log entry:
     log entry to the right.
 - If the log entry is distinguished:
   - An inclusion or non-inclusion proof for a version is omitted only if it has
-    previously been provided in the same query response from the same log entry.
+    previously been provided in the same query response for the same log entry.
     This may happen if the binary ladder is provided in a Monitor query response
     and the user owns the label being monitored.
 
@@ -969,7 +978,9 @@ obligated to monitor the label in the future per
 {{reasonable-monitoring-window}}.
 
 
-# Cipher Suites
+# Cryptographic Computations
+
+## Cipher Suites
 
 Each Transparency Log uses a single fixed cipher suite, chosen when it is
 initially created, that specifies the following primitives and parameters to be used for
@@ -990,9 +1001,6 @@ used.
 Cipher suites are represented with the CipherSuite type. The cipher suites are
 defined in {{kt-cipher-suites}}.
 
-
-# Cryptographic Computations
-
 ## Tree Head Signature
 
 The head of a Transparency Log, which represents its most recent state, is
@@ -1007,7 +1015,7 @@ struct {
 
 where `tree_size` is the number of log entries. If the
 Transparency Log is deployed with Third-Party Management, then the public key
-used to verify the signature belongs to the third-party manager; otherwise the
+used to verify the signature belongs to the Third-Party Manager; otherwise the
 public key used belongs to the Service Operator.
 
 The signature itself is computed over a `TreeHeadTBS` structure, which
@@ -1077,8 +1085,8 @@ milliseconds. If the Transparency Log has chosen to define a maximum lifetime
 for log entries, per {{maximum-lifetime}}, this duration in milliseconds is
 stored in the `maximum_lifetime` field.
 
-Finally, the `root` field contains the root value of the Log Tree with
-`TreeHead.tree_size` leaves. `Hash.Nh` is the output size of the cipher suite's
+Finally, the `root` field contains the root value of the log tree with
+`tree_size` leaves. `Hash.Nh` is the output size of the cipher suite's
 hash function in bytes.
 
 ## Auditor Tree Head Signature
@@ -1115,7 +1123,7 @@ struct {
 
 The `config` field contains the long-term configuration for the Transparency
 Log. The `timestamp` and `tree_size` fields match that of `AuditorTreeHead`. The
-`root` field contains the value of the root node of the Log Tree when it had
+`root` field contains the value of the root node of the log tree when it had
 `tree_size` leaves.
 
 ## Full Tree Head Verification
@@ -1137,8 +1145,8 @@ struct {
       select (Configuration.mode) {
         case thirdPartyAuditing:
           AuditorTreeHead auditor_tree_head;
-      }
-  }
+      };
+  };
 } FullTreeHead;
 ~~~
 
@@ -1195,7 +1203,7 @@ struct {
 } UpdateTBS;
 ~~~
 
-The `value` contains the same contents as `UpdateValue.value`. Users
+The `value` field contains the same contents as `UpdateValue.value`. Users
 MUST successfully verify this signature before consuming `UpdateValue.value`.
 
 ## Commitment
@@ -1466,11 +1474,11 @@ Users processing a `CombinedTreeProof` MUST verify that the `timestamps`,
 of entries -- no more and no less.
 
 Finally, the `inclusion` field contains the minimum set of intermediate node
-values from the Log Tree that would allow a user to compute:
+values from the log tree that would allow a user to compute:
 
-- The root value of the Log Tree, and
+- The root value of the log tree, and
 - If an `AuditorTreeHead` was provided by the Transparency Log, the root value
-  of the Log Tree when it had `AuditorTreeHead.tree_size` leaves,
+  of the log tree when it had `AuditorTreeHead.tree_size` leaves,
 
 from the following:
 
@@ -1880,7 +1888,7 @@ def right(x, n):
     return x
 ~~~
 
-# Binary Ladder
+# Binary Ladder {#appendix-binary-ladder}
 
 The following Python code demonstrates efficient algorithms for computing the
 versions of a label to include in a binary ladder:
