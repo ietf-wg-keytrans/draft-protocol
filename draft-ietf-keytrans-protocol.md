@@ -1042,6 +1042,7 @@ struct {
       opaque leaf_public_key<0..2^16-1>;
     case thirdPartyAuditing:
       uint64 max_auditor_lag;
+      uint64 auditor_start_pos;
       opaque auditor_public_key<0..2^16-1>;
   };
 
@@ -1073,9 +1074,10 @@ signature on modifications to the Transparency Log, as described in
 
 If the deployment mode specifies a Third-Party Auditor, the maximum amount of
 time in milliseconds that the auditor may lag behind the most recent version of
-the Transparency Log is provided in `max_auditor_lag`. Additionally, a public
-key for verifying the auditor's signature on views of the Transparency Log is
-provided in `auditor_public_key`.
+the Transparency Log is provided in `max_auditor_lag`. The position of the first
+log entry that the auditor started processing is provided in
+`auditor_start_pos`. A public key for verifying the auditor's signature on views
+of the Transparency Log is provided in `auditor_public_key`.
 
 The `max_ahead` and `max_behind` fields contain the maximum amount of time in
 milliseconds that a tree head may be ahead of or behind the user's local clock
@@ -1105,12 +1107,15 @@ struct {
 
 Users verify an `AuditorTreeHead` with the following steps:
 
-1. Verify that the timestamp of the rightmost log entry is greater than or equal
+1. If the user advertised a previously observed tree size in their request,
+   verify that the advertised tree size is greater than or equal to
+   `Configuration.auditor_start_pos`.
+2. Verify that the timestamp of the rightmost log entry is greater than or equal
    to `timestamp`, and that the difference between the two is less than or equal
    to `Configuration.max_auditor_lag`.
-2. Verify that `tree_size` is less than or equal to that of the `TreeHead`
+3. Verify that `tree_size` is less than or equal to that of the `TreeHead`
    provided by the Transparency Log.
-3. Verify `signature` as a signature over the `AuditorTreeHeadTBS` structure:
+4. Verify `signature` as a signature over the `AuditorTreeHeadTBS` structure:
 
 ~~~ tls-presentation
 struct {
@@ -1553,44 +1558,6 @@ user's view of the tree and that no additional timestamps are necessary to
 identify the starting log entry. Users verify the proof as described in
 {{greatest-version-searches}}.
 
-<!--
-
-### Proofs for Third-Party Auditing
-
-In third-party auditing, users can rely on the assumption that the prefix tree
-is monitored to be append-only. Therefore, they need not execute the binary
-ladder but the proof can directly jump to the index identified by the prefix
-tree leaf.
-
-~~~ tls-presentation
-struct {
-  optional<uint32> version;
-  VRFProof vrf_proofs<0..2^8-1>;
-  PrefixProof prefix_proof;
-  InclusionProof inclusion;
-} SearchProofCompact;
-~~~
-
-The semantics of the `version` field do not change.
-
-Similarly to `SearchProof`, `vrf_proofs` contains the output of evaluating the
-VRF on a different version of the label. Either one version will be included
-(when requesting a specific version) or the versions to verify the full binary
-ladder (when requesting the latest version).
-
-`prefix_proof` contains the proof to either verify the inclusion of the
-label-version pair (when requesting a specific version) or to verify the full
-binary ladder (when requesting the latest version). Both types of proofs are for
-the most recent prefix tree.
-
-`inclusion` contains a batch inclusion of the most recent leaf and the leaf that
-commits to respective value for the request label-version pair. The most recent
-leaf is needed to obtain the prefix tree's root hash, and the leaf committing to
-the requested value will be at the index identified in the most recent prefix
-tree.
-
--->
-
 
 # User Operations
 
@@ -1803,6 +1770,91 @@ because the user would have already seen and verified it as part of
 conducting other queries. In particular, VRF proofs for different versions of
 each label are not provided, given that these can be cached from the
 original Search or Update query.
+
+
+# Third Parties
+
+## Management
+
+With the Third-Party Management deployment mode, a third party is responsible
+for the majority of the work of storing and operating the Transparency Log,
+while the Service Operator serves mainly to enforce access control and
+authenticate the addition of new entries. All user queries specified in
+{{user-operations}} are initially sent by users directly to the Service Operator
+to be forwarded to the Third-Party Manager if they pass access control.
+
+While other operations are forwarded by the Service Operator unchanged,
+`UpdateRequest` structures are forwarded to the Third-Party Manager with the
+Service Operator's signature attached:
+
+~~~ tls-presentation
+struct {
+  UpdateRequest request;
+  opaque signature<0..2^16-1>;
+} ManagerUpdateRequest;
+~~~
+
+The signature is computed as described in {{update-format}}. The Service
+Operator MUST maintain its own records (independent of the Third-Party Manager)
+for the greatest version of each label for the purpose of producing this
+signature.
+
+## Auditing
+
+With the Third-party Auditing deployment mode, the Service Operator obtains
+signatures from a lightweight Third-Party Auditor attesting to the fact that the
+Service Operator is constructing the tree correctly. These signatures are
+provided to users along with the responses to their queries.
+
+Each entry added to the log tree has a corresponding `AuditorUpdate` structure
+that allows the Third-Party Auditor to verify the log entry against stored state
+from previous log entries:
+
+~~~ tls-presentation
+struct {
+  uint64 timestamp;
+
+  PrefixLeaf added<0..2^16-1>;
+  PrefixLeaf removed<0..2^16-1>;
+
+  PrefixProof proof;
+} AuditorUpdate;
+~~~
+
+The `timestamp` field contains the timestamp of the corresponding log entry. The
+`added` field contains the list of `PrefixLeaf` structures that were added to
+the prefix tree in the corresponding log entry. The `removed` field contains the
+list of `PrefixLeaf` structures that were removed from the prefix tree.
+
+The `proof` field contains a batch lookup proof in the previous log entry's
+prefix tree for all search keys referenced by `added` or `removed. The
+`proof.results` field contains the result of the search for each element of
+`added` in the order provided, followed by the result of the search for each
+element of `removed` in the order provided.
+
+An auditor processes a single `AuditorUpdate` by following these steps:
+
+1. Verify that `timestamp` is greater than or equal to the timestamp of the
+   previous log entry.
+2. Verify that the `PrefixSearchResult` provided in `proof` for each element of
+   `added` has a `result_type` of `nonInclusionParent` or `nonInclusionLeaf`.
+3. Verify that the `PrefixSearchResult` provided in `proof` for each element of
+   `removed` has a `result_type` of `inclusion`.
+4. For each element of `removed`, verify that, with the addition of the new log
+   entry, the prefix tree leaf will have been published in at least one
+   distinguished log entry before removal.
+5. With `proof` and the `PrefixLeaf` structures in `removed`, compute the root
+   value of the previous log entry's prefix tree. Verify that this matches the
+   auditor's state.
+6. With `proof` and the `PrefixLeaf` structures in `added` and `removed`,
+   compute the new root value of the prefix tree. Compute the new root value of
+   the log tree after adding a leaf with the specified `timestamp` and prefix
+   tree root value.
+7. Provide an `AuditorTreeHead` to the Service Operator where
+   `AuditorTreeHead.timestamp` is set to `timestamp` and
+   `AuditorTreeHead.tree_size` is set to the new size of the log tree after the
+   addition of the new leaf. The signature is computed with the log tree root
+   value computed in the previous step.
 
 
 # Security Considerations
