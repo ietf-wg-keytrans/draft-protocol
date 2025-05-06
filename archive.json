@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-04T01:09:08.888809+00:00",
+  "timestamp": "2025-05-06T01:03:19.340473+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2453,6 +2453,32 @@
           "comments": []
         }
       ]
+    },
+    {
+      "number": 41,
+      "id": "PR_kwDOLrnaA86U-Lsm",
+      "title": "Write up how third-party auditing / management work",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/41",
+      "state": "OPEN",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
+      "createdAt": "2025-05-05T17:22:15Z",
+      "updatedAt": "2025-05-05T17:22:16Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "ac681d76612970c52ae304ff8f05297b2e7e721f",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/auditing",
+      "headRefOid": "bc898657f3ed96583335053f60616b7173c14825",
+      "closedAt": null,
+      "mergedAt": null,
+      "mergedBy": null,
+      "mergeCommit": null,
+      "comments": [],
+      "reviews": []
     }
   ]
 }
