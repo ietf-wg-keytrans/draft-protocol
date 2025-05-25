@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-15T01:01:24.729391+00:00",
+  "timestamp": "2025-05-25T01:10:27.618840+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2466,7 +2466,7 @@
       "labels": [],
       "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
       "createdAt": "2025-05-05T17:22:15Z",
-      "updatedAt": "2025-05-05T17:22:16Z",
+      "updatedAt": "2025-05-22T08:33:22Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "ac681d76612970c52ae304ff8f05297b2e7e721f",
@@ -2478,7 +2478,58 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86qfEC0",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "I think auditing needs a bit more context, e.g., how it is supposed to work out in the grand scheme of things, how it affects client operations, and which APIs there are.\r\n\r\nBut written text is good! Just don't think it makes much sense to add it in isolation.",
+          "createdAt": "2025-05-22T08:24:53Z",
+          "updatedAt": "2025-05-22T08:33:22Z",
+          "comments": [
+            {
+              "originalPosition": 159,
+              "body": "Why \"at least one\"? Why not \"the most recent\"?",
+              "createdAt": "2025-05-22T08:24:53Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            },
+            {
+              "originalPosition": 159,
+              "body": "```suggestion\r\n   entry, the prefix tree leaf was published in at least one\r\n```",
+              "createdAt": "2025-05-22T08:25:02Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            },
+            {
+              "originalPosition": 124,
+              "body": "You say that each entry \"has a corresponding `AuditorUpdate` structure. I find it unclear what that means. Will it be added to the log tree itself? I presume not as it is sufficient to show this to single auditors and need not be committed to. Maybe \"`AuditorUpdate` structures correspond to log tree entries and ...\". Or say that auditors can request them.",
+              "createdAt": "2025-05-22T08:28:11Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            },
+            {
+              "originalPosition": 137,
+              "body": "Assuming that these are served to auditors individually, and directly, it may be nice to allow logs to show diffs for more than one log entry, e.g., auditor last checked `n`, and log presents update for `n+m`. This should be easily doable by adding a `uint64 delta_to` field.",
+              "createdAt": "2025-05-22T08:30:00Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            },
+            {
+              "originalPosition": 120,
+              "body": "```suggestion\r\nsignatures from a Third-Party Auditor attesting to the fact that the\r\n```\r\n\r\nPartially personal preference. \"Lightweight\" is such an overused term and conveys little meaning. But also: I don't think auditors will be particularly lightweight, no? They may need to perform a lot of computations to check tree construction.",
+              "createdAt": "2025-05-22T08:31:02Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            },
+            {
+              "originalPosition": 117,
+              "body": "I think this section deserves a bit more context as to how auditing is supposed to work out, e.g., say that \"auditors will check append-only property at a regular basis,\" etc.",
+              "createdAt": "2025-05-22T08:32:21Z",
+              "updatedAt": "2025-05-22T08:33:22Z"
+            }
+          ]
+        }
+      ]
     },
     {
       "number": 42,
@@ -2492,7 +2543,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-05-13T03:07:54Z",
+      "updatedAt": "2025-05-22T09:02:41Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "ac681d76612970c52ae304ff8f05297b2e7e721f",
@@ -2504,7 +2555,118 @@
       "mergedBy": null,
       "mergeCommit": null,
       "comments": [],
-      "reviews": []
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA86qfLHY",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "CHANGES_REQUESTED",
+          "body": "It seems to me that the KT Cipher Suites section would be better off as its own RFC. Just like the JWT spec is distinct from the JWA spec.",
+          "createdAt": "2025-05-22T08:34:08Z",
+          "updatedAt": "2025-05-22T09:02:41Z",
+          "comments": [
+            {
+              "originalPosition": 15,
+              "body": "```suggestion\r\ninitially created, that specifies the following primitives and parameters for\r\ncryptographic computations:\r\n```",
+              "createdAt": "2025-05-22T08:34:09Z",
+              "updatedAt": "2025-05-22T09:02:41Z"
+            },
+            {
+              "originalPosition": 15,
+              "body": "```suggestion\r\ninitially created, that specifies the following primitives and parameters for\r\ncryptographic computations:\r\n```",
+              "createdAt": "2025-05-22T08:36:39Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 40,
+              "body": "```suggestion\r\nunexpected or malicious modifications to their account. Users that go offline\r\nfor longer than the maximum log entry lifetime may not detect that the log\r\ninserted malicious entries associated with their label.\r\n```\r\n\r\nI tried being more concrete in time (what is \"very long periods of time\"?) and attack (what is \"limited value\"?).",
+              "createdAt": "2025-05-22T08:42:03Z",
+              "updatedAt": "2025-05-22T12:00:45Z"
+            },
+            {
+              "originalPosition": 85,
+              "body": "```suggestion\r\nuint16 CipherSuite;\r\nCipherSuite KT_LVL_HASH_SIG = VALUE;\r\n```\r\n\r\nThink this is clear enough, and shorter.",
+              "createdAt": "2025-05-22T08:44:49Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 93,
+              "body": "```suggestion\r\n- Recommended: Whether support for this cipher suite is RECOMMENDED.\r\n```",
+              "createdAt": "2025-05-22T08:46:24Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 98,
+              "body": "```suggestion\r\n  - Y: Indicates that the item is RECOMMENDED. This\r\n```",
+              "createdAt": "2025-05-22T08:46:45Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 100,
+              "body": "I find this sentence unclear. Which purpose was each mechanism defined for? How does one learn about this purpose?",
+              "createdAt": "2025-05-22T08:47:45Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 102,
+              "body": "Applicability to what?",
+              "createdAt": "2025-05-22T08:47:59Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 104,
+              "body": "```suggestion\r\n    necessary to understand the applicability of that mechanism. Mechanisms with\r\n    limited applicability may be recommended, but in such cases applicability\r\n    statements that describe any limitations of the mechanism or necessary\r\n    constraints will be provided.\r\n```",
+              "createdAt": "2025-05-22T08:50:33Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 110,
+              "body": "```suggestion\r\n  - N: Indicates that the item's associated mechanism has not been evaluated and\r\n    is not RECOMMENDED (as opposed to being NOT RECOMMENDED). This does not\r\n    mean that the mechanism is flawed. For example, an item may be marked as \"N\"\r\n    because it has usage constraints or limited applicability.\r\n```",
+              "createdAt": "2025-05-22T08:53:49Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 111,
+              "body": "So what is it? SHOULD NOT or MUST NOT? Can only be one.",
+              "createdAt": "2025-05-22T08:54:16Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 114,
+              "body": "I find it odd to have a category that must not be used. I think, it would be better to drop this category. Anything that's unspecified cannot be used anyways. One could have an appendix for \"evaluated mechanisms\" that were discarded to document reasoning.",
+              "createdAt": "2025-05-22T08:55:11Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 126,
+              "body": "```suggestion\r\nFor all cipher suites, the following primitives and parameters are the same:\r\n```",
+              "createdAt": "2025-05-22T08:56:30Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 130,
+              "body": "I am puzzled. What does this mean?",
+              "createdAt": "2025-05-22T08:57:07Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 130,
+              "body": "Why not list these explicitly? I think we need not standardize that all ciphersuites must use SHA-256. If we think they should, we should only standardize ciphersuites that do.\r\n\r\nThe difference is whether we standardize that we must or just doing it.",
+              "createdAt": "2025-05-22T08:58:34Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            },
+            {
+              "originalPosition": 143,
+              "body": "Oy. This seems like quite the process being standardized here. Has this already been worked towards? This must be carefully discussed before we proceed. I would like to learn more about the requirements for having a \"designated experts\" group etc. Why not just leave it up to the WG?",
+              "createdAt": "2025-05-22T09:00:45Z",
+              "updatedAt": "2025-05-22T09:02:42Z"
+            }
+          ]
+        }
+      ]
     }
   ]
 }
