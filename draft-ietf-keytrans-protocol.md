@@ -1802,13 +1802,12 @@ signature.
 ## Auditing
 
 With the Third-party Auditing deployment mode, the Service Operator obtains
-signatures from a lightweight Third-Party Auditor attesting to the fact that the
+signatures from a Third-Party Auditor attesting to the fact that the
 Service Operator is constructing the tree correctly. These signatures are
 provided to users along with the responses to their queries.
 
-Each entry added to the log tree has a corresponding `AuditorUpdate` structure
-that allows the Third-Party Auditor to verify the log entry against stored state
-from previous log entries:
+`AuditorUpdate` structures correspond to individual log entries and allow the
+Third-Party Auditor to verify the log entry against its stored state:
 
 ~~~ tls-presentation
 struct {
@@ -1841,7 +1840,7 @@ An auditor processes a single `AuditorUpdate` by following these steps:
 3. Verify that the `PrefixSearchResult` provided in `proof` for each element of
    `removed` has a `result_type` of `inclusion`.
 4. For each element of `removed`, verify that, with the addition of the new log
-   entry, the prefix tree leaf will have been published in at least one
+   entry, the prefix tree leaf was published in at least one
    distinguished log entry before removal.
 5. With `proof` and the `PrefixLeaf` structures in `removed`, compute the root
    value of the previous log entry's prefix tree. Verify that this matches the
