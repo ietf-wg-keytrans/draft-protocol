@@ -67,6 +67,7 @@ informative:
       - name: Harika Kalidhindi
       - name: Seung Jin Yang
       - name: Raluca Ada Popa
+  SHS: DOI.10.6028/NIST.FIPS.180-4
 
 
 --- abstract
@@ -983,7 +984,7 @@ obligated to monitor the label in the future per
 ## Cipher Suites
 
 Each Transparency Log uses a single fixed cipher suite, chosen when it is
-initially created, that specifies the following primitives and parameters to be used for
+initially created, that specifies the following primitives and parameters for
 cryptographic computations:
 
 * A hash algorithm
@@ -1807,8 +1808,47 @@ original Search or Update query.
 
 # Security Considerations
 
-<!-- TODO Security -->
-<!-- TODO Say that transport layer should be encrypted, provide auth -->
+The security properties provided by this protocol are discussed in detail in
+{{ARCH}}. Generally speaking, the Key Transparency protocol ensures that all
+users of a Transparency Log have a consistent view of the data stored in the
+log. Service Operators may still be able to make malicious modifications to
+stored data, such as by attaching new public keys to a user's account and
+encouraging other users to encrypt to these public keys when messaging the user.
+However, since the existence of these new public keys is equally visible to the
+user whose account they affect, the user can promptly act to have them removed
+from their account or inform contacts out-of-band that their communication may
+be compromised.
+
+Key Transparency relies on users coming online regularly to monitor for
+unexpected or malicious modifications to their account. Users that go offline
+for longer than the log entry maximum lifetime may not detect if the
+Transparency Log made malicious modifications to their labels.
+
+Similarly, Key Transparency relies on the ability of users to retain long-term
+state regarding their account and past views of the Transparency Log. Users
+which are unable to maintain long-term state, or may lose their state, have a
+correspondingly limited ability to detect misbehavior by the Service Operator.
+In particular, users which are completely stateless will generally gain nothing
+by participating in this protocol over simply verifying a signature from the
+Service Operator and, if there is one, the Third-Party Auditor or Manager.
+
+Ultimately, ensuring that all users have a consistent view of the Transparency
+Log requires that the Service Operator is not able to create and maintain
+long-term network partitions between users. As such, users need access to at
+least one communication channel (even a very low-bandwidth one) that is
+resistant to partitions. The protocol directly provides for a Third-Party
+Auditor or Manager, which is trusted to prevent such partitions. Other options
+include allowing users to gossip with each other, or allowing users to contact
+the Transparency Log over an anonymous channel.
+
+Key Transparency provides users with a limited assurance that query responses
+are authentic: a network attacker will not be able to forge false responses to
+queries but may provide responses which are up to `max_behind` milliseconds
+stale. Key Transparency provides no privacy from network observers and does not
+have the ability to authenticate specific users to the Transparency Log. To
+mitigate these limitations, users SHOULD contact the Transparency Log over a
+protocol that provides transport-layer encryption and an appropriate level of
+authentication for both parties.
 
 
 # IANA Considerations
@@ -1826,15 +1866,99 @@ this document
 
 ## KT Cipher Suites
 
+A cipher suite is a specific combination of cryptographic primitives and
+parameters to be used in an instantiation of the protocol. Cipher suite names
+follow the naming convention:
+
 ~~~ tls-presentation
 uint16 CipherSuite;
+CipherSuite KT_LVL_HASH_SIG = VALUE;
 ~~~
 
-<!-- TODO -->
+The columns in the registry are as follows:
+
+- Value: The numeric value of the cipher suite.
+- Name: The name of the cipher suite.
+- Recommended: Whether support for this cipher suite is RECOMMENDED.
+  Valid values are "Y", "N", and "D", as described below. The default value of
+  the "Recommended" column is "N". Setting the Recommended item to "Y" or "D",
+  or changing an item whose current value is "Y" or "D", requires Standards
+  Action {{!RFC8126}}.
+  - Y: Indicates that the item is RECOMMENDED. This
+    only means that the associated mechanism is fit for the purpose for which it
+    was defined. Careful reading of the documentation for the mechanism is
+    necessary to understand the applicability of that mechanism. Mechanisms with
+    limited applicability may be recommended, but in such cases applicability
+    statements that describe any limitations of the mechanism or necessary
+    constraints will be provided.
+  - N: Indicates that the item's associated mechanism has not been evaluated and
+    is not RECOMMENDED (as opposed to being NOT RECOMMENDED). This does not
+    mean that the mechanism is flawed. For example, an item may be marked as "N"
+    because it has usage constraints or limited applicability.
+  - D: Indicates that the item is discouraged and SHOULD NOT be
+    used. This marking could be used to identify mechanisms that might result in
+    problems if they are used, such as a weak cryptographic algorithm or a
+    mechanism that might cause interoperability problems in deployment.
+- Reference: The document where this cipher suite is defined.
+
+Initial contents:
+
+| Value  | Name                                 | R | Ref      |
+|:-------|:-------------------------------------|:--|:---------|
+| 0x0000 | RESERVED                             | - | RFC XXXX |
+| 0x0001 | KT_128_SHA256_P256                   | Y | RFC XXXX |
+| 0x0002 | KT_128_SHA256_Ed25519                | Y | RFC XXXX |
+
+For all cipher suites this document defines, the following primitives and
+parameters are the same:
+
+- The hash algorithm is SHA-256, as defined in {{SHS}}.
+- `Nc`: 16
+- `Kc`: The hex-decoded value: `d821f8790d97709796b4d7903357c3f5`
+
+The signature algorithm and VRF algorithm for each cipher suite is as follows:
+
+| Name                  | Signature              | VRF Algorithm                     |
+|:----------------------|:-----------------------|:----------------------------------|
+| KT_128_SHA256_P256    | ecdsa_secp256r1_sha256 | ECVRF-P256-SHA256-TAI             |
+| KT_128_SHA256_Ed25519 | ed25519                | ECVRF-EDWARDS25519-SHA512-TAI[32] |
+
+The VRF algorithms are specified in {{RFC9381}}. For `KT_128_SHA256_Ed25519`,
+the final hash output of `ECVRF-EDWARDS25519-SHA512-TAI` is truncated to be 32
+bytes.
 
 ## KT Designated Expert Pool {#de}
 
-<!-- TODO -->
+Specification Required {{RFC8126}} registry requests are registered after a
+three-week review period on the KT Designated Expert (DE) mailing list
+<kt-reg-review@ietf.org> on the advice of one or more of the KT DEs. However, to
+allow for the allocation of values prior to publication, the KT DEs may approve
+registration once they are satisfied that such a specification will be
+published.
+
+Registration requests sent to the KT DEs' mailing list for review SHOULD use an
+appropriate subject (e.g., "Request to register value in KT registry").
+
+Within the review period, the KT DEs will either approve or deny the
+registration request, communicating this decision to the KT DEs' mailing list
+and IANA. Denials SHOULD include an explanation and, if applicable, suggestions
+as to how to make the request successful. Registration requests that are
+undetermined for a period longer than 21 days can be brought to the IESG's
+attention for resolution using the <iesg@ietf.org> mailing list.
+
+Criteria that SHOULD be applied by the KT DEs includes determining whether the
+proposed registration duplicates existing functionality, whether it is likely to
+be of general applicability or useful only for a single application, and whether
+the registration description is clear.
+
+IANA MUST only accept registry updates from the KT DEs and SHOULD direct all
+requests for registration to the KT DEs' mailing list.
+
+It is suggested that multiple KT DEs who are able to represent the perspectives
+of different applications using this specification be appointed, in order to
+enable a broadly informed review of registration decisions. In cases where a
+registration decision could be perceived as creating a conflict of interest for
+a particular KT DE, that KT DE SHOULD defer to the judgment of the other KT DEs.
 
 
 --- back
