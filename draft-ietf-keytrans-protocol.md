@@ -984,8 +984,8 @@ obligated to monitor the label in the future per
 ## Cipher Suites
 
 Each Transparency Log uses a single fixed cipher suite, chosen when it is
-initially created, that specifies the following primitives and parameters to be
-used for cryptographic computations:
+initially created, that specifies the following primitives and parameters for
+cryptographic computations:
 
 * A hash algorithm
 * A signature algorithm
@@ -1881,9 +1881,8 @@ be compromised.
 
 Key Transparency relies on users coming online regularly to monitor for
 unexpected or malicious modifications to their account. Users that go offline
-forever, or for very long periods of time, may derive limited value from storing
-information about themselves in a Transparency Log if they won't be able to
-detect and address unexpected modifications in a timely manner.
+for longer than the log entry maximum lifetime may not detect if the
+Transparency Log made malicious modifications to their labels.
 
 Similarly, Key Transparency relies on the ability of users to retain long-term
 state regarding their account and past views of the Transparency Log. Users
@@ -1932,38 +1931,31 @@ parameters to be used in an instantiation of the protocol. Cipher suite names
 follow the naming convention:
 
 ~~~ tls-presentation
-CipherSuite KT_LVL_HASH_SIG = VALUE;
-~~~
-
-Where `VALUE` is represented as a 16-bit integer:
-
-~~~ tls-presentation
 uint16 CipherSuite;
+CipherSuite KT_LVL_HASH_SIG = VALUE;
 ~~~
 
 The columns in the registry are as follows:
 
 - Value: The numeric value of the cipher suite.
 - Name: The name of the cipher suite.
-- Recommended: Whether support for this cipher suite is recommended by the IETF.
+- Recommended: Whether support for this cipher suite is RECOMMENDED.
   Valid values are "Y", "N", and "D", as described below. The default value of
   the "Recommended" column is "N". Setting the Recommended item to "Y" or "D",
   or changing an item whose current value is "Y" or "D", requires Standards
   Action {{!RFC8126}}.
-  - Y: Indicates that the IETF has consensus that the item is RECOMMENDED. This
+  - Y: Indicates that the item is RECOMMENDED. This
     only means that the associated mechanism is fit for the purpose for which it
     was defined. Careful reading of the documentation for the mechanism is
-    necessary to understand the applicability of that mechanism. The IETF could
-    recommend mechanisms that have limited applicability, but it will provide
-    applicability statements that describe any limitations of the mechanism or
-    necessary constraints on its use.
-  - N: Indicates that the item has not been evaluated by the IETF and that the
-    IETF has made no statement about the suitability of the associated
-    mechanism. This does not necessarily mean that the mechanism is flawed, only
-    that no consensus exists. The IETF might have consensus to leave an item
-    marked as "N" on the basis of it having limited applicability or usage
-    constraints.
-  - D: Indicates that the item is discouraged and SHOULD NOT or MUST NOT be
+    necessary to understand the applicability of that mechanism. Mechanisms with
+    limited applicability may be recommended, but in such cases applicability
+    statements that describe any limitations of the mechanism or necessary
+    constraints will be provided.
+  - N: Indicates that the item's associated mechanism has not been evaluated and
+    is not RECOMMENDED (as opposed to being NOT RECOMMENDED). This does not
+    mean that the mechanism is flawed. For example, an item may be marked as "N"
+    because it has usage constraints or limited applicability.
+  - D: Indicates that the item is discouraged and SHOULD NOT be
     used. This marking could be used to identify mechanisms that might result in
     problems if they are used, such as a weak cryptographic algorithm or a
     mechanism that might cause interoperability problems in deployment.
