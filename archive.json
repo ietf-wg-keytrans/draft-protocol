@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-05-25T01:10:27.618840+00:00",
+  "timestamp": "2025-06-15T01:13:26.107076+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2466,13 +2466,13 @@
       "labels": [],
       "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
       "createdAt": "2025-05-05T17:22:15Z",
-      "updatedAt": "2025-05-22T08:33:22Z",
+      "updatedAt": "2025-06-13T15:52:21Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
-      "baseRefOid": "ac681d76612970c52ae304ff8f05297b2e7e721f",
+      "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/auditing",
-      "headRefOid": "bc898657f3ed96583335053f60616b7173c14825",
+      "headRefOid": "f2d9c1bc431c7b115f4f3c952994816c71ba256c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2528,6 +2528,66 @@
               "updatedAt": "2025-05-22T08:33:22Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uXEhp",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T15:41:25Z",
+          "updatedAt": "2025-06-13T15:41:26Z",
+          "comments": [
+            {
+              "originalPosition": 117,
+              "body": "Background info I think is more appropriate for the arch document. I looked in the arch docu and we're pretty thin on how we describe auditing there too, so I will flesh it out separately",
+              "createdAt": "2025-06-13T15:41:25Z",
+              "updatedAt": "2025-06-13T15:41:26Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uXJNy",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T15:44:27Z",
+          "updatedAt": "2025-06-13T15:44:28Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "I'm not sure what you mean here?",
+              "createdAt": "2025-06-13T15:44:27Z",
+              "updatedAt": "2025-06-13T15:44:28Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uXK9E",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T15:46:53Z",
+          "updatedAt": "2025-06-13T15:46:53Z",
+          "comments": [
+            {
+              "originalPosition": 159,
+              "body": "It's possible that if we add a new log entry, that new log entry will be distinguished immediately. This happens for example if the RMW is 0. That would make it the most recent distinguished log entry. But we just removed this search key from it, so it's not in the \"most recent\" distinguished log entry",
+              "createdAt": "2025-06-13T15:46:53Z",
+              "updatedAt": "2025-06-13T15:46:53Z"
+            }
+          ]
         }
       ]
     },
@@ -2543,13 +2603,13 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-05-22T09:02:41Z",
+      "updatedAt": "2025-06-13T15:53:23Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
-      "baseRefOid": "ac681d76612970c52ae304ff8f05297b2e7e721f",
+      "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/back-matter",
-      "headRefOid": "6f2460d684f75f249c38b5b49a92db451eda4e15",
+      "headRefOid": "92cf06044d910bb36ec1eb627506b2e9905178dc",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2663,6 +2723,106 @@
               "body": "Oy. This seems like quite the process being standardized here. Has this already been worked towards? This must be carefully discussed before we proceed. I would like to learn more about the requirements for having a \"designated experts\" group etc. Why not just leave it up to the WG?",
               "createdAt": "2025-05-22T09:00:45Z",
               "updatedAt": "2025-05-22T09:02:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uPMl9",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T02:04:56Z",
+          "updatedAt": "2025-06-13T02:04:56Z",
+          "comments": [
+            {
+              "originalPosition": 100,
+              "body": "The applicability / purpose of a mechanism is specified in an architecture document. So like, the arch document we have for keytrans",
+              "createdAt": "2025-06-13T02:04:56Z",
+              "updatedAt": "2025-06-13T02:04:56Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uPOA-",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T02:10:02Z",
+          "updatedAt": "2025-06-13T02:10:02Z",
+          "comments": [
+            {
+              "originalPosition": 114,
+              "body": "I think the problem is that once IANA allocates a codepoint, it cannot be un-allocated. But we can change whether the codepoint is Y / N / D. So a codepoint might start Y then move to D due to cryptanalysis.",
+              "createdAt": "2025-06-13T02:10:02Z",
+              "updatedAt": "2025-06-13T02:10:02Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uPOSX",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T02:10:41Z",
+          "updatedAt": "2025-06-13T02:10:41Z",
+          "comments": [
+            {
+              "originalPosition": 126,
+              "body": "This statement only holds for this document. Other documents may create cipher suites that do something different",
+              "createdAt": "2025-06-13T02:10:41Z",
+              "updatedAt": "2025-06-13T02:10:42Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uPPS3",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T02:12:23Z",
+          "updatedAt": "2025-06-13T02:12:23Z",
+          "comments": [
+            {
+              "originalPosition": 130,
+              "body": "We are not standardizing that all cipher suites must use SHA-256? We are just saying that the two defined here do.",
+              "createdAt": "2025-06-13T02:12:23Z",
+              "updatedAt": "2025-06-13T02:12:39Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86uPP5p",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-13T02:14:44Z",
+          "updatedAt": "2025-06-13T02:14:45Z",
+          "comments": [
+            {
+              "originalPosition": 143,
+              "body": "I'm pretty sure it is just a mailing list to approve allocating codepoints. TLS, MLS, etc have them. The keytrans wg may not always exist to make such decisions",
+              "createdAt": "2025-06-13T02:14:44Z",
+              "updatedAt": "2025-06-13T02:14:45Z"
             }
           ]
         }
