@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-15T01:13:26.107076+00:00",
+  "timestamp": "2025-06-17T01:06:13.299194+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2466,7 +2466,7 @@
       "labels": [],
       "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
       "createdAt": "2025-05-05T17:22:15Z",
-      "updatedAt": "2025-06-13T15:52:21Z",
+      "updatedAt": "2025-06-16T06:42:37Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
@@ -2588,6 +2588,46 @@
               "updatedAt": "2025-06-13T15:46:53Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usJXd",
+          "commit": {
+            "abbreviatedOid": "f2d9c1b"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:40:30Z",
+          "updatedAt": "2025-06-16T06:40:30Z",
+          "comments": [
+            {
+              "originalPosition": 117,
+              "body": "We have a lot of introductory/glue text in other sections already, and I think this is a strength of the draft. Why not just a small intro to third-party management and auditing as intro text to the section \"Third Parties\"? I think we could be very succinct here, but this would help readers.",
+              "createdAt": "2025-06-16T06:40:30Z",
+              "updatedAt": "2025-06-16T06:40:30Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usKcS",
+          "commit": {
+            "abbreviatedOid": "f2d9c1b"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:42:37Z",
+          "updatedAt": "2025-06-16T06:42:37Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "This structure is basically a diff, right? The `timestamp` field encodes the newer version of the diff. My assumption was: Since the structure does not define a field for the older version, the diff is to the previous version (i.e., this structure will always represent a diff from epoch `n` to epoch `n+1`).\r\n\r\nI think it would be better to allow for flexibility here and allow auditors to sign off diffs between epochs `n` and `n+m`. For that, we need two timestamps.",
+              "createdAt": "2025-06-16T06:42:37Z",
+              "updatedAt": "2025-06-16T06:42:38Z"
+            }
+          ]
         }
       ]
     },
@@ -2603,7 +2643,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-06-13T15:53:23Z",
+      "updatedAt": "2025-06-16T06:35:50Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
@@ -2823,6 +2863,86 @@
               "body": "I'm pretty sure it is just a mailing list to approve allocating codepoints. TLS, MLS, etc have them. The keytrans wg may not always exist to make such decisions",
               "createdAt": "2025-06-13T02:14:44Z",
               "updatedAt": "2025-06-13T02:14:45Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usCq9",
+          "commit": {
+            "abbreviatedOid": "6f2460d"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:26:59Z",
+          "updatedAt": "2025-06-16T06:27:00Z",
+          "comments": [
+            {
+              "originalPosition": 114,
+              "body": "Okay, if this is true please mark my comment as resolved! How do we get from \"I think the problem is\" to \"the problem is\"? \ud83d\ude01 ",
+              "createdAt": "2025-06-16T06:27:00Z",
+              "updatedAt": "2025-06-16T06:27:00Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usFHe",
+          "commit": {
+            "abbreviatedOid": "92cf060"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:32:08Z",
+          "updatedAt": "2025-06-16T06:32:08Z",
+          "comments": [
+            {
+              "originalPosition": 130,
+              "body": "Okay, I think I parsed \"for all ciphersuites in this document\" differently. That read normative to me. But I still think it would be clearer if we just made the next table bigger. Would suggest that as a commit, but still don't know really what `Kc` means \ud83d\ude07  (Like, _is it_ `d82...` or is it something that decodes to that?)",
+              "createdAt": "2025-06-16T06:32:08Z",
+              "updatedAt": "2025-06-16T06:32:08Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usGEm",
+          "commit": {
+            "abbreviatedOid": "92cf060"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:34:01Z",
+          "updatedAt": "2025-06-16T06:34:01Z",
+          "comments": [
+            {
+              "originalPosition": 143,
+              "body": "Okay, if this is a standard thing, that sounds good, but it also seems like quite the administrative hurdle. I wonder whether we could make this simpler initially and standardize a process to \"do things\" later.",
+              "createdAt": "2025-06-16T06:34:01Z",
+              "updatedAt": "2025-06-16T06:34:01Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86usG9X",
+          "commit": {
+            "abbreviatedOid": "92cf060"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-16T06:35:50Z",
+          "updatedAt": "2025-06-16T06:35:50Z",
+          "comments": [
+            {
+              "originalPosition": 100,
+              "body": "Okay, but there should be a reference to this, no? I think, an example could already help. Maybe a sentence like: \"For example, some ciphersuites may assume that the log's contents are public, while others aim to keep them private.\"",
+              "createdAt": "2025-06-16T06:35:50Z",
+              "updatedAt": "2025-06-16T06:35:50Z"
             }
           ]
         }
