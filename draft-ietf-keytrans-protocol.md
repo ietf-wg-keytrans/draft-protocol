@@ -1774,18 +1774,26 @@ original Search or Update query.
 
 # Third Parties
 
+Third-Party Management and Third-Party Auditing are two deployment modes that
+require the Transparency Log to delegate part of its operation to a third party.
+Users are able to run more efficiently as long as they can assume that the
+Transparency Log and the third party won't collude to trick them into accepting
+malicious results.
+
 ## Management
 
 With the Third-Party Management deployment mode, a third party is responsible
-for the majority of the work of storing and operating the Transparency Log,
-while the Service Operator serves mainly to enforce access control and
-authenticate the addition of new entries. All user queries specified in
-{{user-operations}} are initially sent by users directly to the Service Operator
-to be forwarded to the Third-Party Manager if they pass access control.
+for the majority of the work of storing and operating the Transparency Log. The
+Service Operator serves only to enforce access control, authenticate the
+addition of new entries, and prevent the creation of forks by the Third-Party
+Manager. Critically, the Service Operator is trusted to ensure that only one
+value for each version of a label is authorized.
 
-While other operations are forwarded by the Service Operator unchanged,
-`UpdateRequest` structures are forwarded to the Third-Party Manager with the
-Service Operator's signature attached:
+All user queries specified in {{user-operations}} are initially sent by users
+directly to the Service Operator to be forwarded to the Third-Party Manager if
+they pass access control. While other operations are forwarded by the Service
+Operator unchanged, `UpdateRequest` structures are forwarded to the Third-Party
+Manager with the Service Operator's signature attached:
 
 ~~~ tls-presentation
 struct {
@@ -1794,10 +1802,7 @@ struct {
 } ManagerUpdateRequest;
 ~~~
 
-The signature is computed as described in {{update-format}}. The Service
-Operator MUST maintain its own records (independent of the Third-Party Manager)
-for the greatest version of each label for the purpose of producing this
-signature.
+The signature is computed as described in {{update-format}}.
 
 ## Auditing
 
