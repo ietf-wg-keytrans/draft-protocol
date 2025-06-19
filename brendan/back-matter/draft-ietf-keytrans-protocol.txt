@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 15 December 2025                                   13 June 2025
+Expires: 21 December 2025                                   19 June 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 December 2025.
+   This Internet-Draft will expire on 21 December 2025.
 
 Copyright Notice
 
@@ -2036,10 +2036,12 @@ Table of Contents
          that the associated mechanism is fit for the purpose for which
          it was defined.  Careful reading of the documentation for the
          mechanism is necessary to understand the applicability of that
-         mechanism.  Mechanisms with limited applicability may be
-         recommended, but in such cases applicability statements that
-         describe any limitations of the mechanism or necessary
-         constraints will be provided.
+         mechanism.  A cipher suite may, for example, be recommended
+         that is only suitable for use in applications where the
+         Transparency Log's contents are public.  Mechanisms with
+         limited applicability may be recommended, but in such cases
+         applicability statements that describe any limitations of the
+         mechanism or necessary constraints will be provided.
 
       -  N: Indicates that the item's associated mechanism has not been
          evaluated and is not RECOMMENDED (as opposed to being NOT
@@ -2069,14 +2071,15 @@ Table of Contents
 
                                   Table 1
 
-   For all cipher suites this document defines, the following primitives
-   and parameters are the same:
+   For all cipher suites defined in this document specifically, the
+   following primitives and parameters are the same:
 
    *  The hash algorithm is SHA-256, as defined in [SHS].
 
    *  Nc: 16
 
-   *  Kc: The hex-decoded value: d821f8790d97709796b4d7903357c3f5
+   *  Kc: The following string, hex decoded:
+      d821f8790d97709796b4d7903357c3f5
 
    The signature algorithm and VRF algorithm for each cipher suite is as
    follows:
