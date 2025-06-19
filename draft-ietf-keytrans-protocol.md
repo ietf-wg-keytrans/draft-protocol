@@ -1884,13 +1884,15 @@ The columns in the registry are as follows:
   the "Recommended" column is "N". Setting the Recommended item to "Y" or "D",
   or changing an item whose current value is "Y" or "D", requires Standards
   Action {{!RFC8126}}.
-  - Y: Indicates that the item is RECOMMENDED. This
-    only means that the associated mechanism is fit for the purpose for which it
-    was defined. Careful reading of the documentation for the mechanism is
-    necessary to understand the applicability of that mechanism. Mechanisms with
-    limited applicability may be recommended, but in such cases applicability
-    statements that describe any limitations of the mechanism or necessary
-    constraints will be provided.
+  - Y: Indicates that the item is RECOMMENDED. This only means that the
+    associated mechanism is fit for the purpose for which it was defined.
+    Careful reading of the documentation for the mechanism is necessary to
+    understand the applicability of that mechanism. A cipher suite may, for
+    example, be recommended that is only suitable for use in applications where
+    the Transparency Log's contents are public. Mechanisms with limited
+    applicability may be recommended, but in such cases applicability statements
+    that describe any limitations of the mechanism or necessary constraints will
+    be provided.
   - N: Indicates that the item's associated mechanism has not been evaluated and
     is not RECOMMENDED (as opposed to being NOT RECOMMENDED). This does not
     mean that the mechanism is flawed. For example, an item may be marked as "N"
@@ -1909,12 +1911,12 @@ Initial contents:
 | 0x0001 | KT_128_SHA256_P256                   | Y | RFC XXXX |
 | 0x0002 | KT_128_SHA256_Ed25519                | Y | RFC XXXX |
 
-For all cipher suites this document defines, the following primitives and
-parameters are the same:
+For all cipher suites defined in this document specifically, the following
+primitives and parameters are the same:
 
 - The hash algorithm is SHA-256, as defined in {{SHS}}.
 - `Nc`: 16
-- `Kc`: The hex-decoded value: `d821f8790d97709796b4d7903357c3f5`
+- `Kc`: The following string, hex decoded: `d821f8790d97709796b4d7903357c3f5`
 
 The signature algorithm and VRF algorithm for each cipher suite is as follows:
 
