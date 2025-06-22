@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-17T01:06:13.299194+00:00",
+  "timestamp": "2025-06-22T01:12:51.442791+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2466,13 +2466,13 @@
       "labels": [],
       "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
       "createdAt": "2025-05-05T17:22:15Z",
-      "updatedAt": "2025-06-16T06:42:37Z",
+      "updatedAt": "2025-06-19T16:26:12Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/auditing",
-      "headRefOid": "f2d9c1bc431c7b115f4f3c952994816c71ba256c",
+      "headRefOid": "ad9ff1eb0dddda1062c4b7283545f99fecaa676c",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
@@ -2628,6 +2628,46 @@
               "updatedAt": "2025-06-16T06:42:38Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86vcTDA",
+          "commit": {
+            "abbreviatedOid": "f2d9c1b"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-19T15:20:59Z",
+          "updatedAt": "2025-06-19T15:20:59Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "Oh, I don't think it would be secure to batch diffs like that. The auditor has to go through each AuditorUpdate one at a time to make sure the corresponding log entry is acceptable / won't give a false view to users.",
+              "createdAt": "2025-06-19T15:20:59Z",
+              "updatedAt": "2025-06-19T15:20:59Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86vc8YQ",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-19T16:26:11Z",
+          "updatedAt": "2025-06-19T16:26:12Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "I know that auditors must process every epoch. But they could batch their results to users! (Promising that they indeed processed all epochs in the delta.)",
+              "createdAt": "2025-06-19T16:26:12Z",
+              "updatedAt": "2025-06-19T16:26:12Z"
+            }
+          ]
         }
       ]
     },
@@ -2643,13 +2683,13 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-06-16T06:35:50Z",
+      "updatedAt": "2025-06-19T15:01:55Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/back-matter",
-      "headRefOid": "92cf06044d910bb36ec1eb627506b2e9905178dc",
+      "headRefOid": "0bf1f1da9f35a2378b039b9631544302d9704ea4",
       "closedAt": null,
       "mergedAt": null,
       "mergedBy": null,
