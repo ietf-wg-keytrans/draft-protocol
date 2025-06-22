@@ -1811,8 +1811,12 @@ signatures from a Third-Party Auditor attesting to the fact that the
 Service Operator is constructing the tree correctly. These signatures are
 provided to users along with the responses to their queries.
 
-`AuditorUpdate` structures correspond to individual log entries and allow the
-Third-Party Auditor to verify the log entry against its stored state:
+For each new log entry the Service Operator adds to the log, it produces a
+corresponding `AuditorUpdate` structure and sends this to the Third-Party
+Auditor. The Third-Party Auditor MUST receive and successfully verify an
+`AuditorUpdate` structure for a log entry before providing the Service Operator
+with an `AuditorTreeHead` structure whose `size` field would include the log
+entry.
 
 ~~~ tls-presentation
 struct {
