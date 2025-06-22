@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 21 December 2025                                   19 June 2025
+Expires: 24 December 2025                                   22 June 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 December 2025.
+   This Internet-Draft will expire on 24 December 2025.
 
 Copyright Notice
 
@@ -1995,9 +1995,12 @@ Table of Contents
    signatures are provided to users along with the responses to their
    queries.
 
-   AuditorUpdate structures correspond to individual log entries and
-   allow the Third-Party Auditor to verify the log entry against its
-   stored state:
+   For each new log entry the Service Operator adds to the log, it
+   produces a corresponding AuditorUpdate structure and sends this to
+   the Third-Party Auditor.  The Third-Party Auditor MUST receive and
+   successfully verify an AuditorUpdate structure for a log entry before
+   providing the Service Operator with an AuditorTreeHead structure
+   whose size field would include the log entry.
 
    struct {
      uint64 timestamp;
