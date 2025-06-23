@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 15 December 2025                                   13 June 2025
+Expires: 25 December 2025                                   23 June 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 15 December 2025.
+   This Internet-Draft will expire on 25 December 2025.
 
 Copyright Notice
 
@@ -118,13 +118,16 @@ Table of Contents
      11.1.  Search
      11.2.  Update
      11.3.  Monitor
-   12. Security Considerations
-   13. IANA Considerations
-     13.1.  KT Cipher Suites
-     13.2.  KT Designated Expert Pool
-   14. References
-     14.1.  Normative References
-     14.2.  Informative References
+   12. Third Parties
+     12.1.  Management
+     12.2.  Auditing
+   13. Security Considerations
+   14. IANA Considerations
+     14.1.  KT Cipher Suites
+     14.2.  KT Designated Expert Pool
+   15. References
+     15.1.  Normative References
+     15.2.  Informative References
    Appendix A.  Implicit Binary Search Tree
    Appendix B.  Binary Ladder
    Authors' Addresses
@@ -1153,7 +1156,7 @@ Table of Contents
    algorithms from [RFC9381] must be used.
 
    Cipher suites are represented with the CipherSuite type.  The cipher
-   suites are defined in Section 13.1.
+   suites are defined in Section 14.1.
 
 9.2.  Tree Head Signature
 
@@ -1194,6 +1197,7 @@ Table of Contents
          opaque leaf_public_key<0..2^16-1>;
        case thirdPartyAuditing:
          uint64 max_auditor_lag;
+         uint64 auditor_start_pos;
          opaque auditor_public_key<0..2^16-1>;
      };
 
@@ -1210,7 +1214,7 @@ Table of Contents
    } TreeHeadTBS;
 
    The ciphersuite field contains the cipher suite for the Transparency
-   Log, chosen from the registry in Section 13.1.  The mode field
+   Log, chosen from the registry in Section 14.1.  The mode field
    specifies whether the Transparency Log is deployed in Contact
    Monitoring mode or with a Third-Party Manager or Auditor.  The
    signature_public_key field contains the public key to use for
@@ -1227,9 +1231,10 @@ Table of Contents
    If the deployment mode specifies a Third-Party Auditor, the maximum
    amount of time in milliseconds that the auditor may lag behind the
    most recent version of the Transparency Log is provided in
-   max_auditor_lag.  Additionally, a public key for verifying the
-   auditor's signature on views of the Transparency Log is provided in
-   auditor_public_key.
+   max_auditor_lag.  The position of the first log entry that the
+   auditor started processing is provided in auditor_start_pos.  A
+   public key for verifying the auditor's signature on views of the
+   Transparency Log is provided in auditor_public_key.
 
    The max_ahead and max_behind fields contain the maximum amount of
    time in milliseconds that a tree head may be ahead of or behind the
@@ -1258,14 +1263,18 @@ Table of Contents
 
    Users verify an AuditorTreeHead with the following steps:
 
-   1.  Verify that the timestamp of the rightmost log entry is greater
+   1.  If the user advertised a previously observed tree size in their
+       request, verify that the advertised tree size is greater than or
+       equal to Configuration.auditor_start_pos.
+
+   2.  Verify that the timestamp of the rightmost log entry is greater
        than or equal to timestamp, and that the difference between the
        two is less than or equal to Configuration.max_auditor_lag.
 
-   2.  Verify that tree_size is less than or equal to that of the
+   3.  Verify that tree_size is less than or equal to that of the
        TreeHead provided by the Transparency Log.
 
-   3.  Verify signature as a signature over the AuditorTreeHeadTBS
+   4.  Verify signature as a signature over the AuditorTreeHeadTBS
        structure:
 
    struct {
@@ -1946,32 +1955,131 @@ Table of Contents
    different versions of each label are not provided, given that these
    can be cached from the original Search or Update query.
 
-12.  Security Considerations
+12.  Third Parties
 
-13.  IANA Considerations
+   Third-Party Management and Third-Party Auditing are two deployment
+   modes that require the Transparency Log to delegate part of its
+   operation to a third party.  Users are able to run more efficiently
+   as long as they can assume that the Transparency Log and the third
+   party won't collude to trick them into accepting malicious results.
+
+12.1.  Management
+
+   With the Third-Party Management deployment mode, a third party is
+   responsible for the majority of the work of storing and operating the
+   Transparency Log. The Service Operator serves only to enforce access
+   control, authenticate the addition of new entries, and prevent the
+   creation of forks by the Third-Party Manager.  Critically, the
+   Service Operator is trusted to ensure that only one value for each
+   version of a label is authorized.
+
+   All user queries specified in Section 11 are initially sent by users
+   directly to the Service Operator to be forwarded to the Third-Party
+   Manager if they pass access control.  While other operations are
+   forwarded by the Service Operator unchanged, UpdateRequest structures
+   are forwarded to the Third-Party Manager with the Service Operator's
+   signature attached:
+
+   struct {
+     UpdateRequest request;
+     opaque signature<0..2^16-1>;
+   } ManagerUpdateRequest;
+
+   The signature is computed as described in Section 9.5.
+
+12.2.  Auditing
+
+   With the Third-party Auditing deployment mode, the Service Operator
+   obtains signatures from a Third-Party Auditor attesting to the fact
+   that the Service Operator is constructing the tree correctly.  These
+   signatures are provided to users along with the responses to their
+   queries.
+
+   For each new log entry the Service Operator adds to the log, it
+   produces a corresponding AuditorUpdate structure and sends this to
+   the Third-Party Auditor.  The Third-Party Auditor MUST receive and
+   successfully verify an AuditorUpdate structure for a log entry before
+   providing the Service Operator with an AuditorTreeHead structure
+   whose size field would include the log entry.
+
+   struct {
+     uint64 timestamp;
+
+     PrefixLeaf added<0..2^16-1>;
+     PrefixLeaf removed<0..2^16-1>;
+
+     PrefixProof proof;
+   } AuditorUpdate;
+
+   The timestamp field contains the timestamp of the corresponding log
+   entry.  The added field contains the list of PrefixLeaf structures
+   that were added to the prefix tree in the corresponding log entry.
+   The removed field contains the list of PrefixLeaf structures that
+   were removed from the prefix tree.
+
+   The proof field contains a batch lookup proof in the previous log
+   entry's prefix tree for all search keys referenced by added or
+   removed.  Theproof.resultsfield contains the result of the search for
+   each element ofaddedin the order provided, followed by the result of
+   the search for each element ofremoved` in the order provided.
+
+   An auditor processes a single AuditorUpdate by following these steps:
+
+   1.  Verify that timestamp is greater than or equal to the timestamp
+       of the previous log entry.
+
+   2.  Verify that the PrefixSearchResult provided in proof for each
+       element of added has a result_type of nonInclusionParent or
+       nonInclusionLeaf.
+
+   3.  Verify that the PrefixSearchResult provided in proof for each
+       element of removed has a result_type of inclusion.
+
+   4.  For each element of removed, verify that, with the addition of
+       the new log entry, the prefix tree leaf was published in at least
+       one distinguished log entry before removal.
+
+   5.  With proof and the PrefixLeaf structures in removed, compute the
+       root value of the previous log entry's prefix tree.  Verify that
+       this matches the auditor's state.
+
+   6.  With proof and the PrefixLeaf structures in added and removed,
+       compute the new root value of the prefix tree.  Compute the new
+       root value of the log tree after adding a leaf with the specified
+       timestamp and prefix tree root value.
+
+   7.  Provide an AuditorTreeHead to the Service Operator where
+       AuditorTreeHead.timestamp is set to timestamp and
+       AuditorTreeHead.tree_size is set to the new size of the log tree
+       after the addition of the new leaf.  The signature is computed
+       with the log tree root value computed in the previous step.
+
+13.  Security Considerations
+
+14.  IANA Considerations
 
    This document requests the creation of the following new IANA
    registries:
 
-   *  KT Cipher Suites (Section 13.1)
+   *  KT Cipher Suites (Section 14.1)
 
    All of these registries should be under a heading of "Key
    Transparency", and assignments are made via the Specification
-   Required policy [RFC8126].  See Section 13.2 for additional
+   Required policy [RFC8126].  See Section 14.2 for additional
    information about the KT Designated Experts (DEs).
 
    RFC EDITOR: Please replace XXXX throughout with the RFC number
    assigned to this document
 
-13.1.  KT Cipher Suites
+14.1.  KT Cipher Suites
 
    uint16 CipherSuite;
 
-13.2.  KT Designated Expert Pool
+14.2.  KT Designated Expert Pool
 
-14.  References
+15.  References
 
-14.1.  Normative References
+15.1.  Normative References
 
    [ARCH]     McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
@@ -2007,7 +2115,7 @@ Table of Contents
               DOI 10.17487/RFC9381, August 2023,
               <https://www.rfc-editor.org/rfc/rfc9381>.
 
-14.2.  Informative References
+15.2.  Informative References
 
    [CONIKS]   Melara, M. S., Blankstein, A., Bonneau, J., Felten, E. W.,
               and M. J. Freedman, "CONIKS: Bringing Key Transparency to
