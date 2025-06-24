@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-22T01:12:51.442791+00:00",
+  "timestamp": "2025-06-24T01:06:37.877728+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2459,24 +2459,26 @@
       "id": "PR_kwDOLrnaA86U-Lsm",
       "title": "Write up how third-party auditing / management work",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/41",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "This approach to third-party auditing is not really secure in terms of how it interacts with the monitoring algorithm. But I've been too indecisive in figuring out how I want to update the monitoring algorithm, so opening this now and I'll fix monitoring later.",
       "createdAt": "2025-05-05T17:22:15Z",
-      "updatedAt": "2025-06-19T16:26:12Z",
+      "updatedAt": "2025-06-23T17:03:55Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/auditing",
-      "headRefOid": "ad9ff1eb0dddda1062c4b7283545f99fecaa676c",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "c9a055bf90b62c32e72d482299eadf79373b2549",
+      "closedAt": "2025-06-23T17:03:55Z",
+      "mergedAt": "2025-06-23T17:03:55Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "030d88108cc1f4fa982ffea10b89b66864229d87"
+      },
       "comments": [],
       "reviews": [
         {
@@ -2668,6 +2670,39 @@
               "updatedAt": "2025-06-19T16:26:12Z"
             }
           ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86vvFjd",
+          "commit": {
+            "abbreviatedOid": "bc89865"
+          },
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "state": "COMMENTED",
+          "body": "",
+          "createdAt": "2025-06-22T22:23:31Z",
+          "updatedAt": "2025-06-22T22:23:31Z",
+          "comments": [
+            {
+              "originalPosition": 137,
+              "body": "AuditorUpdate structures aren't shown to users, they are sent from the service operator to the third-party auditor. The auditor's signature comes back as part of TreeHead, section 9.3. I will push some text that makes this clearer",
+              "createdAt": "2025-06-22T22:23:31Z",
+              "updatedAt": "2025-06-22T22:23:31Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86vxQMZ",
+          "commit": {
+            "abbreviatedOid": "c9a055b"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-06-23T07:13:36Z",
+          "updatedAt": "2025-06-23T07:13:36Z",
+          "comments": []
         }
       ]
     },
@@ -2683,7 +2718,7 @@
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-06-19T15:01:55Z",
+      "updatedAt": "2025-06-23T17:03:37Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
@@ -2694,7 +2729,22 @@
       "mergedAt": null,
       "mergedBy": null,
       "mergeCommit": null,
-      "comments": [],
+      "comments": [
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "So what are your thoughts on having the registry separate to the KT spec? @Bren2010 :)",
+          "createdAt": "2025-06-23T07:14:55Z",
+          "updatedAt": "2025-06-23T07:14:55Z"
+        },
+        {
+          "author": "Bren2010",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Putting a cipher suites section with a base set of suites at the end of the protocol doc is standard practice in my experience. I'm also definitely weary of the work required to get a new doc adopted.",
+          "createdAt": "2025-06-23T17:03:37Z",
+          "updatedAt": "2025-06-23T17:03:37Z"
+        }
+      ],
       "reviews": [
         {
           "id": "PRR_kwDOLrnaA86qfLHY",
