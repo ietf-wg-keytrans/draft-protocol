@@ -1971,12 +1971,12 @@ Initial contents:
 | 0x0001 | KT_128_SHA256_P256                   | Y | RFC XXXX |
 | 0x0002 | KT_128_SHA256_Ed25519                | Y | RFC XXXX |
 
-For all cipher suites defined in this document specifically, the following
-primitives and parameters are the same:
+All cipher suites currently specified share the following primitives and
+parameters:
 
 - The hash algorithm is SHA-256, as defined in {{SHS}}.
 - `Nc`: 16
-- `Kc`: The following string, hex decoded: `d821f8790d97709796b4d7903357c3f5`
+- `Kc`: The byte sequence equal to the hex-encoded string `d821f8790d97709796b4d7903357c3f5`
 
 The signature algorithm and VRF algorithm for each cipher suite is as follows:
 
