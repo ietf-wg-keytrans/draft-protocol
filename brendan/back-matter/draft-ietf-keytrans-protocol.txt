@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 21 December 2025                                   19 June 2025
+Expires: 3 January 2026                                      2 July 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 21 December 2025.
+   This Internet-Draft will expire on 3 January 2026.
 
 Copyright Notice
 
@@ -2071,14 +2071,14 @@ Table of Contents
 
                                   Table 1
 
-   For all cipher suites defined in this document specifically, the
-   following primitives and parameters are the same:
+   All cipher suites currently specified share the following primitives
+   and parameters:
 
    *  The hash algorithm is SHA-256, as defined in [SHS].
 
    *  Nc: 16
 
-   *  Kc: The following string, hex decoded:
+   *  Kc: The byte sequence equal to the hex-encoded string
       d821f8790d97709796b4d7903357c3f5
 
    The signature algorithm and VRF algorithm for each cipher suite is as
