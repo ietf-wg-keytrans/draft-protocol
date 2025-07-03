@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-06-24T01:06:37.877728+00:00",
+  "timestamp": "2025-07-03T01:07:04.762510+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -2711,24 +2711,26 @@
       "id": "PR_kwDOLrnaA86V7T6w",
       "title": "Write security considerations, cipher suites registry",
       "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/42",
-      "state": "OPEN",
+      "state": "MERGED",
       "author": "Bren2010",
       "authorAssociation": "COLLABORATOR",
       "assignees": [],
       "labels": [],
       "body": "",
       "createdAt": "2025-05-13T03:07:54Z",
-      "updatedAt": "2025-06-23T17:03:37Z",
+      "updatedAt": "2025-07-02T18:05:20Z",
       "baseRepository": "ietf-wg-keytrans/draft-protocol",
       "baseRefName": "main",
       "baseRefOid": "cfd5d04905c001fefa8aca6edb77fb502e37e48f",
       "headRepository": "ietf-wg-keytrans/draft-protocol",
       "headRefName": "brendan/back-matter",
-      "headRefOid": "0bf1f1da9f35a2378b039b9631544302d9704ea4",
-      "closedAt": null,
-      "mergedAt": null,
-      "mergedBy": null,
-      "mergeCommit": null,
+      "headRefOid": "56e5e2c54f6f2cc503b15ad8ea299766d3ca5363",
+      "closedAt": "2025-07-02T18:05:20Z",
+      "mergedAt": "2025-07-02T18:05:20Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "6265b2121df0817b0980401cab39533b786ef24d"
+      },
       "comments": [
         {
           "author": "felixlinker",
@@ -2743,6 +2745,13 @@
           "body": "Putting a cipher suites section with a base set of suites at the end of the protocol doc is standard practice in my experience. I'm also definitely weary of the work required to get a new doc adopted.",
           "createdAt": "2025-06-23T17:03:37Z",
           "updatedAt": "2025-06-23T17:03:37Z"
+        },
+        {
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "body": "Okay, I don't think it's very important where the ciphersuites are defined. If you think it's better here, that's fine! :)",
+          "createdAt": "2025-07-02T09:27:20Z",
+          "updatedAt": "2025-07-02T09:27:20Z"
         }
       ],
       "reviews": [
@@ -3033,6 +3042,32 @@
               "body": "Okay, but there should be a reference to this, no? I think, an example could already help. Maybe a sentence like: \"For example, some ciphersuites may assume that the log's contents are public, while others aim to keep them private.\"",
               "createdAt": "2025-06-16T06:35:50Z",
               "updatedAt": "2025-06-16T06:35:50Z"
+            }
+          ]
+        },
+        {
+          "id": "PRR_kwDOLrnaA86xh3VX",
+          "commit": {
+            "abbreviatedOid": "0bf1f1d"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "Two more small suggestions but overall good to go :)",
+          "createdAt": "2025-07-02T09:31:43Z",
+          "updatedAt": "2025-07-02T09:33:01Z",
+          "comments": [
+            {
+              "originalPosition": 122,
+              "body": "```suggestion\r\n- `Kc`: The byte sequence equal to the hex-encoded string `d821f8790d97709796b4d7903357c3f5`\r\n```",
+              "createdAt": "2025-07-02T09:31:44Z",
+              "updatedAt": "2025-07-02T09:33:01Z"
+            },
+            {
+              "originalPosition": 118,
+              "body": "```suggestion\r\nAll cipher suites currently specified share the following primitives and\r\nparameters:\r\n```",
+              "createdAt": "2025-07-02T09:32:43Z",
+              "updatedAt": "2025-07-02T09:33:01Z"
             }
           ]
         }
