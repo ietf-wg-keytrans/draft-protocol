@@ -16,12 +16,12 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.28.1" name="generator">
+<meta content="xml2rfc 3.29.0" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.1
-    Python 3.12.10
+  xml2rfc 3.29.0
+    Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
@@ -30,7 +30,7 @@ timely manner.
     platformdirs 4.3.8
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.3
+    requests 2.32.4
     setuptools 80.9.0
     wcwidth 0.2.13
 -->
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">June 2025</td>
+<td class="right">July 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 7 December 2025</td>
+<td class="center">Expires 8 January 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-06-05" class="published">5 June 2025</time>
+<time datetime="2025-07-07" class="published">7 July 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-12-07">7 December 2025</time></dd>
+<dd class="expires"><time datetime="2026-01-08">8 January 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 December 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 8 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1319,38 +1319,49 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-third-parties" class="internal xref">Third Parties</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
-                <p id="section-toc.1-1.13.2.1.1"><a href="#section-13.1" class="auto internal xref">13.1</a>.  <a href="#name-kt-cipher-suites" class="internal xref">KT Cipher Suites</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
+                <p id="section-toc.1-1.12.2.1.1"><a href="#section-12.1" class="auto internal xref">12.1</a>.  <a href="#name-management" class="internal xref">Management</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
-                <p id="section-toc.1-1.13.2.2.1"><a href="#section-13.2" class="auto internal xref">13.2</a>.  <a href="#name-kt-designated-expert-pool" class="internal xref">KT Designated Expert Pool</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
+                <p id="section-toc.1-1.12.2.2.1"><a href="#section-12.2" class="auto internal xref">12.2</a>.  <a href="#name-auditing" class="internal xref">Auditing</a></p>
 </li>
             </ul>
 </li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="auto internal xref">13</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a href="#name-references" class="internal xref">References</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#section-14" class="auto internal xref">14</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
-                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1" class="auto internal xref">14.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1" class="auto internal xref">14.1</a>.  <a href="#name-kt-cipher-suites" class="internal xref">KT Cipher Suites</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
-                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2" class="auto internal xref">14.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2" class="auto internal xref">14.2</a>.  <a href="#name-kt-designated-expert-pool" class="internal xref">KT Designated Expert Pool</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
-            <p id="section-toc.1-1.15.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implicit-binary-search-tree-2" class="internal xref">Implicit Binary Search Tree</a></p>
+            <p id="section-toc.1-1.15.1"><a href="#section-15" class="auto internal xref">15</a>. <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.1">
+                <p id="section-toc.1-1.15.2.1.1"><a href="#section-15.1" class="auto internal xref">15.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15.2.2">
+                <p id="section-toc.1-1.15.2.2.1"><a href="#section-15.2" class="auto internal xref">15.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.16">
-            <p id="section-toc.1-1.16.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-5" class="internal xref">Binary Ladder</a></p>
+            <p id="section-toc.1-1.16.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implicit-binary-search-tree-2" class="internal xref">Implicit Binary Search Tree</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
-            <p id="section-toc.1-1.17.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-5" class="internal xref">Binary Ladder</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
+            <p id="section-toc.1-1.18.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -2618,7 +2629,7 @@ obligated to monitor the label in the future per
 <a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-cipher-suites" class="section-name selfRef">Cipher Suites</a>
         </h3>
 <p id="section-9.1-1">Each Transparency Log uses a single fixed cipher suite, chosen when it is
-initially created, that specifies the following primitives and parameters to be used for
+initially created, that specifies the following primitives and parameters for
 cryptographic computations:<a href="#section-9.1-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-9.1-2.1">
@@ -2643,7 +2654,7 @@ operator and the third party, if one is present. The VRF is used for preserving
 the privacy of labels. One of the VRF algorithms from <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span> must be
 used.<a href="#section-9.1-3" class="pilcrow">¶</a></p>
 <p id="section-9.1-4">Cipher suites are represented with the CipherSuite type. The cipher suites are
-defined in <a href="#kt-cipher-suites" class="auto internal xref">Section 13.1</a>.<a href="#section-9.1-4" class="pilcrow">¶</a></p>
+defined in <a href="#kt-cipher-suites" class="auto internal xref">Section 14.1</a>.<a href="#section-9.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="tree-head-signature">
@@ -2689,6 +2700,7 @@ struct {
       opaque leaf_public_key&lt;0..2^16-1&gt;;
     case thirdPartyAuditing:
       uint64 max_auditor_lag;
+      uint64 auditor_start_pos;
       opaque auditor_public_key&lt;0..2^16-1&gt;;
   };
 
@@ -2706,7 +2718,7 @@ struct {
 </pre><a href="#section-9.2-5" class="pilcrow">¶</a>
 </div>
 <p id="section-9.2-6">The <code>ciphersuite</code> field contains the cipher suite for the Transparency Log,
-chosen from the registry in <a href="#kt-cipher-suites" class="auto internal xref">Section 13.1</a>. The <code>mode</code> field specifies
+chosen from the registry in <a href="#kt-cipher-suites" class="auto internal xref">Section 14.1</a>. The <code>mode</code> field specifies
 whether the Transparency Log is deployed in Contact Monitoring mode or with a
 Third-Party Manager or Auditor. The <code>signature_public_key</code> field contains the
 public key to use for verifying signatures on the <code>TreeHeadTBS</code> structure. The
@@ -2718,9 +2730,10 @@ signature on modifications to the Transparency Log, as described in
 <a href="#update-format" class="auto internal xref">Section 9.5</a>.<a href="#section-9.2-7" class="pilcrow">¶</a></p>
 <p id="section-9.2-8">If the deployment mode specifies a Third-Party Auditor, the maximum amount of
 time in milliseconds that the auditor may lag behind the most recent version of
-the Transparency Log is provided in <code>max_auditor_lag</code>. Additionally, a public
-key for verifying the auditor's signature on views of the Transparency Log is
-provided in <code>auditor_public_key</code>.<a href="#section-9.2-8" class="pilcrow">¶</a></p>
+the Transparency Log is provided in <code>max_auditor_lag</code>. The position of the first
+log entry that the auditor started processing is provided in
+<code>auditor_start_pos</code>. A public key for verifying the auditor's signature on views
+of the Transparency Log is provided in <code>auditor_public_key</code>.<a href="#section-9.2-8" class="pilcrow">¶</a></p>
 <p id="section-9.2-9">The <code>max_ahead</code> and <code>max_behind</code> fields contain the maximum amount of time in
 milliseconds that a tree head may be ahead of or behind the user's local clock
 without being rejected. The <code>reasonable_monitoring_window</code> contains the
@@ -2753,16 +2766,21 @@ struct {
 <p id="section-9.3-3">Users verify an <code>AuditorTreeHead</code> with the following steps:<a href="#section-9.3-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.3-4">
 <li id="section-9.3-4.1">
-            <p id="section-9.3-4.1.1">Verify that the timestamp of the rightmost log entry is greater than or equal
-to <code>timestamp</code>, and that the difference between the two is less than or equal
-to <code>Configuration.max_auditor_lag</code>.<a href="#section-9.3-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-9.3-4.1.1">If the user advertised a previously observed tree size in their request,
+verify that the advertised tree size is greater than or equal to
+<code>Configuration.auditor_start_pos</code>.<a href="#section-9.3-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-9.3-4.2">
-            <p id="section-9.3-4.2.1">Verify that <code>tree_size</code> is less than or equal to that of the <code>TreeHead</code>
-provided by the Transparency Log.<a href="#section-9.3-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-9.3-4.2.1">Verify that the timestamp of the rightmost log entry is greater than or equal
+to <code>timestamp</code>, and that the difference between the two is less than or equal
+to <code>Configuration.max_auditor_lag</code>.<a href="#section-9.3-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-9.3-4.3">
-            <p id="section-9.3-4.3.1">Verify <code>signature</code> as a signature over the <code>AuditorTreeHeadTBS</code> structure:<a href="#section-9.3-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-9.3-4.3.1">Verify that <code>tree_size</code> is less than or equal to that of the <code>TreeHead</code>
+provided by the Transparency Log.<a href="#section-9.3-4.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-9.3-4.4">
+            <p id="section-9.3-4.4.1">Verify <code>signature</code> as a signature over the <code>AuditorTreeHeadTBS</code> structure:<a href="#section-9.3-4.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <div class="lang-tls-presentation sourcecode" id="section-9.3-5">
@@ -3562,59 +3580,355 @@ original Search or Update query.<a href="#section-11.3-12" class="pilcrow">¶</a
 </div>
 </section>
 </div>
-<div id="security-considerations">
+<div id="third-parties">
 <section id="section-12">
-      <h2 id="name-security-considerations">
-<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      <h2 id="name-third-parties">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-third-parties" class="section-name selfRef">Third Parties</a>
       </h2>
+<p id="section-12-1">Third-Party Management and Third-Party Auditing are two deployment modes that
+require the Transparency Log to delegate part of its operation to a third party.
+Users are able to run more efficiently as long as they can assume that the
+Transparency Log and the third party won't collude to trick them into accepting
+malicious results.<a href="#section-12-1" class="pilcrow">¶</a></p>
+<div id="management">
+<section id="section-12.1">
+        <h3 id="name-management">
+<a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-management" class="section-name selfRef">Management</a>
+        </h3>
+<p id="section-12.1-1">With the Third-Party Management deployment mode, a third party is responsible
+for the majority of the work of storing and operating the Transparency Log. The
+Service Operator serves only to enforce access control, authenticate the
+addition of new entries, and prevent the creation of forks by the Third-Party
+Manager. Critically, the Service Operator is trusted to ensure that only one
+value for each version of a label is authorized.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
+<p id="section-12.1-2">All user queries specified in <a href="#user-operations" class="auto internal xref">Section 11</a> are initially sent by users
+directly to the Service Operator to be forwarded to the Third-Party Manager if
+they pass access control. While other operations are forwarded by the Service
+Operator unchanged, <code>UpdateRequest</code> structures are forwarded to the Third-Party
+Manager with the Service Operator's signature attached:<a href="#section-12.1-2" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-12.1-3">
+<pre>
+struct {
+  UpdateRequest request;
+  opaque signature&lt;0..2^16-1&gt;;
+} ManagerUpdateRequest;
+</pre><a href="#section-12.1-3" class="pilcrow">¶</a>
+</div>
+<p id="section-12.1-4">The signature is computed as described in <a href="#update-format" class="auto internal xref">Section 9.5</a>.<a href="#section-12.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="auditing">
+<section id="section-12.2">
+        <h3 id="name-auditing">
+<a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-auditing" class="section-name selfRef">Auditing</a>
+        </h3>
+<p id="section-12.2-1">With the Third-party Auditing deployment mode, the Service Operator obtains
+signatures from a Third-Party Auditor attesting to the fact that the
+Service Operator is constructing the tree correctly. These signatures are
+provided to users along with the responses to their queries.<a href="#section-12.2-1" class="pilcrow">¶</a></p>
+<p id="section-12.2-2">For each new log entry the Service Operator adds to the log, it produces a
+corresponding <code>AuditorUpdate</code> structure and sends this to the Third-Party
+Auditor. The Third-Party Auditor <span class="bcp14">MUST</span> receive and successfully verify an
+<code>AuditorUpdate</code> structure for a log entry before providing the Service Operator
+with an <code>AuditorTreeHead</code> structure whose <code>size</code> field would include the log
+entry.<a href="#section-12.2-2" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-12.2-3">
+<pre>
+struct {
+  uint64 timestamp;
+
+  PrefixLeaf added&lt;0..2^16-1&gt;;
+  PrefixLeaf removed&lt;0..2^16-1&gt;;
+
+  PrefixProof proof;
+} AuditorUpdate;
+</pre><a href="#section-12.2-3" class="pilcrow">¶</a>
+</div>
+<p id="section-12.2-4">The <code>timestamp</code> field contains the timestamp of the corresponding log entry. The
+<code>added</code> field contains the list of <code>PrefixLeaf</code> structures that were added to
+the prefix tree in the corresponding log entry. The <code>removed</code> field contains the
+list of <code>PrefixLeaf</code> structures that were removed from the prefix tree.<a href="#section-12.2-4" class="pilcrow">¶</a></p>
+<p id="section-12.2-5">The <code>proof</code> field contains a batch lookup proof in the previous log entry's
+prefix tree for all search keys referenced by <code>added</code> or <code>removed. The
+</code>proof.results<code> field contains the result of the search for each element of
+</code>added<code> in the order provided, followed by the result of the search for each
+element of </code>removed` in the order provided.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
+<p id="section-12.2-6">An auditor processes a single <code>AuditorUpdate</code> by following these steps:<a href="#section-12.2-6" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-12.2-7">
+<li id="section-12.2-7.1">
+            <p id="section-12.2-7.1.1">Verify that <code>timestamp</code> is greater than or equal to the timestamp of the
+previous log entry.<a href="#section-12.2-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.2">
+            <p id="section-12.2-7.2.1">Verify that the <code>PrefixSearchResult</code> provided in <code>proof</code> for each element of
+<code>added</code> has a <code>result_type</code> of <code>nonInclusionParent</code> or <code>nonInclusionLeaf</code>.<a href="#section-12.2-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.3">
+            <p id="section-12.2-7.3.1">Verify that the <code>PrefixSearchResult</code> provided in <code>proof</code> for each element of
+<code>removed</code> has a <code>result_type</code> of <code>inclusion</code>.<a href="#section-12.2-7.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.4">
+            <p id="section-12.2-7.4.1">For each element of <code>removed</code>, verify that, with the addition of the new log
+entry, the prefix tree leaf was published in at least one
+distinguished log entry before removal.<a href="#section-12.2-7.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.5">
+            <p id="section-12.2-7.5.1">With <code>proof</code> and the <code>PrefixLeaf</code> structures in <code>removed</code>, compute the root
+value of the previous log entry's prefix tree. Verify that this matches the
+auditor's state.<a href="#section-12.2-7.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.6">
+            <p id="section-12.2-7.6.1">With <code>proof</code> and the <code>PrefixLeaf</code> structures in <code>added</code> and <code>removed</code>,
+compute the new root value of the prefix tree. Compute the new root value of
+the log tree after adding a leaf with the specified <code>timestamp</code> and prefix
+tree root value.<a href="#section-12.2-7.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.2-7.7">
+            <p id="section-12.2-7.7.1">Provide an <code>AuditorTreeHead</code> to the Service Operator where
+<code>AuditorTreeHead.timestamp</code> is set to <code>timestamp</code> and
+<code>AuditorTreeHead.tree_size</code> is set to the new size of the log tree after the
+addition of the new leaf. The signature is computed with the log tree root
+value computed in the previous step.<a href="#section-12.2-7.7.1" class="pilcrow">¶</a></p>
+</li>
+        </ol>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-13">
+      <h2 id="name-security-considerations">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-13-1">The security properties provided by this protocol are discussed in detail in
+<span>[<a href="#ARCH" class="cite xref">ARCH</a>]</span>. Generally speaking, the Key Transparency protocol ensures that all
+users of a Transparency Log have a consistent view of the data stored in the
+log. Service Operators may still be able to make malicious modifications to
+stored data, such as by attaching new public keys to a user's account and
+encouraging other users to encrypt to these public keys when messaging the user.
+However, since the existence of these new public keys is equally visible to the
+user whose account they affect, the user can promptly act to have them removed
+from their account or inform contacts out-of-band that their communication may
+be compromised.<a href="#section-13-1" class="pilcrow">¶</a></p>
+<p id="section-13-2">Key Transparency relies on users coming online regularly to monitor for
+unexpected or malicious modifications to their account. Users that go offline
+for longer than the log entry maximum lifetime may not detect if the
+Transparency Log made malicious modifications to their labels.<a href="#section-13-2" class="pilcrow">¶</a></p>
+<p id="section-13-3">Similarly, Key Transparency relies on the ability of users to retain long-term
+state regarding their account and past views of the Transparency Log. Users
+which are unable to maintain long-term state, or may lose their state, have a
+correspondingly limited ability to detect misbehavior by the Service Operator.
+In particular, users which are completely stateless will generally gain nothing
+by participating in this protocol over simply verifying a signature from the
+Service Operator and, if there is one, the Third-Party Auditor or Manager.<a href="#section-13-3" class="pilcrow">¶</a></p>
+<p id="section-13-4">Ultimately, ensuring that all users have a consistent view of the Transparency
+Log requires that the Service Operator is not able to create and maintain
+long-term network partitions between users. As such, users need access to at
+least one communication channel (even a very low-bandwidth one) that is
+resistant to partitions. The protocol directly provides for a Third-Party
+Auditor or Manager, which is trusted to prevent such partitions. Other options
+include allowing users to gossip with each other, or allowing users to contact
+the Transparency Log over an anonymous channel.<a href="#section-13-4" class="pilcrow">¶</a></p>
+<p id="section-13-5">Key Transparency provides users with a limited assurance that query responses
+are authentic: a network attacker will not be able to forge false responses to
+queries but may provide responses which are up to <code>max_behind</code> milliseconds
+stale. Key Transparency provides no privacy from network observers and does not
+have the ability to authenticate specific users to the Transparency Log. To
+mitigate these limitations, users <span class="bcp14">SHOULD</span> contact the Transparency Log over a
+protocol that provides transport-layer encryption and an appropriate level of
+authentication for both parties.<a href="#section-13-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-13">
+<section id="section-14">
       <h2 id="name-iana-considerations">
-<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-13-1">This document requests the creation of the following new IANA registries:<a href="#section-13-1" class="pilcrow">¶</a></p>
+<p id="section-14-1">This document requests the creation of the following new IANA registries:<a href="#section-14-1" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13-2.1">
-          <p id="section-13-2.1.1">KT Cipher Suites (<a href="#kt-cipher-suites" class="auto internal xref">Section 13.1</a>)<a href="#section-13-2.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-14-2.1">
+          <p id="section-14-2.1.1">KT Cipher Suites (<a href="#kt-cipher-suites" class="auto internal xref">Section 14.1</a>)<a href="#section-14-2.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-13-3">All of these registries should be under a heading of "Key Transparency",
+<p id="section-14-3">All of these registries should be under a heading of "Key Transparency",
 and assignments are made via the Specification Required policy <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>. See
-<a href="#de" class="auto internal xref">Section 13.2</a> for additional information about the KT Designated Experts (DEs).<a href="#section-13-3" class="pilcrow">¶</a></p>
-<p id="section-13-4">RFC EDITOR: Please replace XXXX throughout with the RFC number assigned to
-this document<a href="#section-13-4" class="pilcrow">¶</a></p>
+<a href="#de" class="auto internal xref">Section 14.2</a> for additional information about the KT Designated Experts (DEs).<a href="#section-14-3" class="pilcrow">¶</a></p>
+<p id="section-14-4">RFC EDITOR: Please replace XXXX throughout with the RFC number assigned to
+this document<a href="#section-14-4" class="pilcrow">¶</a></p>
 <div id="kt-cipher-suites">
-<section id="section-13.1">
+<section id="section-14.1">
         <h3 id="name-kt-cipher-suites">
-<a href="#section-13.1" class="section-number selfRef">13.1. </a><a href="#name-kt-cipher-suites" class="section-name selfRef">KT Cipher Suites</a>
+<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-kt-cipher-suites" class="section-name selfRef">KT Cipher Suites</a>
         </h3>
-<div class="lang-tls-presentation sourcecode" id="section-13.1-1">
+<p id="section-14.1-1">A cipher suite is a specific combination of cryptographic primitives and
+parameters to be used in an instantiation of the protocol. Cipher suite names
+follow the naming convention:<a href="#section-14.1-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-14.1-2">
 <pre>
 uint16 CipherSuite;
-</pre><a href="#section-13.1-1" class="pilcrow">¶</a>
+CipherSuite KT_LVL_HASH_SIG = VALUE;
+</pre><a href="#section-14.1-2" class="pilcrow">¶</a>
 </div>
+<p id="section-14.1-3">The columns in the registry are as follows:<a href="#section-14.1-3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-14.1-4.1">
+            <p id="section-14.1-4.1.1">Value: The numeric value of the cipher suite.<a href="#section-14.1-4.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-14.1-4.2">
+            <p id="section-14.1-4.2.1">Name: The name of the cipher suite.<a href="#section-14.1-4.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-14.1-4.3">
+            <p id="section-14.1-4.3.1">Recommended: Whether support for this cipher suite is <span class="bcp14">RECOMMENDED</span>.
+Valid values are "Y", "N", and "D", as described below. The default value of
+the "Recommended" column is "N". Setting the Recommended item to "Y" or "D",
+or changing an item whose current value is "Y" or "D", requires Standards
+Action <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>.<a href="#section-14.1-4.3.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-14.1-4.3.2.1">
+                <p id="section-14.1-4.3.2.1.1">Y: Indicates that the item is <span class="bcp14">RECOMMENDED</span>. This only means that the
+associated mechanism is fit for the purpose for which it was defined.
+Careful reading of the documentation for the mechanism is necessary to
+understand the applicability of that mechanism. A cipher suite may, for
+example, be recommended that is only suitable for use in applications where
+the Transparency Log's contents are public. Mechanisms with limited
+applicability may be recommended, but in such cases applicability statements
+that describe any limitations of the mechanism or necessary constraints will
+be provided.<a href="#section-14.1-4.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-14.1-4.3.2.2">
+                <p id="section-14.1-4.3.2.2.1">N: Indicates that the item's associated mechanism has not been evaluated and
+is not <span class="bcp14">RECOMMENDED</span> (as opposed to being <span class="bcp14">NOT RECOMMENDED</span>). This does not
+mean that the mechanism is flawed. For example, an item may be marked as "N"
+because it has usage constraints or limited applicability.<a href="#section-14.1-4.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-14.1-4.3.2.3">
+                <p id="section-14.1-4.3.2.3.1">D: Indicates that the item is discouraged and <span class="bcp14">SHOULD NOT</span> be
+used. This marking could be used to identify mechanisms that might result in
+problems if they are used, such as a weak cryptographic algorithm or a
+mechanism that might cause interoperability problems in deployment.<a href="#section-14.1-4.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-14.1-4.4">
+            <p id="section-14.1-4.4.1">Reference: The document where this cipher suite is defined.<a href="#section-14.1-4.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-14.1-5">Initial contents:<a href="#section-14.1-5" class="pilcrow">¶</a></p>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Value</th>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">R</th>
+              <th class="text-left" rowspan="1" colspan="1">Ref</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0000</td>
+              <td class="text-left" rowspan="1" colspan="1">RESERVED</td>
+              <td class="text-left" rowspan="1" colspan="1">-</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0001</td>
+              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_P256</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0x0002</td>
+              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_Ed25519</td>
+              <td class="text-left" rowspan="1" colspan="1">Y</td>
+              <td class="text-left" rowspan="1" colspan="1">RFC XXXX</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-14.1-7">All cipher suites currently specified share the following primitives and
+parameters:<a href="#section-14.1-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-14.1-8.1">
+            <p id="section-14.1-8.1.1">The hash algorithm is SHA-256, as defined in <span>[<a href="#SHS" class="cite xref">SHS</a>]</span>.<a href="#section-14.1-8.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-14.1-8.2">
+            <p id="section-14.1-8.2.1"><code>Nc</code>: 16<a href="#section-14.1-8.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-14.1-8.3">
+            <p id="section-14.1-8.3.1"><code>Kc</code>: The byte sequence equal to the hex-encoded string <code>d821f8790d97709796b4d7903357c3f5</code><a href="#section-14.1-8.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-14.1-9">The signature algorithm and VRF algorithm for each cipher suite is as follows:<a href="#section-14.1-9" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Name</th>
+              <th class="text-left" rowspan="1" colspan="1">Signature</th>
+              <th class="text-left" rowspan="1" colspan="1">VRF Algorithm</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_P256</td>
+              <td class="text-left" rowspan="1" colspan="1">ecdsa_secp256r1_sha256</td>
+              <td class="text-left" rowspan="1" colspan="1">ECVRF-P256-SHA256-TAI</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_Ed25519</td>
+              <td class="text-left" rowspan="1" colspan="1">ed25519</td>
+              <td class="text-left" rowspan="1" colspan="1">ECVRF-EDWARDS25519-SHA512-TAI[32]</td>
+            </tr>
+          </tbody>
+        </table>
+<p id="section-14.1-11">The VRF algorithms are specified in <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span>. For <code>KT_128_SHA256_Ed25519</code>,
+the final hash output of <code>ECVRF-EDWARDS25519-SHA512-TAI</code> is truncated to be 32
+bytes.<a href="#section-14.1-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="de">
-<section id="section-13.2">
+<section id="section-14.2">
         <h3 id="name-kt-designated-expert-pool">
-<a href="#section-13.2" class="section-number selfRef">13.2. </a><a href="#name-kt-designated-expert-pool" class="section-name selfRef">KT Designated Expert Pool</a>
+<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-kt-designated-expert-pool" class="section-name selfRef">KT Designated Expert Pool</a>
         </h3>
+<p id="section-14.2-1">Specification Required <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span> registry requests are registered after a
+three-week review period on the KT Designated Expert (DE) mailing list
+<a href="mailto:kt-reg-review@ietf.org">kt-reg-review@ietf.org</a> on the advice of one or more of the KT DEs. However, to
+allow for the allocation of values prior to publication, the KT DEs may approve
+registration once they are satisfied that such a specification will be
+published.<a href="#section-14.2-1" class="pilcrow">¶</a></p>
+<p id="section-14.2-2">Registration requests sent to the KT DEs' mailing list for review <span class="bcp14">SHOULD</span> use an
+appropriate subject (e.g., "Request to register value in KT registry").<a href="#section-14.2-2" class="pilcrow">¶</a></p>
+<p id="section-14.2-3">Within the review period, the KT DEs will either approve or deny the
+registration request, communicating this decision to the KT DEs' mailing list
+and IANA. Denials <span class="bcp14">SHOULD</span> include an explanation and, if applicable, suggestions
+as to how to make the request successful. Registration requests that are
+undetermined for a period longer than 21 days can be brought to the IESG's
+attention for resolution using the <a href="mailto:iesg@ietf.org">iesg@ietf.org</a> mailing list.<a href="#section-14.2-3" class="pilcrow">¶</a></p>
+<p id="section-14.2-4">Criteria that <span class="bcp14">SHOULD</span> be applied by the KT DEs includes determining whether the
+proposed registration duplicates existing functionality, whether it is likely to
+be of general applicability or useful only for a single application, and whether
+the registration description is clear.<a href="#section-14.2-4" class="pilcrow">¶</a></p>
+<p id="section-14.2-5">IANA <span class="bcp14">MUST</span> only accept registry updates from the KT DEs and <span class="bcp14">SHOULD</span> direct all
+requests for registration to the KT DEs' mailing list.<a href="#section-14.2-5" class="pilcrow">¶</a></p>
+<p id="section-14.2-6">It is suggested that multiple KT DEs who are able to represent the perspectives
+of different applications using this specification be appointed, in order to
+enable a broadly informed review of registration decisions. In cases where a
+registration decision could be perceived as creating a conflict of interest for
+a particular KT DE, that KT DE <span class="bcp14">SHOULD</span> defer to the judgment of the other KT DEs.<a href="#section-14.2-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
 </div>
 <div id="sec-combined-references">
-<section id="section-14">
+<section id="section-15">
       <h2 id="name-references">
-<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-15" class="section-number selfRef">15. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
 <div id="sec-normative-references">
-<section id="section-14.1">
+<section id="section-15.1">
         <h3 id="name-normative-references">
-<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-15.1" class="section-number selfRef">15.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="ARCH">[ARCH]</dt>
@@ -3649,9 +3963,9 @@ uint16 CipherSuite;
 </section>
 </div>
 <div id="sec-informative-references">
-<section id="section-14.2">
+<section id="section-15.2">
         <h3 id="name-informative-references">
-<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-15.2" class="section-number selfRef">15.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="CONIKS">[CONIKS]</dt>
@@ -3667,8 +3981,12 @@ uint16 CipherSuite;
 <span class="refAuthor">Len, J.</span>, <span class="refAuthor">Chase, M.</span>, <span class="refAuthor">Ghosh, E.</span>, <span class="refAuthor">Laine, K.</span>, and <span class="refAuthor">R. C. Moreno</span>, <span class="refTitle">"OPTIKS: An Optimized Key Transparency System"</span>, <time datetime="2023-10-04" class="refDate">4 October 2023</time>, <span>&lt;<a href="https://eprint.iacr.org/2023/1515">https://eprint.iacr.org/2023/1515</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="SEEMLess">[SEEMLess]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">Chase, M.</span>, <span class="refAuthor">Deshpande, A.</span>, <span class="refAuthor">Ghosh, E.</span>, and <span class="refAuthor">H. Malvai</span>, <span class="refTitle">"SEEMless: Secure End-to-End Encrypted Messaging with less trust"</span>, <time datetime="2018-06-18" class="refDate">18 June 2018</time>, <span>&lt;<a href="https://eprint.iacr.org/2018/607">https://eprint.iacr.org/2018/607</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="SHS">[SHS]</dt>
+      <dd>
+<span class="refTitle">"Secure hash standard"</span>, <span class="refContent">National Institute of Standards and Technology (U.S.)</span>, <span class="seriesInfo">DOI 10.6028/nist.fips.180-4</span>, <time datetime="2015" class="refDate">2015</time>, <span>&lt;<a href="https://doi.org/10.6028/nist.fips.180-4">https://doi.org/10.6028/nist.fips.180-4</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
