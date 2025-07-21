@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 3 January 2026                                      2 July 2025
+Expires: 22 January 2026                                    21 July 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 3 January 2026.
+   This Internet-Draft will expire on 22 January 2026.
 
 Copyright Notice
 
@@ -2167,15 +2167,17 @@ Table of Contents
 
    Initial contents:
 
-             +========+=======================+===+==========+
-             | Value  | Name                  | R | Ref      |
-             +========+=======================+===+==========+
-             | 0x0000 | RESERVED              | - | RFC XXXX |
-             +--------+-----------------------+---+----------+
-             | 0x0001 | KT_128_SHA256_P256    | Y | RFC XXXX |
-             +--------+-----------------------+---+----------+
-             | 0x0002 | KT_128_SHA256_Ed25519 | Y | RFC XXXX |
-             +--------+-----------------------+---+----------+
+       +=================+==========================+===+==========+
+       | Value           | Name                     | R | Ref      |
+       +=================+==========================+===+==========+
+       | 0x0000          | RESERVED                 | - | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0x0001          | KT_128_SHA256_P256       | Y | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0x0002          | KT_128_SHA256_Ed25519    | Y | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0xF000 - 0xFFFF | Reserved for Private Use | - | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
 
                                   Table 1
 
@@ -2251,9 +2253,9 @@ Table of Contents
 
    [ARCH]     McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
-              architecture-03, 25 February 2025,
+              architecture-04, 6 July 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-
-              keytrans-architecture-03>.
+              keytrans-architecture-04>.
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
