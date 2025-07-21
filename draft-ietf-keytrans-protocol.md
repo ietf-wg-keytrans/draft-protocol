@@ -1965,11 +1965,12 @@ The columns in the registry are as follows:
 
 Initial contents:
 
-| Value  | Name                                 | R | Ref      |
-|:-------|:-------------------------------------|:--|:---------|
-| 0x0000 | RESERVED                             | - | RFC XXXX |
-| 0x0001 | KT_128_SHA256_P256                   | Y | RFC XXXX |
-| 0x0002 | KT_128_SHA256_Ed25519                | Y | RFC XXXX |
+| Value           | Name                        | R | Ref      |
+|:----------------|:----------------------------|:--|:---------|
+| 0x0000          | RESERVED                    | - | RFC XXXX |
+| 0x0001          | KT_128_SHA256_P256          | Y | RFC XXXX |
+| 0x0002          | KT_128_SHA256_Ed25519       | Y | RFC XXXX |
+| 0xF000 - 0xFFFF | Reserved for Private Use    | - | RFC XXXX |
 
 All cipher suites currently specified share the following primitives and
 parameters:
