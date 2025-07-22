@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2025-07-03T01:07:04.762510+00:00",
+  "timestamp": "2025-07-22T01:10:39.602507+00:00",
   "repo": "ietf-wg-keytrans/draft-protocol",
   "labels": [
     {
@@ -3070,6 +3070,48 @@
               "updatedAt": "2025-07-02T09:33:01Z"
             }
           ]
+        }
+      ]
+    },
+    {
+      "number": 43,
+      "id": "PR_kwDOLrnaA86fwuWD",
+      "title": "Add private use range",
+      "url": "https://github.com/ietf-wg-keytrans/draft-protocol/pull/43",
+      "state": "MERGED",
+      "author": "Bren2010",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2025-07-21T01:20:04Z",
+      "updatedAt": "2025-07-21T16:08:37Z",
+      "baseRepository": "ietf-wg-keytrans/draft-protocol",
+      "baseRefName": "main",
+      "baseRefOid": "6265b2121df0817b0980401cab39533b786ef24d",
+      "headRepository": "ietf-wg-keytrans/draft-protocol",
+      "headRefName": "brendan/private-use",
+      "headRefOid": "926536b302f1bd49636ab87caa1447c351a901df",
+      "closedAt": "2025-07-21T16:08:36Z",
+      "mergedAt": "2025-07-21T16:08:36Z",
+      "mergedBy": "Bren2010",
+      "mergeCommit": {
+        "oid": "636a8d7030a624248cec47c3810b57df787d365f"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOLrnaA861B2Gg",
+          "commit": {
+            "abbreviatedOid": "926536b"
+          },
+          "author": "felixlinker",
+          "authorAssociation": "COLLABORATOR",
+          "state": "APPROVED",
+          "body": "",
+          "createdAt": "2025-07-21T09:07:32Z",
+          "updatedAt": "2025-07-21T09:07:32Z",
+          "comments": []
         }
       ]
     }
