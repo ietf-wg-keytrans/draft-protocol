@@ -1274,16 +1274,30 @@ milliseconds since the Unix epoch. The `prefix_tree` field contains the updated
 root hash of the prefix tree after making any desired modifications.
 
 The value of a parent node in the log tree is computed by hashing together the
-values of its left and right children:
+values of its left and right children. Overall, a log tree node's value
+is computed as follows.
 
 ~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
+struct {
+  opaque value[Hash.Nh];
+  optional<LogLeaf> leaf_data;
+  optional<LogTreeNode> left_child;
+  optional<LogTreeNode> right_child;
+} LogTreeNode;
 
-hashContent(node):
-  if node.type == leafNode:
+log_node.value = logTreeValue(log_node)
+
+logTreeValue(node):
+  if node.left_child == undefined && node.right_child == undefined:
+    return Hash(node.leaf_data)
+  else:
+    return Hash(logTreeHashContent(node.left_child) ||
+                logTreeHashContent(node.right_child))
+
+logTreeHashContent(node):
+  if node.left_child == undefined && node.right_child == undefined:
     return 0x00 || node.value
-  else if node.type == parentNode:
+  else:
     return 0x01 || node.value
 ~~~
 
@@ -1307,21 +1321,34 @@ The `vrf_output` field contains the VRF output for the label-version pair.
 structure.
 
 The value of a parent node in the prefix tree is computed by hashing together
-the values of its left and right children:
+the values of its left and right children. Overall, a prefix tree node's value
+is computed as follows.
 
-~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
+~~~
+struct {
+  opaque value[Hash.Nh];
+  optional<PrefixLeaf> leaf_data;
+  optional<PrefixNode> left_child;
+  optional<PrefixNode> right_child;
+} PrefixNode;
 
-hashContent(node):
-  if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh+1
-  else if node.type == leafNode:
+prefix_node.value = prefixTreeValue(node)
+
+prefixTreeValue(node):
+  if node.type.left_child == undefined && node.right_child == undefined:
+    return Hash(node.leaf_data)
+  else:
+    return Hash(prefixTreeHashContent(node.left_child) ||
+                prefixTreeHashContent(node.right_child))
+
+prefixTreeHashContent(node):
+  if node == undefined:
+    return 0x00...0x00 // all-zero vector of length Hash.Nh+1
+  else if node.left_child == undefined && node.right_child == undefined:
     return 0x01 || node.value
   else if node.type == parentNode:
-    return 0x02 || node.value
+    return 0x02 || node.value
 ~~~
-
 
 # Tree Proofs
 
