@@ -393,9 +393,9 @@ value was stored.
  /   \         |               /   \          /             \
 /_____\   (T_n, PT_n)         /_____\   (T_n, PT_n)   (T_n+1, PT_n+1)
 ~~~
-{: title="An example evolution of the combined tree structure. Every new log
-entry added contains the timestamp T_n of when it was created and the new prefix
-tree root hash PT_n."}
+{: title="An example evolution of the log tree in the combined tree structure.
+Every new log entry added contains the timestamp T_n of when it was created and
+the new prefix tree root hash PT_n."}
 
 
 # Updating Views of the Tree
@@ -506,7 +506,7 @@ following:
   entry with index `size-1`, where `size` is the tree size advertised by the
   user. Provide the timestamp of each log entry in the direct path whose index
   is greater than or equal to `size`.
-- Exactly one of these log entries will lie on the new tree's frontier. From
+- The last of these log entries will lie on the new tree's frontier. From
   this log entry, compute the remainder of the frontier. That is, compute the
   log entry's right child, the right child's right child, and so on. Provide
   the timestamps for these log entries as well.
@@ -583,8 +583,8 @@ same label, allowing for efficient user monitoring of the Transparency Log.
 To perform a binary search, users need to be able to inspect individual log
 entries and determine whether their search should continue to the left of the
 current log entry or the right. Specifically, they need to be able to determine
-if the greatest version of their label that was present in some version of the
-prefix tree was greater than, equal to, or less than their **target version**.
+if the greatest version of their label that's present in a given version of the
+prefix tree is greater than, equal to, or less than their **target version**.
 
 This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
@@ -593,7 +593,7 @@ purpose of a fixed-version search follow the series of lookups described in
 
 First, the series of lookups ends after the first inclusion proof for a version
 greater than or equal to the target version, or the first non-inclusion proof
-for a version less than the target version. The additional lookups are
+for a version less than or equal to the target version. The additional lookups are
 unnecessary, since the user only needs to know whether the greatest version of
 the label that existed as of a particular log entry is greater than or less than
 their target version -- not its exact value.
@@ -926,14 +926,14 @@ One special consideration for a greatest-version search is that the Transparency
 Log must prove that it is revealing the absolute greatest version of a label
 that exists, referred to as the **target version**. This differs from the binary
 ladders described for fixed-version searches ({{fv-binary-ladder}}) and
-monitoring ({{monitor-binary-ladder}}), which only aim to prove a lower
+monitoring ({{monitor-binary-ladder}}), which only aim to prove some
 bound on the greatest version.
 
 Binary ladders provided for the purpose of a greatest-version search follow the
 series of lookups described in {{binary-ladder}}, with two optimizations:
 
 First, the series of lookups ends after the first non-inclusion proof for a
-version less than the target version. This differs from {{fv-binary-ladder}} in
+version less than or equal to the target version. This differs from {{fv-binary-ladder}} in
 that the binary ladder algorithm will continue even after receiving an inclusion
 proof for a version equal to the target version. This is often necessary to
 demonstrate that there are no versions greater than the target version.
@@ -2116,12 +2116,11 @@ def fixed_version_binary_ladder(
 ):
     def would_end(v):
         # (Proof of inclusion for a version greater than or equal to t) OR
-        # (Proof of non-inclusion for a version less than t)
-        return (v <= n and v >= t) or (v > n and v < t)
+        # (Proof of non-inclusion for a version less than or equal to t)
+        return (v <= n and v >= t) or (v > n and v <= t)
 
     def would_be_duplicate(v):
-        return (v <= n and v in left_inclusion) or \
-               (v > n and v in right_non_inclusion)
+        return (v in left_inclusion) or (v in right_non_inclusion)
 
     out = base_binary_ladder(n)
     end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
@@ -2146,15 +2145,14 @@ def greatest_version_binary_ladder(
     left_inclusion = [], right_non_inclusion = [], same_entry = []
 ):
     def would_end(v):
-        # Proof of non-inclusion for a version less than t
-        return (v > n and v < t)
+        # Proof of non-inclusion for a version less than or equal to t
+        return (v > n and v <= t)
 
     def would_be_duplicate(v):
         if distinguished:
-            return (v <= n and v in left_inclusion) or \
-                   (v > n and v in right_non_inclusion)
-        else:
             return v in same_entry
+        else:
+            return (v in left_inclusion) or (v in right_non_inclusion)
 
     out = base_binary_ladder(t)
     end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
