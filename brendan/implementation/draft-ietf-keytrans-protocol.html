@@ -16,21 +16,21 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.30.0" name="generator">
+<meta content="xml2rfc 3.30.2" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.30.0
+  xml2rfc 3.30.2
     Python 3.12.11
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
     lxml 5.3.1
-    platformdirs 4.3.8
+    platformdirs 4.4.0
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.4
+    requests 2.32.5
     setuptools 80.9.0
     wcwidth 0.2.13
 -->
@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">July 2025</td>
+<td class="right">September 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 22 January 2026</td>
+<td class="center">Expires 26 March 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-07-21" class="published">21 July 2025</time>
+<time datetime="2025-09-22" class="published">22 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-01-22">22 January 2026</time></dd>
+<dd class="expires"><time datetime="2026-03-26">26 March 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 January 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 26 March 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1872,7 +1872,7 @@ value was stored.<a href="#section-3.4-3" class="pilcrow">¶</a></p>
 </div>
 </div>
 <figcaption><a href="#figure-7" class="selfRef">Figure 7</a>:
-<a href="#name-an-example-evolution-of-the" class="selfRef">An example evolution of the combined tree structure. Every new log entry added contains the timestamp T_n of when it was created and the new prefix tree root hash PT_n.</a>
+<a href="#name-an-example-evolution-of-the" class="selfRef">An example evolution of the log tree in the combined tree structure. Every new log entry added contains the timestamp T_n of when it was created and the new prefix tree root hash PT_n.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -2044,7 +2044,7 @@ user. Provide the timestamp of each log entry in the direct path whose index
 is greater than or equal to <code>size</code>.<a href="#section-4.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-4.2-4.2">
-            <p id="section-4.2-4.2.1">Exactly one of these log entries will lie on the new tree's frontier. From
+            <p id="section-4.2-4.2.1">The last of these log entries will lie on the new tree's frontier. From
 this log entry, compute the remainder of the frontier. That is, compute the
 log entry's right child, the right child's right child, and so on. Provide
 the timestamps for these log entries as well.<a href="#section-4.2-4.2.1" class="pilcrow">¶</a></p>
@@ -2052,20 +2052,21 @@ the timestamps for these log entries as well.<a href="#section-4.2-4.2.1" class=
         </ul>
 <p id="section-4.2-5">Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
-greater than or equal to the one prior. While this only requires users to verify
-a logarithmic number of the newly added log entries' timestamps, it guarantees
+greater than or equal to the one prior. This only requires users to verify
+a logarithmic number of the newly added log entries' timestamps and guarantees
 that two users with overlapping views of the tree will detect any violations.
 While retaining only the rightmost log entry's timestamp would be sufficient for
 this purpose, users retain the timestamps of all log entries along the frontier.
 The additional timestamps are retained to make later parts of the protocol more
 efficient.<a href="#section-4.2-5" class="pilcrow">¶</a></p>
-<p id="section-4.2-6">Additionally, the Transparency Log defines two durations: how far ahead and how
-far behind the current time the rightmost log entry's timestamp may be. Users
-verify this against their local clock.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
+<p id="section-4.2-6">The Transparency Log defines two durations: how far ahead and how far behind the
+current time the rightmost log entry's timestamp may be. Users verify this
+against their local clock at the time they receive the query response.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
 <p id="section-4.2-7">For users which have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
-timestamps of the log entries on the frontier. The user verifies each timestamp
-is greater than or equal to the one prior, as above.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
+timestamps of the log entries on the frontier. The user verifies that each
+timestamp is greater than or equal to the one prior and that the rightmost
+timestamp is within the defined bounds of the user's local clock.<a href="#section-4.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2132,15 +2133,15 @@ same label, allowing for efficient user monitoring of the Transparency Log.<a hr
 <p id="section-6.1-1">To perform a binary search, users need to be able to inspect individual log
 entries and determine whether their search should continue to the left of the
 current log entry or the right. Specifically, they need to be able to determine
-if the greatest version of their label that was present in some version of the
-prefix tree was greater than, equal to, or less than their <strong>target version</strong>.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+if the greatest version of their label that's present in a given version of the
+prefix tree is greater than, equal to, or less than their <strong>target version</strong>.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.1-2">This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
 purpose of a fixed-version search follow the series of lookups described in
 <a href="#binary-ladder" class="auto internal xref">Section 5</a>, but with two optimizations:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">First, the series of lookups ends after the first inclusion proof for a version
 greater than or equal to the target version, or the first non-inclusion proof
-for a version less than the target version. The additional lookups are
+for a version less than or equal to the target version. The additional lookups are
 unnecessary, since the user only needs to know whether the greatest version of
 the label that existed as of a particular log entry is greater than or less than
 their target version -- not its exact value.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
@@ -2223,7 +2224,7 @@ less than or equal to any log entries to the right.<a href="#section-6.3-2.3.1" 
 </li>
           <li id="section-6.3-2.4">
             <p id="section-6.3-2.4.1">If the binary ladder was terminated early due to a non-inclusion proof for a
-version less than or equal the target version, recurse to the log entry's right child.
+version less than or equal to the target version, recurse to the log entry's right child.
 Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
 abort the search with an error indicating that the desired version of the
 label has expired and is no longer available. If not, recurse to the log
@@ -2541,12 +2542,12 @@ be on the frontier of the log and will never be past its maximum lifetime.<a hre
 Log must prove that it is revealing the absolute greatest version of a label
 that exists, referred to as the <strong>target version</strong>. This differs from the binary
 ladders described for fixed-version searches (<a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>) and
-monitoring (<a href="#monitor-binary-ladder" class="auto internal xref">Section 7.3</a>), which only aim to prove a lower
+monitoring (<a href="#monitor-binary-ladder" class="auto internal xref">Section 7.3</a>), which only aim to prove some
 bound on the greatest version.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">Binary ladders provided for the purpose of a greatest-version search follow the
 series of lookups described in <a href="#binary-ladder" class="auto internal xref">Section 5</a>, with two optimizations:<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">First, the series of lookups ends after the first non-inclusion proof for a
-version less than the target version. This differs from <a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a> in
+version less than or equal to the target version. This differs from <a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a> in
 that the binary ladder algorithm will continue even after receiving an inclusion
 proof for a version equal to the target version. This is often necessary to
 demonstrate that there are no versions greater than the target version.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
@@ -4097,12 +4098,11 @@ def fixed_version_binary_ladder(
 ):
     def would_end(v):
         # (Proof of inclusion for a version greater than or equal to t) OR
-        # (Proof of non-inclusion for a version less than t)
-        return (v &lt;= n and v &gt;= t) or (v &gt; n and v &lt; t)
+        # (Proof of non-inclusion for a version less than or equal to t)
+        return (v &lt;= n and v &gt;= t) or (v &gt; n and v &lt;= t)
 
     def would_be_duplicate(v):
-        return (v &lt;= n and v in left_inclusion) or \
-               (v &gt; n and v in right_non_inclusion)
+        return (v in left_inclusion) or (v in right_non_inclusion)
 
     out = base_binary_ladder(n)
     end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
@@ -4127,15 +4127,14 @@ def greatest_version_binary_ladder(
     left_inclusion = [], right_non_inclusion = [], same_entry = []
 ):
     def would_end(v):
-        # Proof of non-inclusion for a version less than t
-        return (v &gt; n and v &lt; t)
+        # Proof of non-inclusion for a version less than or equal to t
+        return (v &gt; n and v &lt;= t)
 
     def would_be_duplicate(v):
         if distinguished:
-            return (v &lt;= n and v in left_inclusion) or \
-                   (v &gt; n and v in right_non_inclusion)
-        else:
             return v in same_entry
+        else:
+            return (v in left_inclusion) or (v in right_non_inclusion)
 
     out = base_binary_ladder(t)
     end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))

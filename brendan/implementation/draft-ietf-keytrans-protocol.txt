@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 8 January 2026                                      7 July 2025
+Expires: 26 March 2026                                 22 September 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 8 January 2026.
+   This Internet-Draft will expire on 26 March 2026.
 
 Copyright Notice
 
@@ -461,9 +461,10 @@ Table of Contents
     /   \         |               /   \          /             \
    /_____\   (T_n, PT_n)         /_____\   (T_n, PT_n)   (T_n+1, PT_n+1)
 
-       Figure 7: An example evolution of the combined tree structure.
-      Every new log entry added contains the timestamp T_n of when it
-            was created and the new prefix tree root hash PT_n.
+       Figure 7: An example evolution of the log tree in the combined
+     tree structure.  Every new log entry added contains the timestamp
+        T_n of when it was created and the new prefix tree root hash
+                                   PT_n.
 
 4.  Updating Views of the Tree
 
@@ -584,32 +585,34 @@ Table of Contents
       advertised by the user.  Provide the timestamp of each log entry
       in the direct path whose index is greater than or equal to size.
 
-   *  Exactly one of these log entries will lie on the new tree's
-      frontier.  From this log entry, compute the remainder of the
-      frontier.  That is, compute the log entry's right child, the right
-      child's right child, and so on.  Provide the timestamps for these
-      log entries as well.
+   *  The last of these log entries will lie on the new tree's frontier.
+      From this log entry, compute the remainder of the frontier.  That
+      is, compute the log entry's right child, the right child's right
+      child, and so on.  Provide the timestamps for these log entries as
+      well.
 
    Users verify that the first timestamp is greater than or equal to the
    timestamp of the rightmost log entry they retained, and that each
-   subsequent timestamp is greater than or equal to the one prior.
-   While this only requires users to verify a logarithmic number of the
-   newly added log entries' timestamps, it guarantees that two users
-   with overlapping views of the tree will detect any violations.  While
+   subsequent timestamp is greater than or equal to the one prior.  This
+   only requires users to verify a logarithmic number of the newly added
+   log entries' timestamps and guarantees that two users with
+   overlapping views of the tree will detect any violations.  While
    retaining only the rightmost log entry's timestamp would be
    sufficient for this purpose, users retain the timestamps of all log
    entries along the frontier.  The additional timestamps are retained
    to make later parts of the protocol more efficient.
 
-   Additionally, the Transparency Log defines two durations: how far
-   ahead and how far behind the current time the rightmost log entry's
-   timestamp may be.  Users verify this against their local clock.
+   The Transparency Log defines two durations: how far ahead and how far
+   behind the current time the rightmost log entry's timestamp may be.
+   Users verify this against their local clock at the time they receive
+   the query response.
 
    For users which have never interacted with the Transparency Log
    before and don't have a previous tree head to advertise, the
    Transparency Log simply provides the timestamps of the log entries on
-   the frontier.  The user verifies each timestamp is greater than or
-   equal to the one prior, as above.
+   the frontier.  The user verifies that each timestamp is greater than
+   or equal to the one prior and that the rightmost timestamp is within
+   the defined bounds of the user's local clock.
 
 5.  Binary Ladder
 
@@ -668,8 +671,9 @@ Table of Contents
    individual log entries and determine whether their search should
    continue to the left of the current log entry or the right.
    Specifically, they need to be able to determine if the greatest
-   version of their label that was present in some version of the prefix
-   tree was greater than, equal to, or less than their *target version*.
+   version of their label that's present in a given version of the
+   prefix tree is greater than, equal to, or less than their *target
+   version*.
 
    This is accomplished by having the Transparency Log provide a binary
    ladder from each log entry in the user's search path.  Binary ladders
@@ -678,11 +682,11 @@ Table of Contents
 
    First, the series of lookups ends after the first inclusion proof for
    a version greater than or equal to the target version, or the first
-   non-inclusion proof for a version less than the target version.  The
-   additional lookups are unnecessary, since the user only needs to know
-   whether the greatest version of the label that existed as of a
-   particular log entry is greater than or less than their target
-   version -- not its exact value.
+   non-inclusion proof for a version less than or equal to the target
+   version.  The additional lookups are unnecessary, since the user only
+   needs to know whether the greatest version of the label that existed
+   as of a particular log entry is greater than or less than their
+   target version -- not its exact value.
 
    Second, the Transparency Log omits inclusion proofs for any versions
    of the label where another inclusion proof for the same version was
@@ -764,7 +768,7 @@ Table of Contents
        equal to any log entries to the right.
 
    4.  If the binary ladder was terminated early due to a non-inclusion
-       proof for a version less than or equal the target version,
+       proof for a version less than or equal to the target version,
        recurse to the log entry's right child.  Otherwise, check if the
        log entry has surpassed its maximum lifetime.  If so, abort the
        search with an error indicating that the desired version of the
@@ -1068,18 +1072,18 @@ Table of Contents
    greatest version of a label that exists, referred to as the *target
    version*. This differs from the binary ladders described for fixed-
    version searches (Section 6.1) and monitoring (Section 7.3), which
-   only aim to prove a lower bound on the greatest version.
+   only aim to prove some bound on the greatest version.
 
    Binary ladders provided for the purpose of a greatest-version search
    follow the series of lookups described in Section 5, with two
    optimizations:
 
    First, the series of lookups ends after the first non-inclusion proof
-   for a version less than the target version.  This differs from
-   Section 6.1 in that the binary ladder algorithm will continue even
-   after receiving an inclusion proof for a version equal to the target
-   version.  This is often necessary to demonstrate that there are no
-   versions greater than the target version.
+   for a version less than or equal to the target version.  This differs
+   from Section 6.1 in that the binary ladder algorithm will continue
+   even after receiving an inclusion proof for a version equal to the
+   target version.  This is often necessary to demonstrate that there
+   are no versions greater than the target version.
 
    Second, depending on whether the binary ladder is for a distinguished
    or non-distinguished log entry:
@@ -2167,15 +2171,17 @@ Table of Contents
 
    Initial contents:
 
-             +========+=======================+===+==========+
-             | Value  | Name                  | R | Ref      |
-             +========+=======================+===+==========+
-             | 0x0000 | RESERVED              | - | RFC XXXX |
-             +--------+-----------------------+---+----------+
-             | 0x0001 | KT_128_SHA256_P256    | Y | RFC XXXX |
-             +--------+-----------------------+---+----------+
-             | 0x0002 | KT_128_SHA256_Ed25519 | Y | RFC XXXX |
-             +--------+-----------------------+---+----------+
+       +=================+==========================+===+==========+
+       | Value           | Name                     | R | Ref      |
+       +=================+==========================+===+==========+
+       | 0x0000          | RESERVED                 | - | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0x0001          | KT_128_SHA256_P256       | Y | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0x0002          | KT_128_SHA256_Ed25519    | Y | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
+       | 0xF000 - 0xFFFF | Reserved for Private Use | - | RFC XXXX |
+       +-----------------+--------------------------+---+----------+
 
                                   Table 1
 
@@ -2251,9 +2257,9 @@ Table of Contents
 
    [ARCH]     McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
-              architecture-03, 25 February 2025,
+              architecture-04, 6 July 2025,
               <https://datatracker.ietf.org/doc/html/draft-ietf-
-              keytrans-architecture-03>.
+              keytrans-architecture-04>.
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
@@ -2393,12 +2399,11 @@ Appendix B.  Binary Ladder
    ):
        def would_end(v):
            # (Proof of inclusion for a version greater than or equal to t) OR
-           # (Proof of non-inclusion for a version less than t)
-           return (v <= n and v >= t) or (v > n and v < t)
+           # (Proof of non-inclusion for a version less than or equal to t)
+           return (v <= n and v >= t) or (v > n and v <= t)
 
        def would_be_duplicate(v):
-           return (v <= n and v in left_inclusion) or \
-                  (v > n and v in right_non_inclusion)
+           return (v in left_inclusion) or (v in right_non_inclusion)
 
        out = base_binary_ladder(n)
        end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
@@ -2423,15 +2428,14 @@ Appendix B.  Binary Ladder
        left_inclusion = [], right_non_inclusion = [], same_entry = []
    ):
        def would_end(v):
-           # Proof of non-inclusion for a version less than t
-           return (v > n and v < t)
+           # Proof of non-inclusion for a version less than or equal to t
+           return (v > n and v <= t)
 
        def would_be_duplicate(v):
            if distinguished:
-               return (v <= n and v in left_inclusion) or \
-                      (v > n and v in right_non_inclusion)
-           else:
                return v in same_entry
+           else:
+               return (v in left_inclusion) or (v in right_non_inclusion)
 
        out = base_binary_ladder(t)
        end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
