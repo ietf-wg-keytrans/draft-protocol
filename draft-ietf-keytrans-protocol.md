@@ -513,22 +513,23 @@ following:
 
 Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
-greater than or equal to the one prior. While this only requires users to verify
-a logarithmic number of the newly added log entries' timestamps, it guarantees
+greater than or equal to the one prior. This only requires users to verify
+a logarithmic number of the newly added log entries' timestamps and guarantees
 that two users with overlapping views of the tree will detect any violations.
 While retaining only the rightmost log entry's timestamp would be sufficient for
 this purpose, users retain the timestamps of all log entries along the frontier.
 The additional timestamps are retained to make later parts of the protocol more
 efficient.
 
-Additionally, the Transparency Log defines two durations: how far ahead and how
-far behind the current time the rightmost log entry's timestamp may be. Users
-verify this against their local clock.
+The Transparency Log defines two durations: how far ahead and how far behind the
+current time the rightmost log entry's timestamp may be. Users verify this
+against their local clock at the time they receive the query response.
 
 For users which have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
-timestamps of the log entries on the frontier. The user verifies each timestamp
-is greater than or equal to the one prior, as above.
+timestamps of the log entries on the frontier. The user verifies that each
+timestamp is greater than or equal to the one prior and that the rightmost
+timestamp is within the defined bounds of the user's local clock.
 
 
 # Binary Ladder
@@ -666,7 +667,7 @@ recurses to left or right children, each time starting back at step 1.
    maximum version greater than or equal to any log entries to the left, and
    less than or equal to any log entries to the right.
 4. If the binary ladder was terminated early due to a non-inclusion proof for a
-   version less than or equal the target version, recurse to the log entry's right child.
+   version less than or equal to the target version, recurse to the log entry's right child.
    Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
    abort the search with an error indicating that the desired version of the
    label has expired and is no longer available. If not, recurse to the log
