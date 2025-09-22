@@ -1237,10 +1237,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.8.1"><a href="#section-8" class="auto internal xref">8</a>.  <a href="#name-greatest-version-searches" class="internal xref">Greatest-Version Searches</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.1">
-                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-binary-ladder-4" class="internal xref">Binary Ladder</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.2">
-                <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-algorithm-4" class="internal xref">Algorithm</a></p>
+                <p id="section-toc.1-1.8.2.1.1"><a href="#section-8.1" class="auto internal xref">8.1</a>.  <a href="#name-algorithm-4" class="internal xref">Algorithm</a></p>
 </li>
             </ul>
 </li>
@@ -1358,7 +1355,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.16.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-implicit-binary-search-tree-2" class="internal xref">Implicit Binary Search Tree</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.17">
-            <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-5" class="internal xref">Binary Ladder</a></p>
+            <p id="section-toc.1-1.17.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-4" class="internal xref">Binary Ladder</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.18">
             <p id="section-toc.1-1.18.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
@@ -2120,11 +2117,15 @@ provided in <a href="#appendix-binary-ladder" class="auto internal xref">Appendi
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-fixed-version-searches" class="section-name selfRef">Fixed-Version Searches</a>
       </h2>
 <p id="section-6-1">When searching the combined tree structure described in <a href="#combined-tree" class="auto internal xref">Section 3.4</a>, users
-perform a binary search for the first log entry where the prefix tree at that
-entry contains the target label-version pair. Users reuse the implicit binary
-search tree from <a href="#implicit-binary-search-tree" class="auto internal xref">Section 4.1</a> for this purpose. This ensures
-that all users will check the same or similar entries when searching for the
-same label, allowing for efficient user monitoring of the Transparency Log.<a href="#section-6-1" class="pilcrow">¶</a></p>
+essentially perform a binary search for the first log entry where the prefix
+tree contained the target version of the label. This search may terminate early
+if the user discovers a log entry where the target version of the label is the
+greatest that exists, as this is assumed to have been verified by the label
+owner (discussed in <a href="#monitoring-the-tree" class="auto internal xref">Section 7</a>).<a href="#section-6-1" class="pilcrow">¶</a></p>
+<p id="section-6-2">Users reuse the implicit binary search tree from <a href="#implicit-binary-search-tree" class="auto internal xref">Section 4.1</a>
+to execute their search. This ensures that all users will check the same or
+similar log entries when searching for a label, allowing the Transparency Log to
+be monitored efficiently.<a href="#section-6-2" class="pilcrow">¶</a></p>
 <div id="fv-binary-ladder">
 <section id="section-6.1">
         <h3 id="name-binary-ladder-2">
@@ -2133,26 +2134,29 @@ same label, allowing for efficient user monitoring of the Transparency Log.<a hr
 <p id="section-6.1-1">To perform a binary search, users need to be able to inspect individual log
 entries and determine whether their search should continue to the left of the
 current log entry or the right. Specifically, they need to be able to determine
-if the greatest version of their label that's present in a given version of the
+if the greatest version of the label that's present in a given version of the
 prefix tree is greater than, equal to, or less than their <strong>target version</strong>.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.1-2">This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
 purpose of a fixed-version search follow the series of lookups described in
 <a href="#binary-ladder" class="auto internal xref">Section 5</a>, but with two optimizations:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">First, the series of lookups ends after the first inclusion proof for a version
-greater than or equal to the target version, or the first non-inclusion proof
-for a version less than or equal to the target version. The additional lookups are
+greater than the target version, or the first non-inclusion proof for a version
+less than or equal to the target version. Providing additional lookups is
 unnecessary, since the user only needs to know whether the greatest version of
-the label that existed as of a particular log entry is greater than or less than
-their target version -- not its exact value.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
-<p id="section-6.1-4">Second, the Transparency Log omits inclusion proofs for any versions of the
-label where another inclusion proof for the same version was already provided in
-the same query response for a log entry to the left. Similarly, the Transparency
-Log omits non-inclusion proofs for any versions of the label where another
-non-inclusion proof for the same version was already provided in the same query
-response for a log entry to the right. Providing these proofs is unnecessary
-since the only possible outcome they could have on the user's binary search
-would be to cause it to fail.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
+the label that exists is greater than, equal to, or less than the target
+version, rather than its exact value. However, note that the binary ladder
+continues after receiving an inclusion proof for a version <strong>equal</strong> to the
+target version, as this is needed to determine whether any versions greater than
+the target version exist.<a href="#section-6.1-3" class="pilcrow">¶</a></p>
+<p id="section-6.1-4">Second, depending on the context in which the binary ladder is provided, the
+Transparency Log may omit inclusion proofs for any versions where another
+inclusion proof for the same version was already provided in the same query
+response for a log entry to the left. Similarly, the Transparency Log may omit
+non-inclusion proofs for any versions of the label where another non-inclusion
+proof for the same version was already provided in the same query response for a
+log entry to the right. Whether or not these lookups are omitted is specified in
+context.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="maximum-lifetime">
@@ -2161,15 +2165,15 @@ would be to cause it to fail.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-maximum-lifetime" class="section-name selfRef">Maximum Lifetime</a>
         </h3>
 <p id="section-6.2-1">A Transparency Log operator <span class="bcp14">MAY</span> define a maximum lifetime for log entries. If
-defined, it <span class="bcp14">MUST</span> be greater than zero milliseconds. Whether a log entry has surpassed
-its maximum lifetime is determined by subtracting the timestamp of the rightmost
-log entry from the timestamp of the log entry in question and checking if the
-result is greater than or equal to the defined duration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
-<p id="section-6.2-2">A user executing a search may arrive at a log entry which is past its maximum
-lifetime by either of two ways: The user may have inspected a log entry which is
-<strong>not</strong> expired and decided to recurse to the log entry's left child, which is
-expired. Alternatively, the root log entry may be expired, in which case the
-user would've started their search at an expired root log entry.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
+defined, it <span class="bcp14">MUST</span> be greater than zero milliseconds. Whether a log entry is
+expired is determined by subtracting the timestamp of the rightmost log entry
+from the timestamp of the log entry in question and checking if the result is
+greater than or equal to the defined duration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-2">A user executing a search may arrive at an expired log entry by either of two
+ways: The user may have inspected a log entry which is <strong>not</strong> expired and
+decided to recurse to the log entry's left child, which is expired.
+Alternatively, the root log entry may be expired, in which case the user
+would've started their search at an expired root log entry.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 <p id="section-6.2-3">When a user's search proceeds from a log entry which is not expired to a log
 entry which is expired, the user is provided with a binary ladder from the
 expired log entry as usual. If the user's search would recurse further into the
@@ -2185,10 +2189,9 @@ portion of the tree), it aborts; to the right (into the unexpired portion of the
 tree), it continues.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <p id="section-6.2-5">This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
-lifetime need to be retained. Specifically, users will still need only a
-logarithmic number of log entries that have passed their maximum lifetime,
-meaning the rest can be discarded. Pruning is explained in more detail in
-<span>[<a href="#ARCH" class="cite xref">ARCH</a>]</span>.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
+lifetime need to be retained. Users will need to inspect at most a logarithmic
+number of expired log entries, meaning the rest can be discarded. Pruning is
+explained in more detail in <span>[<a href="#ARCH" class="cite xref">ARCH</a>]</span>.<a href="#section-6.2-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="fv-algorithm">
@@ -2209,58 +2212,94 @@ log entry is in the ancestor's right subtree, then its timestamp is greater
 than or equal to the ancestor's.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
-            <p id="section-6.3-2.2.1">If the log entry has surpassed its maximum lifetime and is on the frontier,
-determine whether its right child has also surpassed its maximum lifetime. If
-so, recurse to the right child; otherwise, continue to step 3. Note that a
-right child always exists, as the rightmost log entry cannot exceed its
-maximum lifetime by definition.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.2.1">If the log entry is expired, is on the frontier, and its right child is also
+expired, recurse to the right child. Note that a right child always exists,
+as the rightmost log entry can not exceed its maximum lifetime by definition.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.3">
-            <p id="section-6.3-2.3.1">Obtain a binary ladder from the current log entry for the target version.
-Verify that the binary ladder terminates in a way that is consistent with
-previously inspected log entries. Specifically, verify that it indicates a
-maximum version greater than or equal to any log entries to the left, and
-less than or equal to any log entries to the right.<a href="#section-6.3-2.3.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.3.1">Obtain a binary ladder from the current log entry for the target version,
+omitting redundant lookups as described in <a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>. Determine
+whether the binary ladder indicates a greatest version of the label that is
+greater than, equal to, or less than the target version.<a href="#section-6.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.4">
-            <p id="section-6.3-2.4.1">If the binary ladder was terminated early due to a non-inclusion proof for a
-version less than or equal to the target version, recurse to the log entry's right child.
-Otherwise, check if the log entry has surpassed its maximum lifetime. If so,
-abort the search with an error indicating that the desired version of the
-label has expired and is no longer available. If not, recurse to the log
-entry's left child. If, in either case, recursion isn't possible because the
-search is at a leaf node:<a href="#section-6.3-2.4.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.4.1">If the binary ladder indicates a greatest version less than the target
+version (that is, if it was stopped early by a non-inclusion proof for a
+version less than or equal to the target version), then:<a href="#section-6.3-2.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.3-2.4.2">
+<li id="section-6.3-2.4.2.1">
+                <p id="section-6.3-2.4.2.1.1">If the log entry is a leaf, proceed to step 7.<a href="#section-6.3-2.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.4.2.2">
+                <p id="section-6.3-2.4.2.2.1">Otherwise, recurse to the log entry's right child.<a href="#section-6.3-2.4.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
 </li>
           <li id="section-6.3-2.5">
-            <p id="section-6.3-2.5.1">This largely concludes the search. However, there are some additional
-technicalities to address. First, it's possible for the binary search to
-conclude even if the label-version pair that the user is interested in
-doesn't exist or is expired. Out of the log entries touched by the binary
-search, identify which log entry was first to contain the desired
-label-version pair. If there is no such log entry, or if it is past its
-maximum lifetime, abort the search and return an error to the user.<a href="#section-6.3-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.5.1">If the binary ladder indicates a greatest version equal to the target version
+(that is, it contains inclusion proofs for all expected versions less than or
+equal to the target, and non-inclusion proofs for all expected versions
+greater than the target), then:<a href="#section-6.3-2.5.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.3-2.5.2">
+<li id="section-6.3-2.5.2.1">
+                <p id="section-6.3-2.5.2.1.1">If the log entry is not expired, terminate the search successfully.<a href="#section-6.3-2.5.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.5.2.2">
+                <p id="section-6.3-2.5.2.2.1">If the log entry is a leaf, proceed to step 7.<a href="#section-6.3-2.5.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.5.2.3">
+                <p id="section-6.3-2.5.2.3.1">Otherwise, recurse to the log entry's right child.<a href="#section-6.3-2.5.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
 </li>
           <li id="section-6.3-2.6">
-            <p id="section-6.3-2.6.1">It's also possible at this point that a commitment to the contents of the
-desired label-version pair has not been provided by the Transparency Log.
-This can happen, for example, if multiple versions of a label were inserted
-in the same log entry and the binary ladder was terminated early due to an
-inclusion proof for a version greater than the target version. If this has
-happened, obtain a search proof for the target label-version pair from the
-prefix tree in the first log entry to contain it (identified in step 5). If
-the search proof shows non-inclusion rather than inclusion, return an error
-to the user.<a href="#section-6.3-2.6.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.6.1">If the binary ladder indicates a greatest version greater than the target
+version (that is, if it was stopped early by an inclusion proof for a version
+greater than the target version), then:<a href="#section-6.3-2.6.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.3-2.6.2">
+<li id="section-6.3-2.6.2.1">
+                <p id="section-6.3-2.6.2.1.1">If the log entry is a leaf, proceed to step 7.<a href="#section-6.3-2.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.6.2.2">
+                <p id="section-6.3-2.6.2.2.1">If the log entry is expired, terminate the search with an error indicating
+that the requested version of the label has expired.<a href="#section-6.3-2.6.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.6.2.3">
+                <p id="section-6.3-2.6.2.3.1">Otherwise, recurse to the log entry's left child.<a href="#section-6.3-2.6.2.3.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
+</li>
+          <li id="section-6.3-2.7">
+            <p id="section-6.3-2.7.1">If this step is reached, the search has reached a leaf node without finding
+an unexpired log entry where the target version is the greatest that exists.
+In this case, out of all the log entries inspected, identify the leftmost one
+where the binary ladder indicated a greatest version greater than or equal to
+the target version.<a href="#section-6.3-2.7.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-6.3-2.7.2">
+<li id="section-6.3-2.7.2.1">
+                <p id="section-6.3-2.7.2.1.1">If there is no such log entry or this log entry is expired, terminate the
+search with an error indicating that the requested version of the label is
+unavailable.<a href="#section-6.3-2.7.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li id="section-6.3-2.7.2.2">
+                <p id="section-6.3-2.7.2.2.1">Otherwise, obtain a search proof from this log entry for the target
+version of the label. If the search proof shows non-inclusion, terminate
+the search with an error indicating that the requested version of the
+label is unavailable. If the search proof shows inclusion, terminate the
+search successfully.<a href="#section-6.3-2.7.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ol>
 </li>
         </ol>
-<p id="section-6.3-3">The most important goal of this algorithm is correctly identifying the first log
-entry that contains the target label-version pair. The purpose of
-doing this is to make monitoring more efficient for the label owner. If a label
-has a large number of versions, it can become prohibitively expensive for its
-owner to repeatedly check that every single version is represented correctly in
-multiple log entries. Instead, the label owner can check that the version was
-created correctly in the one log entry where it was first added and then enforce
-that binary searches for that version always converge back to that same log
-entry.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">If the Transparency Log is deployed in Contact Monitoring mode and the terminal
+node of the search is to the right of the rightmost distinguished log entry
+(defined in <a href="#reasonable-monitoring-window" class="auto internal xref">Section 7.1</a>), the user <span class="bcp14">MUST</span> monitor the label
+as described in <a href="#reasonable-monitoring-window" class="auto internal xref">Section 7.1</a>. The <em>terminal node</em> of a
+search is defined as the log entry that triggered step 5.1, or the log entry
+identified in step 7.<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-4">If the Transparency Log is deployed in Third-Party Auditing mode and a binary
+ladder was provided from any non-distinguished log entry, the user <span class="bcp14">MUST</span> verify
+that <code>auditor_start_pos</code> is less than or equal to the leftmost such log entry.<a href="#section-6.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2499,7 +2538,7 @@ greatest version of the label is correct. Users advertise this log entry's
 position in their Monitor request. For a number of subsequent distinguished log
 entries, the Transparency Log provides the greatest version of the label that
 the log entry's prefix tree contains, along with a binary ladder (according to
-the rules stated in <a href="#gv-binary-ladder" class="auto internal xref">Section 8.1</a>) to prove that this is correct.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
+the rules stated in <a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>) to prove that this is correct.<a href="#section-7.4.1-1" class="pilcrow">¶</a></p>
 <p id="section-7.4.1-2">Users verify that the version has not unexpectedly increased or decreased.
 Importantly, users also verify that they receive a binary ladder for the
 distinguished log entry immediately following the one they've advertised, the
@@ -2533,88 +2572,38 @@ are required to check for correctness. As a result, users can start their search
 at the rightmost distinguished log entry and only consider new versions which
 have been created since then. The rightmost distinguished log entry will always
 be on the frontier of the log and will never be past its maximum lifetime.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<div id="gv-binary-ladder">
-<section id="section-8.1">
-        <h3 id="name-binary-ladder-4">
-<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-binary-ladder-4" class="section-name selfRef">Binary Ladder</a>
-        </h3>
-<p id="section-8.1-1">One special consideration for a greatest-version search is that the Transparency
-Log must prove that it is revealing the absolute greatest version of a label
-that exists, referred to as the <strong>target version</strong>. This differs from the binary
-ladders described for fixed-version searches (<a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>) and
-monitoring (<a href="#monitor-binary-ladder" class="auto internal xref">Section 7.3</a>), which only aim to prove some
-bound on the greatest version.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">Binary ladders provided for the purpose of a greatest-version search follow the
-series of lookups described in <a href="#binary-ladder" class="auto internal xref">Section 5</a>, with two optimizations:<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">First, the series of lookups ends after the first non-inclusion proof for a
-version less than or equal to the target version. This differs from <a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a> in
-that the binary ladder algorithm will continue even after receiving an inclusion
-proof for a version equal to the target version. This is often necessary to
-demonstrate that there are no versions greater than the target version.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
-<p id="section-8.1-4">Second, depending on whether the binary ladder is for a distinguished or
-non-distinguished log entry:<a href="#section-8.1-4" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.1-5.1">
-            <p id="section-8.1-5.1.1">If the log entry is non-distinguished:<a href="#section-8.1-5.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.1-5.1.2.1">
-                <p id="section-8.1-5.1.2.1.1">An inclusion proof for a version is omitted if an inclusion proof for the
-same version has already been provided in the same query response from a log
-entry to the left.<a href="#section-8.1-5.1.2.1.1" class="pilcrow">¶</a></p>
-</li>
-              <li class="normal" id="section-8.1-5.1.2.2">
-                <p id="section-8.1-5.1.2.2.1">A non-inclusion proof for a version is omitted if a non-inclusion proof for
-the same version has already been provided in the same query response from a
-log entry to the right.<a href="#section-8.1-5.1.2.2.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-</li>
-          <li class="normal" id="section-8.1-5.2">
-            <p id="section-8.1-5.2.1">If the log entry is distinguished:<a href="#section-8.1-5.2.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-8.1-5.2.2.1">
-                <p id="section-8.1-5.2.2.1.1">An inclusion or non-inclusion proof for a version is omitted only if it has
-previously been provided in the same query response for the same log entry.
-This may happen if the binary ladder is provided in a Monitor query response
-and the user owns the label being monitored.<a href="#section-8.1-5.2.2.1.1" class="pilcrow">¶</a></p>
-</li>
-            </ul>
-</li>
-        </ul>
-</section>
-</div>
 <div id="algorithm">
-<section id="section-8.2">
+<section id="section-8.1">
         <h3 id="name-algorithm-4">
-<a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-algorithm-4" class="section-name selfRef">Algorithm</a>
+<a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-algorithm-4" class="section-name selfRef">Algorithm</a>
         </h3>
-<p id="section-8.2-1">The algorithm for performing a greatest-version search (a search for the
+<p id="section-8.1-1">The algorithm for performing a greatest-version search (a search for the
 greatest version of a label) is described below as a recursive algorithm. It
 starts at the rightmost distinguished log entry, or the root of the implicit
 binary search tree if there are no distinguished log entries, and then recurses
-down the remainder of the frontier, each time starting back at step 1:<a href="#section-8.2-1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-8.2-2">
-<li id="section-8.2-2.1">
-            <p id="section-8.2-2.1.1">Obtain a binary ladder from the current log entry for the target version. If
+down the remainder of the frontier, each time starting back at step 1:<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.1-2">
+<li id="section-8.1-2.1">
+            <p id="section-8.1-2.1.1">Obtain a binary ladder from the current log entry for the target version. If
 this is not the starting log entry, verify that the binary ladder indicates a
-maximum version greater than or equal to that of its parent log entry.<a href="#section-8.2-2.1.1" class="pilcrow">¶</a></p>
+maximum version greater than or equal to that of its parent log entry.<a href="#section-8.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.2-2.2">
-            <p id="section-8.2-2.2.1">If this is the rightmost log entry, verify the binary ladder terminates in a
+          <li id="section-8.1-2.2">
+            <p id="section-8.1-2.2.1">If this is the rightmost log entry, verify the binary ladder terminates in a
 way that proves the target version to be the greatest that exists. This means
 that it does not terminate early, all lookups for versions less than or equal
 to the target version produce inclusion proofs, and all lookups for versions
-greater than the target version produce non-inclusion proofs.<a href="#section-8.2-2.2.1" class="pilcrow">¶</a></p>
+greater than the target version produce non-inclusion proofs.<a href="#section-8.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.2-2.3">
-            <p id="section-8.2-2.3.1">If this is not the rightmost log entry, recurse to the current log entry's
-right child.<a href="#section-8.2-2.3.1" class="pilcrow">¶</a></p>
+          <li id="section-8.1-2.3">
+            <p id="section-8.1-2.3.1">If this is not the rightmost log entry, recurse to the current log entry's
+right child.<a href="#section-8.1-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-8.2-3">If the starting log entry was not distinguished or if the starting log entry did
+<p id="section-8.1-3">If the starting log entry was not distinguished or if the starting log entry did
 not contain the greatest version of the label, note that the user may be
 obligated to monitor the label in the future per
-<a href="#reasonable-monitoring-window" class="auto internal xref">Section 7.1</a>.<a href="#section-8.2-3" class="pilcrow">¶</a></p>
+<a href="#reasonable-monitoring-window" class="auto internal xref">Section 7.1</a>.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -3308,7 +3297,7 @@ map.<a href="#section-10.3.3-2.1.2.2.1" class="pilcrow">¶</a></p>
 conduct a depth-first search for each subsequent distinguished log entry.<a href="#section-10.3.3-2.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-10.3.3-2.2.2.2">
-                  <p id="section-10.3.3-2.2.2.2.1">For each distinguished log entry, a binary ladder (<a href="#gv-binary-ladder" class="auto internal xref">Section 8.1</a>)
+                  <p id="section-10.3.3-2.2.2.2.1">For each distinguished log entry, a binary ladder (<a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>)
 targeting the greatest version of the label that the log entry contains.<a href="#section-10.3.3-2.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
@@ -3326,7 +3315,7 @@ following is provided:<a href="#section-10.3.4-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-10.3.4-2.1">
               <p id="section-10.3.4-2.1.1">For each log entry along the frontier, starting from the log entry identified
-in <a href="#greatest-version-searches" class="auto internal xref">Section 8</a>: a binary ladder (<a href="#gv-binary-ladder" class="auto internal xref">Section 8.1</a>)
+in <a href="#greatest-version-searches" class="auto internal xref">Section 8</a>: a binary ladder (<a href="#fv-binary-ladder" class="auto internal xref">Section 6.1</a>)
 targeting the greatest version of the label that exists in the log overall.<a href="#section-10.3.4-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -4056,8 +4045,8 @@ def right(x, n):
 </div>
 <div id="appendix-binary-ladder">
 <section id="appendix-B">
-      <h2 id="name-binary-ladder-5">
-<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-binary-ladder-5" class="section-name selfRef">Binary Ladder</a>
+      <h2 id="name-binary-ladder-4">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-binary-ladder-4" class="section-name selfRef">Binary Ladder</a>
       </h2>
 <p id="appendix-B-1">The following Python code demonstrates efficient algorithms for computing the
 versions of a label to include in a binary ladder:<a href="#appendix-B-1" class="pilcrow">¶</a></p>
