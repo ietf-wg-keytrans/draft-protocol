@@ -570,7 +570,7 @@ Example code for computing the versions of a label that go in a binary ladder is
 provided in {{appendix-binary-ladder}}.
 
 
-# Fixed-Version Searches
+# Fixed-Version Search
 
 When searching the combined tree structure described in {{combined-tree}}, users
 essentially perform a binary search for the first log entry where the prefix
@@ -682,7 +682,7 @@ recurses to left or right children, each time starting back at step 1.
 
 5. If the binary ladder indicates a greatest version equal to the target version
    (that is, it contains inclusion proofs for all expected versions less than or
-   equal to the target, and non-inclusion proofs for all expected versions
+   equal to the target and non-inclusion proofs for all expected versions
    greater than the target), then:
 
    1. If the log entry is not expired, terminate the search successfully.
@@ -716,13 +716,99 @@ recurses to left or right children, each time starting back at step 1.
 If the Transparency Log is deployed in Contact Monitoring mode and the terminal
 node of the search is to the right of the rightmost distinguished log entry
 (defined in {{reasonable-monitoring-window}}), the user MUST monitor the label
-as described in {{reasonable-monitoring-window}}. The *terminal node* of a
-search is defined as the log entry that triggered step 5.1, or the log entry
-identified in step 7.
+as described in {{monitoring-the-tree}}. The terminal node of the search is
+defined as the log entry that triggered step 5.1, or the log entry identified in
+step 7.
 
 If the Transparency Log is deployed in Third-Party Auditing mode and a binary
 ladder was provided from any non-distinguished log entry, the user MUST verify
 that `auditor_start_pos` is less than or equal to the leftmost such log entry.
+
+
+# Greatest-Version Search
+
+Users often wish to search for the "most recent" version, or the greatest
+version, of a label. Unlike searches for a specific version, label owners
+regularly verify that the greatest version is correctly represented in the log.
+This enables a simpler, more efficient approach to searching.
+
+This section defines the concept of a distinguished log entry, which is any log
+entry that label owners are required to check for correctness. Given this, users
+can start their search at the rightmost distinguished log entry and only
+consider new versions which have been created since then. The rightmost
+distinguished log entry will always be on the frontier of the log and will never
+be past its maximum lifetime.
+
+## Reasonable Monitoring Window
+
+Transparency Logs define a duration, referred to as the **Reasonable Monitoring
+Window** (RMW), which is the frequency with which the Transparency Log generally
+expects label owners to perform monitoring. The log entry maximum lifetime, if
+defined, MUST be greater than the RMW.
+
+**Distinguished** log entries are chosen according to the recursive algorithm
+below, such that there is roughly one per every interval of the RMW:
+
+1. Take as input: a log entry, the timestamp of a log entry to its left, and the
+   timestamp of a log entry to its right.
+2. If the right timestamp minus the left timestamp is less than the Reasonable
+   Monitoring Window, terminate the algorithm. Otherwise, declare that the given
+   log entry is distinguished.
+3. If the given log entry has a left child in the implicit binary search tree,
+   then recurse to its subtree by executing this algorithm with: the given log
+   entry's left child, the given left timestamp, and the timestamp of the given
+   log entry.
+4. If the given log entry has a right child, then recurse to its right subtree
+   by executing this algorithm with: the given log entry's right child, the
+   timestamp of the given log entry, and the given right timestamp.
+
+The algorithm is initialized with these parameters: the root node in the
+implicit binary search tree, the timestamp 0, and the timestamp of the rightmost
+log entry. Note that step 2 is specifically "less than" and not "less than or
+equal to"; this ensures correct behavior when the RMW is zero.
+
+This process for choosing distinguished log entries ensures that they are
+**regularly spaced**. Having irregularly spaced distinguished log entries risks
+either overwhelming label owners with a large number of them, or delaying
+consensus between users by having arbitrarily few. Distinguished log entries
+must reliably occur at roughly the same interval as the Reasonable Monitoring
+Window regardless of variations in how quickly new log entries are added.
+
+This process also ensures that distinguished log entries are **stable**. Once a
+log entry is chosen to be distinguished, it will never stop being distinguished.
+This ensures that, if a user looks up a label and checks consistency with some
+distinguished log entry, this log entry can't later avoid inspection by the
+label owner by losing its distinguished status.
+
+## Algorithm
+
+The algorithm for performing a greatest-version search is described below as a
+recursive algorithm. It starts at the rightmost distinguished log entry, or the
+root of the implicit binary search tree if there are no distinguished log
+entries, and then recurses down the remainder of the frontier, each time
+starting back at step 1:
+
+1. Obtain a binary ladder from the current log entry for the claimed greatest
+   version of the label, omitting redundant lookups as described in
+   {{fv-binary-ladder}}.
+2. If this is the rightmost log entry, verify that the binary ladder is
+   consistent the claimed greatest version of the label. That is, verify that it
+   contains inclusion proofs for all expected versions less than or equal to the
+   target and non-inclusion proofs for all expected versions greater than the
+   target.
+3. If this is not the rightmost log entry, recurse to the log entry's right
+   child.
+
+If the Transparency Log is deployed in Contact Monitoring mode and the terminal
+node of the search is to the right of the rightmost distinguished log entry, the
+user MUST monitor the label as described in {{monitoring-the-tree}}. The
+terminal node of the search is defined as the leftmost log entry inspected that
+contains the greatest version of the label.
+
+If the Transparency Log is deployed in Third-Party Auditing mode and a binary
+ladder was provided from any non-distinguished log entry, the user MUST verify
+that `auditor_start_pos` is less than or equal to the leftmost such log entry.
+
 
 # Monitoring the Tree
 
@@ -741,18 +827,9 @@ been added. Users that looked up a label may sometimes need to monitor it
 afterwards to ensure that the version they observed isn't later concealed by the
 Transparency Log.
 
-## Reasonable Monitoring Window
-
 Label owners MUST monitor their labels regularly, ensuring that past versions of
 the label are still correctly represented in the log and that any new versions
-of the label are permissible (alerting the user if not). Transparency Logs
-define a duration, referred to as the **Reasonable Monitoring
-Window** (RMW), which is the frequency with which the Transparency Log generally
-expects label owners to perform monitoring. The log entry maximum lifetime, if
-defined, MUST be greater than the RMW.
-
-**Distinguished** log entries are chosen according to the algorithm below, such
-that there is roughly one per every interval of the RMW. If a user looks up a
+of the label are permissible (alerting the user if not). If a user looks up a
 label (either through a fixed-version or greatest-version search) and finds that
 the first log entry that contains the desired label-version pair is to the right
 of the rightmost distinguished log entry, and the Transparency Log is deployed
@@ -761,8 +838,9 @@ pair until its monitoring path intersects a distinguished log entry. That is,
 until a new distinguished log entry is established to its right and the two log
 entries are verified to be consistent. The purpose of this monitoring is to
 ensure that the label-version pair is not removed or obscured by the
-Transparency Log before the label owner has had an opportunity to detect it. If
-the Transparency Log is deployed with a Third-Party Auditor or Third-Party
+Transparency Log before the label owner has had an opportunity to detect it.
+
+If the Transparency Log is deployed with a Third-Party Auditor or Third-Party
 Manager, this monitoring is not necessary if the third party is honest. However,
 the user MAY still perform it to detect collusion between the Transparency Log
 and the third party.
@@ -777,41 +855,6 @@ tree head, as discussed in {{updating-views-of-the-tree}}.
 MUST, if at all possible, happen more frequently than the log entry maximum
 lifetime.
 
-## Distinguished Log Entries
-
-Distinguished log entries are chosen according to the following recursive
-algorithm:
-
-1. Take as input: a log entry, the timestamp of a log entry to its left, and the
-   timestamp of a log entry to its right.
-2. If the right timestamp minus the left timestamp is less than the Reasonable
-   Monitoring Window, terminate the algorithm. Otherwise, declare that the given
-   log entry is distinguished.
-3. If the given log entry has a left child in the implicit binary search tree,
-   then recurse to its subtree by executing this algorithm with: the given log
-   entry's left child, the given left timestamp, and the timestamp of the given
-   log entry.
-4. If the given log entry has a right child, then recurse to its right subtree
-   by executing this algorithm with: the given log entry's right child, the
-   timestamp of the given log entry, and the given right timestamp.
-
-The algorithm is initialized with these parameters: the
-root node in the implicit binary search tree, the timestamp 0, and the timestamp
-of the rightmost log entry. Note that step 2 is specifically "less than" and not
-"less than or equal to"; this ensures correct behavior when the RMW is zero.
-
-This process for choosing distinguished log entries ensures that they are
-**regularly spaced**. Having irregularly spaced distinguished log entries risks
-either overwhelming label owners with a large number of them, or delaying
-consensus between users by having arbitrarily few. Distinguished log entries
-must reliably occur at roughly the same interval as the Reasonable Monitoring
-Window regardless of variations in how quickly new log entries are added.
-
-This process also ensures that distinguished log entries are **stable**. Once a
-log entry is chosen to be distinguished, it will never stop being distinguished.
-This is important because it means that, if a user looks up a label and checks
-consistency with some distinguished log entry, this log entry can't later avoid
-inspection by the label owner by losing its distinguished status.
 
 ## Binary Ladder {#monitor-binary-ladder}
 
@@ -928,45 +971,6 @@ If a user is monitoring the label for the first time since it was created, they
 advertise the first log entry to contain the label even if it is not known to be
 distinguished. The Transparency Log provides binary ladders for subsequent
 distinguished log entries.
-
-
-# Greatest-Version Searches
-
-Users often wish to search for the "most recent" version, or the greatest
-version, of a label. Unlike searches for a specific version, label owners
-regularly verify that the greatest version is correctly represented in the
-log. This enables a simpler, more efficient approach to searching.
-
-{{distinguished-log-entries}} defines the
-concept of a distinguished log entry, which is any log entry that label owners
-are required to check for correctness. As a result, users can start their search
-at the rightmost distinguished log entry and only consider new versions which
-have been created since then. The rightmost distinguished log entry will always
-be on the frontier of the log and will never be past its maximum lifetime.
-
-## Algorithm
-
-The algorithm for performing a greatest-version search (a search for the
-greatest version of a label) is described below as a recursive algorithm. It
-starts at the rightmost distinguished log entry, or the root of the implicit
-binary search tree if there are no distinguished log entries, and then recurses
-down the remainder of the frontier, each time starting back at step 1:
-
-1. Obtain a binary ladder from the current log entry for the target version. If
-   this is not the starting log entry, verify that the binary ladder indicates a
-   maximum version greater than or equal to that of its parent log entry.
-2. If this is the rightmost log entry, verify the binary ladder terminates in a
-   way that proves the target version to be the greatest that exists. This means
-   that it does not terminate early, all lookups for versions less than or equal
-   to the target version produce inclusion proofs, and all lookups for versions
-   greater than the target version produce non-inclusion proofs.
-3. If this is not the rightmost log entry, recurse to the current log entry's
-   right child.
-
-If the starting log entry was not distinguished or if the starting log entry did
-not contain the greatest version of the label, note that the user may be
-obligated to monitor the label in the future per
-{{reasonable-monitoring-window}}.
 
 
 # Cryptographic Computations
