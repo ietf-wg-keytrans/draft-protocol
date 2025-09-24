@@ -938,27 +938,81 @@ on.
 
 ## Owner Algorithm
 
-If the user owns the label being monitored, they will additionally need to
-retain the rightmost distinguished log entry where they've verified that the
-greatest version of the label is correct. Users advertise this log entry's
-position in their Monitor request. For a number of subsequent distinguished log
-entries, the Transparency Log provides the greatest version of the label that
-the log entry's prefix tree contains, along with a binary ladder (according to
-the rules stated in {{fv-binary-ladder}}) to prove that this is correct.
+Label owners initialize their state by providing the Transparency Log with a
+**starting position** coresponding to the log entry where they wish their
+ownership of the label to begin. This starting position MUST correspond to a
+distinguished log entry that is not expired. The user then executes the
+following algorithm to initialize their state and verify the search structure of
+the tree:
 
-Users verify that the version has not unexpectedly increased or decreased.
-Importantly, users also verify that they receive a binary ladder for the
-distinguished log entry immediately following the one they've advertised, the
-distinguished log entry immediately following that one, and so on. The
-Transparency Log provides whichever intermediate timestamps are necessary to
-demonstrate that this is the case. To avoid excessive load, the Transparency Log
-SHOULD limit the number of distinguished log entries it provides binary ladders
-for in a single response.
+1. Compute the list of log entries to inspect. This list starts with the log
+   entry at the user's requested starting position, followed by the log entries
+   that are on the starting position's direct path and to its left, ending after
+   the first expired log entry.
 
-If a user is monitoring the label for the first time since it was created, they
-advertise the first log entry to contain the label even if it is not known to be
-distinguished. The Transparency Log provides binary ladders for subsequent
-distinguished log entries.
+2. Obtain from the Transparency Log the greatest version of the label that
+   existed as of each of these log entries. If the label did not exist, no value
+   is provided. The user verifies that each version is less than or equal to the
+   one prior.
+
+3. Obtain from the Transparency Log VRF proofs for version zero of the label and
+   all other versions of the label that would appear in a binary ladder (as
+   defined in {{search-binary-ladder}}) where the target version was any of the
+   versions given in step 2.
+
+4. Obtain from the Transparency Log the commitment to the label's value at each
+   version where a VRF proof was provided in step 3 and the version is
+   understood to exist based on the information provided in step 2.
+
+5. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from the
+   Transparency Log for each log entry in the list computed in step 1 where the
+   target version is the corresponding version given in step 2, or zero if no
+   version was given, without omitting redundant lookups. The user verifies that
+   each binary ladder is consistent with the claimed greatest version of the
+   label.
+
+Once the label owner has initialized their state, they can begin regular
+monitoring. The label owner advertises the greatest version of the label that
+they're aware of, and the rightmost distinguished log entry that they've
+verified is correct, to the Transparency Log. For a number of subsequent
+distinguished log entries, the Transparency Log provides a binary ladder proving
+that no new unexpected versions of the label exist. This is described below as a
+recursive algorithm, starting with the root log entry:
+
+1. If the current log entry is not distinguished, stop.
+
+2. If the current log entry's index is less than or equal to that of the log
+   entry advertised by the user:
+   1. If the current log entry has a right child, recurse to the right child.
+   2. Regardless of the outcome of step 1, stop.
+
+3. If the current log entry has a left child, recurse to the left child.
+   Afterwards, proceed to step 4.
+
+4. If the greatest version of the label present at this log entry is greater
+   than the version advertised by the user, or if another stop condition has
+   occurred (such as meeting a maximum output size), stop.
+
+5. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from the
+   Transparency Log for the current log entry where the target version is the
+   greatest version of the label that exists in the current log entry, without
+   omitting redundant lookups.
+
+6. If the current log entry has a right child, recurse to the right child.
+
+To avoid excessive load, the Transparency Log SHOULD limit the number of
+distinguished log entries it provides binary ladders for in a single response.
+Users repeatedly query the Transparency Log until they detect that the above
+algorithm has either hit an unresolvable error or successfully reached the
+rightmost distinguished log entry.
+
+Users are expected to already know the correct greatest version of the label
+at each distinguished log entry, and to already have all necessary VRF outputs
+and commitments. This information is conveyed through the algorithm in
+{{updating-labels}}. If no distinguished log entry exists yet, or for new
+versions of a label that are to the right of the rightmost distinguished log
+entry, the algorithms above do not apply and the algorithm in
+{{contact-algorithm}} is used until a distinguished log entry is issued.
 
 
 # Cryptographic Computations
