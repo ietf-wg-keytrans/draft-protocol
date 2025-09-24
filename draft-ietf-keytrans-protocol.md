@@ -539,16 +539,16 @@ non-inclusion proofs, from a single log entry's prefix tree. The purpose of a
 binary ladder varies depending on the exact context in which it is provided, but
 it is generally to establish some bound on the greatest version of a label that
 existed as of a particular log entry. All binary ladders are variants of the
-following series of lookups, which exactly determines the greatest version of a
+following series of lookups that exactly determine the greatest version of a
 label that exists:
 
 1. First, version `x` of the label is looked up, where `x` is a consecutively
    higher power of two minus one (0, 1, 3, 7, ...). This is repeated until the
    first non-inclusion proof is produced.
 2. Once the first non-inclusion proof is produced, a binary search is conducted
-   between the greatest version that was proved to be included, and the version
+   between the greatest version that was proved to be included and the version
    that was proved to not be included. Each step of the binary search produces
-   either an inclusion or non-inclusion proof, which guides the search left or
+   either an inclusion or non-inclusion proof which guides the search left or
    right until it terminates.
 
 As an example, if the greatest version of a label that existed in a particular
@@ -584,7 +584,7 @@ to execute their search. This ensures that all users will check the same or
 similar log entries when searching for a label, allowing the Transparency Log to
 be monitored efficiently.
 
-## Binary Ladder {#fv-binary-ladder}
+## Binary Ladder {#search-binary-ladder}
 
 To perform a binary search, users need to be able to inspect individual log
 entries and determine whether their search should continue to the left of the
@@ -594,7 +594,7 @@ prefix tree is greater than, equal to, or less than their **target version**.
 
 This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
-purpose of a fixed-version search follow the series of lookups described in
+purpose of searching the tree follow the series of lookups described in
 {{binary-ladder}}, but with two optimizations:
 
 First, the series of lookups ends after the first inclusion proof for a version
@@ -604,8 +604,8 @@ unnecessary, since the user only needs to know whether the greatest version of
 the label that exists is greater than, equal to, or less than the target
 version, rather than its exact value. However, note that the binary ladder
 continues after receiving an inclusion proof for a version **equal** to the
-target version, as this is needed to determine whether any versions greater than
-the target version exist.
+target version, as this is often needed to determine whether or not any versions
+greater than the target version exist.
 
 Second, depending on the context in which the binary ladder is provided, the
 Transparency Log may omit inclusion proofs for any versions where another
@@ -653,10 +653,10 @@ explained in more detail in {{ARCH}}.
 
 ## Algorithm {#fv-algorithm}
 
-The algorithm for performing a fixed-version search (a search for a specific
-version of a label) is described below as a recursive algorithm. It starts with
-the root log entry, as defined by the implicit binary search tree, and then
-recurses to left or right children, each time starting back at step 1.
+The algorithm for performing a fixed-version search is described below as a
+recursive algorithm. It starts with the root log entry, as defined by the
+implicit binary search tree, and then recurses to left or right children, each
+time starting back at step 1.
 
 1. Verify that the log entry's timestamp is consistent with the timestamps of
    all ancestor log entries. That is, if the log entry is in the ancestor's left
@@ -669,15 +669,15 @@ recurses to left or right children, each time starting back at step 1.
    as the rightmost log entry can not exceed its maximum lifetime by definition.
 
 3. Obtain a binary ladder from the current log entry for the target version,
-   omitting redundant lookups as described in {{fv-binary-ladder}}. Determine
-   whether the binary ladder indicates a greatest version of the label that is
-   greater than, equal to, or less than the target version.
+   omitting redundant lookups as described in {{search-binary-ladder}}.
+   Determine whether the binary ladder indicates a greatest version of the label
+   that is greater than, equal to, or less than the target version.
 
 4. If the binary ladder indicates a greatest version less than the target
-   version (that is, if it was stopped early by a non-inclusion proof for a
-   version less than or equal to the target version), then:
+   version (that is, if it contains a non-inclusion proof for a version less
+   than or equal to the target version), then:
 
-   1. If the log entry is a leaf, proceed to step 7.
+   1. If the log entry does not have a right child, proceed to step 7.
    2. Otherwise, recurse to the log entry's right child.
 
 5. If the binary ladder indicates a greatest version equal to the target version
@@ -686,21 +686,21 @@ recurses to left or right children, each time starting back at step 1.
    greater than the target), then:
 
    1. If the log entry is not expired, terminate the search successfully.
-   2. If the log entry is a leaf, proceed to step 7.
+   2. If the log entry does not have a right child, proceed to step 7.
    3. Otherwise, recurse to the log entry's right child.
 
 6. If the binary ladder indicates a greatest version greater than the target
-   version (that is, if it was stopped early by an inclusion proof for a version
-   greater than the target version), then:
+   version (that is, if it contains an inclusion proof for a version greater
+   than the target version), then:
 
-   1. If the log entry is a leaf, proceed to step 7.
+   1. If the log entry does not have a left child, proceed to step 7.
    2. If the log entry is expired, terminate the search with an error indicating
       that the requested version of the label has expired.
    3. Otherwise, recurse to the log entry's left child.
 
-7. If this step is reached, the search has reached a leaf node without finding
-   an unexpired log entry where the target version is the greatest that exists.
-   In this case, out of all the log entries inspected, identify the leftmost one
+7. If this step is reached, the search has terminated without finding an
+   unexpired log entry where the target version is the greatest that exists. In
+   this case, out of all the log entries inspected, identify the leftmost one
    where the binary ladder indicated a greatest version greater than or equal to
    the target version.
 
@@ -758,8 +758,8 @@ below, such that there is roughly one per every interval of the RMW:
    then recurse to its subtree by executing this algorithm with: the given log
    entry's left child, the given left timestamp, and the timestamp of the given
    log entry.
-4. If the given log entry has a right child, then recurse to its right subtree
-   by executing this algorithm with: the given log entry's right child, the
+4. If the given log entry has a right child, then recurse to its subtree by
+   executing this algorithm with: the given log entry's right child, the
    timestamp of the given log entry, and the given right timestamp.
 
 The algorithm is initialized with these parameters: the root node in the
@@ -790,7 +790,7 @@ starting back at step 1:
 
 1. Obtain a binary ladder from the current log entry for the claimed greatest
    version of the label, omitting redundant lookups as described in
-   {{fv-binary-ladder}}.
+   {{search-binary-ladder}}.
 2. If this is the rightmost log entry, verify that the binary ladder is
    consistent the claimed greatest version of the label. That is, verify that it
    contains inclusion proofs for all expected versions less than or equal to the
