@@ -720,10 +720,6 @@ as described in {{monitoring-the-tree}}. The terminal node of the search is
 defined as the log entry that triggered step 5.1, or the log entry identified in
 step 7.
 
-If the Transparency Log is deployed in Third-Party Auditing mode and a binary
-ladder was provided from any non-distinguished log entry, the user MUST verify
-that `auditor_start_pos` is less than or equal to the leftmost such log entry.
-
 
 # Greatest-Version Search
 
@@ -804,10 +800,6 @@ node of the search is to the right of the rightmost distinguished log entry, the
 user MUST monitor the label as described in {{monitoring-the-tree}}. The
 terminal node of the search is defined as the leftmost log entry inspected that
 contains the greatest version of the label.
-
-If the Transparency Log is deployed in Third-Party Auditing mode and a binary
-ladder was provided from any non-distinguished log entry, the user MUST verify
-that `auditor_start_pos` is less than or equal to the leftmost such log entry.
 
 
 # Monitoring the Tree
@@ -1105,6 +1097,7 @@ Users verify an `AuditorTreeHead` with the following steps:
 1. If the user advertised a previously observed tree size in their request,
    verify that the advertised tree size is greater than or equal to
    `Configuration.auditor_start_pos`.
+   <!-- TODO: Verify that auditor_start_pos is lte previous auditor tree head size -->
 2. Verify that the timestamp of the rightmost log entry is greater than or equal
    to `timestamp`, and that the difference between the two is less than or equal
    to `Configuration.max_auditor_lag`.
@@ -1853,22 +1846,12 @@ An auditor processes a single `AuditorUpdate` by following these steps:
    compute the new root value of the prefix tree. Compute the new root value of
    the log tree after adding a leaf with the specified `timestamp` and prefix
    tree root value.
-7. Provide an `AuditorTreeHead` to the Service Operator where
+7. Optionally, provide an `AuditorTreeHead` to the Service Operator where
    `AuditorTreeHead.timestamp` is set to `timestamp` and
    `AuditorTreeHead.tree_size` is set to the new size of the log tree after the
    addition of the new leaf. The signature is computed with the log tree root
    value computed in the previous step.
 
-For an auditor that is being sunset, once the auditor has provided the
-Transparency Log with its final `AuditorTreeHead` structure, the auditor MUST
-continue to audit the Transparency Log until the following two conditions are
-met:
-
-1. The timestamp of the rightmost log entry minus the timestamp of the rightmost
-   log entry in the auditor's final `AuditorTreeHead` structure is greater than
-   `max_auditor_lag`.
-2. A distinguished log entry has been declared at, or to the right of, the first
-   log entry to satisfy condition 1.
 
 # Security Considerations
 
