@@ -1859,6 +1859,16 @@ An auditor processes a single `AuditorUpdate` by following these steps:
    addition of the new leaf. The signature is computed with the log tree root
    value computed in the previous step.
 
+For an auditor that is being sunset, once the auditor has provided the
+Transparency Log with its final `AuditorTreeHead` structure, the auditor MUST
+continue to audit the Transparency Log until the following two conditions are
+met:
+
+1. The timestamp of the rightmost log entry minus the timestamp of the rightmost
+   log entry in the auditor's final `AuditorTreeHead` structure is greater than
+   `max_auditor_lag`.
+2. A distinguished log entry has been declared at, or to the right of, the first
+   log entry to satisfy condition 1.
 
 # Security Considerations
 
