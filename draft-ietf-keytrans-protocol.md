@@ -658,47 +658,41 @@ recursive algorithm. It starts with the root log entry, as defined by the
 implicit binary search tree, and then recurses to left or right children, each
 time starting back at step 1.
 
-1. Verify that the log entry's timestamp is consistent with the timestamps of
-   all ancestor log entries. That is, if the log entry is in the ancestor's left
-   subtree, then its timestamp is less than or equal to the ancestor's. If the
-   log entry is in the ancestor's right subtree, then its timestamp is greater
-   than or equal to the ancestor's.
-
-2. If the log entry is expired, is on the frontier, and its right child is also
+1. If the log entry is expired, is on the frontier, and its right child is also
    expired, recurse to the right child. Note that a right child always exists,
    as the rightmost log entry can not exceed its maximum lifetime by definition.
 
-3. Obtain a binary ladder from the current log entry for the target version,
+2. Obtain a binary ladder from the current log entry for the target version,
    omitting redundant lookups as described in {{search-binary-ladder}}.
    Determine whether the binary ladder indicates a greatest version of the label
    that is greater than, equal to, or less than the target version.
 
-4. If the binary ladder indicates a greatest version less than the target
+3. If the binary ladder indicates a greatest version less than the target
    version (that is, if it contains a non-inclusion proof for a version less
    than or equal to the target version), then:
 
-   1. If the log entry does not have a right child, proceed to step 7.
+   1. If the log entry does not have a right child, proceed to step 6.
    2. Otherwise, recurse to the log entry's right child.
 
-5. If the binary ladder indicates a greatest version equal to the target version
+4. If the binary ladder indicates a greatest version equal to the target version
    (that is, it contains inclusion proofs for all expected versions less than or
    equal to the target and non-inclusion proofs for all expected versions
    greater than the target), then:
 
    1. If the log entry is not expired, terminate the search successfully.
-   2. If the log entry does not have a right child, proceed to step 7.
+   2. If the log entry does not have a right child, proceed to step 6.
    3. Otherwise, recurse to the log entry's right child.
 
-6. If the binary ladder indicates a greatest version greater than the target
+5. If the binary ladder indicates a greatest version greater than the target
    version (that is, if it contains an inclusion proof for a version greater
    than the target version), then:
 
-   1. If the log entry does not have a left child, proceed to step 7.
+   1. If the log entry does not have a left child, proceed to step 6.
    2. If the log entry is expired, terminate the search with an error indicating
       that the requested version of the label has expired.
    3. Otherwise, recurse to the log entry's left child.
 
-7. If this step is reached, the search has terminated without finding an
+6. If this step is reached, the search has terminated without finding an
    unexpired log entry where the target version is the greatest that exists. In
    this case, out of all the log entries inspected, identify the leftmost one
    where the binary ladder indicated a greatest version greater than or equal to
@@ -717,8 +711,8 @@ If the Transparency Log is deployed in Contact Monitoring mode and the terminal
 node of the search is to the right of the rightmost distinguished log entry
 (defined in {{reasonable-monitoring-window}}), the user MUST monitor the label
 as described in {{monitoring-the-tree}}. The terminal node of the search is
-defined as the log entry that triggered step 5.1, or the log entry identified in
-step 7.
+defined as the log entry that triggered step 4.1, or the log entry identified in
+step 6.
 
 
 # Greatest-Version Search
@@ -1530,6 +1524,8 @@ from the following:
   `prefix_roots`, and
 - If the user advertised a previously observed tree size in their request, any
   intermediate node values the user is expected to have retained.
+
+<!-- TODO: Always verify timestamps are monotonic -->
 
 ### Updating View
 
