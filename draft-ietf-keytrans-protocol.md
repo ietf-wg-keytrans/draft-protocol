@@ -776,7 +776,7 @@ This ensures that, if a user looks up a label and checks consistency with some
 distinguished log entry, this log entry can't later avoid inspection by the
 label owner by losing its distinguished status.
 
-## Algorithm
+## Algorithm {#gv-algorithm}
 
 The algorithm for performing a greatest-version search is described below as a
 recursive algorithm. It starts at the rightmost distinguished log entry, or the
@@ -806,47 +806,42 @@ contains the greatest version of the label.
 
 As new entries are added to the log tree, the search path that's traversed to
 find a specific version of a label may change. New intermediate nodes may be
-established between the search root and the log entry, or a new search root may be
-created. The goal of monitoring a label is to efficiently ensure that, when
+established between the search root and the log entry, or a new search root may
+be created. The goal of monitoring a label is to efficiently ensure that, when
 these new parent nodes are created, they're created correctly such that searches
-for the same versions of a label continue converging to the same entries in the log.
-
-Monitoring is performed both by the users that own a label, meaning they are the
-authoritative source for the label's content, and the users that lookup a label.
-Owners monitor their labels to ensure that past (expected) versions of a label
-are still correctly stored in the log and that no new (unexpected) versions have
-been added. Users that looked up a label may sometimes need to monitor it
-afterwards to ensure that the version they observed isn't later concealed by the
-Transparency Log.
+for the same versions of a label continue converging to the same entries in the
+log.
 
 Label owners MUST monitor their labels regularly, ensuring that past versions of
 the label are still correctly represented in the log and that any new versions
-of the label are permissible (alerting the user if not). If a user looks up a
-label (either through a fixed-version or greatest-version search) and finds that
-the first log entry that contains the desired label-version pair is to the right
-of the rightmost distinguished log entry, and the Transparency Log is deployed
-in Contact Monitoring mode, the user MUST regularly monitor the label-version
-pair until its monitoring path intersects a distinguished log entry. That is,
-until a new distinguished log entry is established to its right and the two log
-entries are verified to be consistent. The purpose of this monitoring is to
-ensure that the label-version pair is not removed or obscured by the
-Transparency Log before the label owner has had an opportunity to detect it.
+of the label are permissible, alerting the user if not.
+
+If the Transparency Log is deployed in Contact Monitoring mode, then the users
+that looked up a label (either through a fixed-version or greatest-version
+search) are also sometimes required to monitor the label. Specifically, if the
+user looks up a label and finds that the first log entry to contain the desired
+label-version pair is to the right of the rightmost distinguished log entry, the
+user MUST regularly monitor the label-version pair until its monitoring path
+intersects a distinguished log entry. That is, until a new distinguished log
+entry is established to its right and the two log entries are verified to be
+consistent. The purpose of this monitoring is to ensure that the label-version
+pair is not removed or obscured by the Transparency Log before the label owner
+has had an opportunity to detect it.
 
 If the Transparency Log is deployed with a Third-Party Auditor or Third-Party
-Manager, this monitoring is not necessary if the third party is honest. However,
-the user MAY still perform it to detect collusion between the Transparency Log
-and the third party.
+Manager, this monitoring is unnecessary assuming that either the Service
+Operator or the Third Party are honest. However, the user MAY still perform it
+to detect collusion between the Service Operator and the Third Party.
 
-If a user looks up a label and finds that the first log entry
-containing the label-version pair is either a distinguished log entry or to the
-left of any distinguished log entry, they do not need to monitor it
-afterwards. The only state that would be retained from the query would be the
-tree head, as discussed in {{updating-views-of-the-tree}}.
+If a user looks up a label and finds that the first log entry containing the
+label-version pair is either a distinguished log entry or to the left of any
+distinguished log entry, monitoring is never necessary. In this case, the only
+state that would be retained from the query would be the tree head, as discussed
+in {{updating-views-of-the-tree}}.
 
 "Regular" monitoring SHOULD be performed at least as frequently as the RMW and
 MUST, if at all possible, happen more frequently than the log entry maximum
 lifetime.
-
 
 ## Binary Ladder {#monitor-binary-ladder}
 
@@ -859,10 +854,7 @@ target version of the label exists and only need proof that there has not been
 an unexpected downgrade.
 
 Binary ladders provided for the purpose of monitoring follow the series of
-lookups that would be made by the algorithm in {{binary-ladder}} if the target
-version of the label was the greatest that existed. Note that this means the
-series of lookups performed is always the same for the same target version,
-regardless of whatever the actual greatest version of the label is. From this
+lookups that would be made by the algorithm in {{binary-ladder}}. From this
 series of lookups, two optimizations are made:
 
 First, any lookup for a version greater than the target version is omitted. As a
@@ -877,7 +869,7 @@ path and to its left. If, during a search for the label-version pair being
 monitored, the user would receive an inclusion proof for some version `v` from
 one of these log entries, then the lookup for version `v` is omitted.
 
-## Algorithm {#m-algorithm}
+## Contact Algorithm {#contact-algorithm}
 
 To monitor a given label, users maintain a small amount of state: a map from a
 position in the log to a version counter. The version counter is the greatest
@@ -887,21 +879,25 @@ contain the label-version pair they've looked up to map to that version. A map
 may track several different versions of a label simultaneously if a user has
 been shown different versions of the same label.
 
-To update this map, users receive the most recent tree head from the server and
-follow these steps for each entry in the map, from rightmost to leftmost log
-entry:
+To update this map, users receive the most recent tree head from the
+Transparency Log and follow these steps for each entry in the map, from
+rightmost to leftmost log entry:
 
-1. Determine if the log entry is distinguished. If so, leave
-   the position-version pair in the map and move on to the next map entry.
+1. Determine if the log entry is distinguished. If so, leave the
+   position-version pair in the map and move on to the next map entry.
+
 2. Compute the ordered list of log entries to inspect:
    1. Initialize the list by setting it to be the log entry's direct path in the
       implicit binary search tree based on the current tree size.
    2. Remove all entries that are to the left of the log entry.
    3. If any of the remaining log entries are distinguished, terminate the list
       just after the first distinguished log entry.
+
 3. If the computed list is empty, leave the position-version pair in the map
    and move on to the next map entry.
+
 4. For each log entry in the computed list, from left to right:
+
    1. Check if a binary ladder for this log entry was already provided in the
       same query response. If so:
       1. If the previously provided binary ladder had a greater target version
@@ -911,10 +907,11 @@ entry:
          entry.
       2. If it had a version less than or equal to that of the current map
          entry, terminate and return an error to the user.
-   2. Receive and verify a binary ladder from this log entry where the target
-      version is the version currently in the map. This proves that, at the
-      indicated log entry, the greatest version present is greater than or equal
-      to the previously observed version.
+
+   2. Obtain a binary ladder (as defined in {{m-binary-ladder}}) from this log
+      entry where the target version is the version currently in the map. Verify
+      that all expected lookups are present and all show inclusion.
+
    3. If the above check fails, terminate and return an error to the user.
       Otherwise, remove the current position-version pair from the map and
       replace it with a new one for the position of the log entry that the
@@ -925,11 +922,10 @@ monitoring is to remove all mappings where the position corresponds to a
 distinguished log entry. All remaining entries will be non-distinguished log
 entries lying on the log's frontier.
 
-In summary, monitoring works by progressively moving up the tree as new
-intermediate/root nodes are established and verifying that they're constructed
-correctly. Once a distinguished log entry is reached and successfully verified,
-monitoring is no longer necessary and the relevant entry is removed from the
-map.
+This algorithm works by progressively moving up the tree as new intermediate or
+root nodes are established and verifying that they're constructed correctly.
+Once a distinguished log entry is reached and successfully verified, monitoring
+is no longer necessary and the relevant entry is removed from the map.
 
 Users will often be able to execute the monitoring process, at least partially,
 with the output of a fixed-version or greatest-version search for the label.
@@ -940,7 +936,7 @@ intersect. Intersections reduce the total number of entries in the map and
 therefore the amount of work that will be needed to monitor the label from then
 on.
 
-### Owner Algorithm
+## Owner Algorithm
 
 If the user owns the label being monitored, they will additionally need to
 retain the rightmost distinguished log entry where they've verified that the
@@ -980,8 +976,8 @@ cryptographic computations:
 * `Kc`: A fixed string of bytes used in the computation of commitments
 
 The hash algorithm is used to calculate intermediate and root values of
-hash trees. The signature algorithm is used for signatures from both the service
-operator and the third party, if one is present. The VRF is used for preserving
+hash trees. The signature algorithm is used for signatures from both the Service
+Operator and the Third Party, if one is present. The VRF is used for preserving
 the privacy of labels. One of the VRF algorithms from {{!RFC9381}} must be
 used.
 
@@ -1765,7 +1761,7 @@ original Search or Update query.
 Third-Party Management and Third-Party Auditing are two deployment modes that
 require the Transparency Log to delegate part of its operation to a third party.
 Users are able to run more efficiently as long as they can assume that the
-Transparency Log and the third party won't collude to trick them into accepting
+Transparency Log and the Third Party won't collude to trick them into accepting
 malicious results.
 
 ## Management
