@@ -1009,6 +1009,45 @@ entry, the algorithms above do not apply and the algorithm in
 {{contact-algorithm}} is used until a distinguished log entry is issued.
 
 
+# Updating Labels
+
+As discussed in {{ARCH}}, a label owner is the authoritative source for a
+label's contents and must either initiate all changes to the label's value
+themself or at least be informed of changes afterwards. This section describes
+the mechanism by which label owners ensure that new versions of a label are
+inserted correctly into the Transparency Log. Label owners MUST follow this
+process for every new version of a label that is created after their ownership
+begins.
+
+## Algorithm
+
+Whenever a log entry is added to the Transparency Log that contains some new
+versions of a label, the Transparency Log informs the label owner of the
+following:
+
+- The new greatest version of the label.
+- The index of the log entry where the new versions were inserted.
+- The commitment openings that were chosen for each new version of the label.
+- If the Transparency Log is deployed with a Third-Party Manager, the signatures
+  produced by the Service Operator over each new value.
+- VRF proofs for the following versions of the label:
+  - Compute the set of all versions that would be contained in a binary ladder
+    for the new greatest version of the label.
+  - If more than one version of the label was added, additionally include each
+    of these individual versions.
+  - Of the versions matching the two criteria above, omit any versions that
+    would contained in a binary ladder for the previous greatest version of the
+    label, as the label owner is expected to already know the VRF outputs for
+    these versions.
+
+To ensure that the new versions of the label were inserted correctly, the label
+owner considers the Transparency Log as it existed at two points in time. The
+first is the **previous tree**, which is defined as the combined tree just
+before the log entry with the new versions was added. The second is the
+**current tree**, which is defined as the combined tree as it is currently
+presented to the user, containing the new log entry and potentially other log
+entries to its right.
+
 # Cryptographic Computations
 
 ## Cipher Suites
