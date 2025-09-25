@@ -902,9 +902,9 @@ rightmost to leftmost log entry:
       2. If it had a version less than or equal to that of the current map
          entry, terminate and return an error to the user.
 
-   2. Obtain a binary ladder (as defined in {{m-binary-ladder}}) from this log
-      entry where the target version is the version currently in the map. Verify
-      that all expected lookups are present and all show inclusion.
+   2. Obtain a binary ladder (as defined in {{monitor-binary-ladder}}) from this
+      log entry where the target version is the version currently in the map.
+      Verify that all expected lookups are present and all show inclusion.
 
    3. If the above check fails, terminate and return an error to the user.
       Otherwise, remove the current position-version pair from the map and
@@ -1380,8 +1380,8 @@ the values of its left and right children:
 parent.value = Hash(0x02 || parent.leftChild.value || parent.rightChild.value)
 ~~~
 
-If one of the children does not exist, a stand-in value of an all-zero array of
-`Hash.Nh` bytes is used instead.
+If one of the children does not exist, an all-zero byte string of length
+`Hash.Nh` is used instead.
 
 # Tree Proofs
 
@@ -1391,20 +1391,20 @@ In the interest of efficiency, KT combines multiple inclusion proofs and
 consistency proofs into a single batch proof. Recalling from the discussion in
 {{log-tree}},
 
-- Whenever the Transparency Log serves an inclusion proof for a leaf of the log tree,
-  it provides the minimum set of head values from balanced subtrees
-  that would allow the user to compute the root hash from the leaf's value.
-- Whenever the Transparency Log serves a consistency proof, the user is expected to have
-  retained the head values of the full subtrees of the previous version of the
-  log. The Transparency Log provides the minimum set of head values from
-  balanced subtrees that would allow the user to compute the root hash from
-  their retained values.
+- Whenever the Transparency Log serves an inclusion proof for a leaf of the log
+  tree, it provides the minimum set of head values from balanced subtrees that
+  allow the user to compute the root value when combined with the leaf's value.
+- Whenever the Transparency Log serves a consistency proof, the user is expected
+  to have retained the head values of the full subtrees of the previous version
+  of the log. The Transparency Log provides the minimum set of head values from
+  balanced subtrees that allow the user to compute the new root value when
+  combined with the retained values.
 
 These two proof types are composed together as such: considering the leaf values
 which will be proved included, and any node values the user is understood to
 have retained, the Transparency Log provides the minimum set of head values from
-balanced subtrees that would allow the user to compute the root hash from the
-leaf and retained values. This proof is encoded as follows:
+balanced subtrees that allows the user to compute the root value when combined
+with the leaf and retained values. This proof is encoded as follows:
 
 ~~~ tls-presentation
 opaque NodeValue[Hash.Nh];
@@ -1415,8 +1415,8 @@ struct {
 ~~~
 
 The contents of the `elements` array is in left-to-right order: if a node is
-present in the root's left subtree then its value is listed before the values of
-any nodes in the root's right subtree, and so on recursively.
+present in the root's left subtree, then its value is listed before the values
+of any nodes in the root's right subtree, and so on recursively.
 
 Batching together inclusion and consistency proofs creates an edge case that
 requires special care: when a user has requested a consistency proof, and also
@@ -1424,10 +1424,10 @@ requested inclusion proofs for leaves located in one or more of the subtrees
 that the user has retained the head of. When this happens, the portion of the
 batch proof that shows inclusion for the leaves in these subtrees will itself be
 sufficient to recompute the retained head values. This makes the retained values
-redundant for the purpose of computing the new root hash, which could result in
-the retained values being disregarded in a naive implementation. To avoid
-accepting invalid proofs, users MUST verify that the computed value for the head
-of any such subtree matches the retained value.
+redundant for the purpose of computing the new root value, which could result in
+the retained values being disregarded in a naive implementation. Users MUST
+verify that the computed value for the head of any such subtree matches the
+retained value to avoid accepting invalid proofs.
 
 ## Prefix Tree
 
@@ -1458,17 +1458,19 @@ struct {
 } PrefixProof;
 ~~~
 
-The `results` field contains the search result for each individual value. Every
-index corresponds to the respectively indexed binary ladder step targeting the
-queried version. The `result_type` field of each `PrefixSearchResult` struct
-indicates what the terminal node of the search for that value was:
+The `results` field contains the search result for each individual value,
+provided in the order requested. For `PrefixProof` structures that correspond to
+a binary ladder, this means the entries of `results` correspond directly with
+the lookups of the binary ladder. The `result_type` field of each
+`PrefixSearchResult` struct indicates what the terminal node of the search for
+that value was:
 
 - `inclusion` for a leaf node matching the requested value.
 - `nonInclusionLeaf` for a leaf node not matching the requested value. In this
   case, the terminal node's value is provided since it can not be inferred.
 - `nonInclusionParent` for a parent node that lacks the desired child.
 
-The `depth` field indicates the depth of the terminal node of the search, and is
+The `depth` field indicates the depth of the terminal node of the search and is
 provided to assist proof verification. The root node of the prefix tree
 corresponds to a depth of 0, the root's children correspond to a depth of 1, and
 so on recursively.
@@ -1476,10 +1478,9 @@ so on recursively.
 The `elements` array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
 `elements` array is kept in left-to-right order: if a node is present in the
-root's left subtree, its value must be listed before any values provided from
-nodes that are in the root's right subtree, and so on recursively. In the event
-that a node is not present, an all-zero byte string of length `Hash.Nh` is
-listed instead.
+root's left subtree, its value is listed before any values from nodes that are
+in the root's right subtree, and so on recursively. In the event that a node
+does not exist, an all-zero byte string of length `Hash.Nh` is listed instead.
 
 The proof is verified by hashing together the provided elements, in the
 left/right arrangement dictated by the bits of the search keys, and checking
@@ -1495,10 +1496,11 @@ needed.
 
 This subsection defines a general structure, called a `CombinedTreeProof`, that
 contains the minimum set of timestamps and `PrefixProof` structures that a user
-needs for their execution of these algorithms. For the purposes of this protocol,
-the user always executes the algorithm to update their view of the tree,
-described in {{updating-views-of-the-tree}}, followed immediately by one of the
-algorithms to search or monitor the tree.
+needs for their execution of these algorithms. For the purposes of this
+protocol, the user always executes the algorithm to update their view of the
+tree, described in {{updating-views-of-the-tree}}, followed immediately by one
+of the algorithms from {{fixed-version-search}}, {{greatest-version-search}},
+{{monitoring-the-tree}}, or {{updating-labels}}.
 
 Proofs are encoded as follows:
 
@@ -1581,7 +1583,7 @@ following is provided:
   - If it is not the case that the log entry has surpassed its maximum lifetime,
     is on the frontier, and the log entry's right child has also surpassed its
     maximum lifetime, then a `PrefixProof` corresponding to a binary ladder
-    ({{fv-binary-ladder}}) in the log entry's prefix tree is provided.
+    ({{search-binary-ladder}}) in the log entry's prefix tree is provided.
 - If the `PrefixProof` from the first log entry containing the target
   label-version pair didn't include a lookup for the target version, provide a
   second `PrefixProof` from this log entry specifically looking up the target
@@ -1594,17 +1596,18 @@ Users verify the output as specified in {{fv-algorithm}}.
 For a user to monitor a label in the combined tree, the following is provided:
 
 - For each entry in the user's monitoring map:
-  - The timestamps needed by the algorithm in {{distinguished-log-entries}} to
-    determine where the monitoring algorithm would first reach a distinguished
-    log entry. This may either be the log entry in the user's monitoring map, or
-    some other log entry from the list computed in step 2 of {{m-algorithm}}.
+  - The timestamps needed by the algorithm in {{reasonable-monitoring-window}}
+    to determine where the monitoring algorithm would first reach a
+    distinguished log entry. This may either be the log entry in the user's
+    monitoring map, or some other log entry from the list computed in step 2 of
+    {{m-algorithm}}.
   - Where necessary for the algorithm in {{m-algorithm}}, a binary ladder
     ({{monitor-binary-ladder}}) targeting the version in the user's monitoring
     map.
 - If the user owns the label:
-  - The timestamps needed by the algorithm in {{distinguished-log-entries}} to
-    conduct a depth-first search for each subsequent distinguished log entry.
-  - For each distinguished log entry, a binary ladder ({{fv-binary-ladder}})
+  - The timestamps needed by the algorithm in {{reasonable-monitoring-window}}
+    to conduct a depth-first search for each subsequent distinguished log entry.
+  - For each distinguished log entry, a binary ladder ({{search-binary-ladder}})
     targeting the greatest version of the label that the log entry contains.
 
 ### Greatest-Version Search
@@ -1613,13 +1616,13 @@ For a user to search the combined tree for the greatest version of a label, the
 following is provided:
 
 - For each log entry along the frontier, starting from the log entry identified
-  in {{greatest-version-searches}}: a binary ladder ({{fv-binary-ladder}})
+  in {{greatest-version-search}}: a binary ladder ({{search-binary-ladder}})
   targeting the greatest version of the label that exists in the log overall.
 
 Note that the log entry timestamps are already provided as part of updating the
 user's view of the tree and that no additional timestamps are necessary to
 identify the starting log entry. Users verify the proof as described in
-{{greatest-version-searches}}.
+{{greatest-version-search}}.
 
 
 # User Operations
