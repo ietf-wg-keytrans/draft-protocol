@@ -1048,6 +1048,8 @@ before the log entry with the new versions was added. The second is the
 presented to the user, containing the new log entry and potentially other log
 entries to its right.
 
+TODO
+
 # Cryptographic Computations
 
 ## Cipher Suites
@@ -1065,8 +1067,7 @@ cryptographic computations:
 The hash algorithm is used to calculate intermediate and root values of
 hash trees. The signature algorithm is used for signatures from both the Service
 Operator and the Third Party, if one is present. The VRF is used for preserving
-the privacy of labels. One of the VRF algorithms from {{!RFC9381}} must be
-used.
+the privacy of labels.
 
 Cipher suites are represented with the CipherSuite type. The cipher suites are
 defined in {{kt-cipher-suites}}.
@@ -1083,10 +1084,10 @@ struct {
 } TreeHead;
 ~~~
 
-where `tree_size` is the number of log entries. If the
-Transparency Log is deployed with Third-Party Management, then the public key
-used to verify the signature belongs to the Third-Party Manager; otherwise the
-public key used belongs to the Service Operator.
+where `tree_size` is the number of log entries. If the Transparency Log is
+deployed in Third-Party Management mode, then the public key used to verify the
+signature belongs to the Third-Party Manager; otherwise the public key used
+belongs to the Service Operator.
 
 The signature itself is computed over a `TreeHeadTBS` structure, which
 incorporates the log's current state as well as long-term log configuration:
@@ -1131,11 +1132,11 @@ struct {
 
 The `ciphersuite` field contains the cipher suite for the Transparency Log,
 chosen from the registry in {{kt-cipher-suites}}. The `mode` field specifies
-whether the Transparency Log is deployed in Contact Monitoring mode or with a
+whether the Transparency Log is deployed in Contact Monitoring mode, or with a
 Third-Party Manager or Auditor. The `signature_public_key` field contains the
 public key to use for verifying signatures on the `TreeHeadTBS` structure. The
-`vrf_public_key` field contains the VRF public key to use for evaluating the VRF
-proofs provided in the `BinaryLadderStep.proof` field described in {{search}}.
+`vrf_public_key` field contains the VRF public key to use for evaluating VRF
+proofs provided in the `BinaryLadderStep.proof` field described in {{search}}.  <!-- TODO: Check -->
 
 If the deployment mode specifies a Third-Party Manager, a public key is provided
 in `leaf_public_key`. This public key is used to verify the Service Operator's
@@ -1177,10 +1178,10 @@ struct {
 
 Users verify an `AuditorTreeHead` with the following steps:
 
-1. If the user advertised a previously observed tree size in their request,
-   verify that the advertised tree size is greater than or equal to
-   `Configuration.auditor_start_pos`.
-   <!-- TODO: Verify that auditor_start_pos is lte previous auditor tree head size -->
+1. If the user advertised a previously observed tree head, verify that the
+   `tree_size` of the `AuditorTreeHead` structure in the previous tree head
+   (which may be from a different auditor) is greater than or equal to
+   `auditor_start_pos` for the current auditor.
 2. Verify that the timestamp of the rightmost log entry is greater than or equal
    to `timestamp`, and that the difference between the two is less than or equal
    to `Configuration.max_auditor_lag`.
@@ -1199,8 +1200,8 @@ struct {
 
 The `config` field contains the long-term configuration for the Transparency
 Log. The `timestamp` and `tree_size` fields match that of `AuditorTreeHead`. The
-`root` field contains the value of the root node of the log tree when it had
-`tree_size` leaves.
+`root` field contains the root value of the log tree when it had `tree_size`
+leaves.
 
 ## Full Tree Head Verification
 
@@ -1211,6 +1212,7 @@ enum {
   reserved(0),
   same(1),
   updated(2),
+  (255)
 } FullTreeHeadType;
 
 struct {
@@ -1234,8 +1236,8 @@ more recent tree head is provided.
 Users verify a `FullTreeHead` with the following steps:
 
 1. If `head_type` is `same`, verify that the user advertised a previously
-   observed tree size and that the rightmost log entry of this tree is still
-   within the bounds set by `max_ahead` and `max_behind`.
+   observed tree size and that the timestamp of the rightmost log entry of this
+   tree is still within the bounds set by `max_ahead` and `max_behind`.
 2. If `head_type` is `updated`:
    1. If the user advertised a previously observed tree size, verify that
       `TreeHead.tree_size` is greater than the advertised tree size.
@@ -1249,7 +1251,7 @@ Users verify a `FullTreeHead` with the following steps:
 The leaves of the prefix tree contain commitments which open to the value of a
 label-version pair, potentially with some additional information depending on
 the deployment mode of the Transparency Log. The contents of these commitments
-is serialized as follows:
+is serialized as an `UpdateValue` structure:
 
 ~~~ tls-presentation
 struct {
@@ -1311,7 +1313,7 @@ deriving it from a secret key, as long as the result is indistinguishable from
 random to other participants. The Transparency Log SHOULD ensure that individual
 `opening` values can later be deleted in a way where they can not feasibly be
 recovered. This preserves the Transparency Log's ability to delete certain
-information in compliance with privacy laws.
+information in compliance with privacy laws, discussed further in {{ARCH}}.
 
 ## Verifiable Random Function
 
@@ -1365,33 +1367,21 @@ The value of a leaf node in the prefix tree is computed as the hash, with the
 cipher suite hash function, of the following structure:
 
 ~~~ tls
-struct {
-    opaque vrf_output[VRF.Nh];
-    opaque commitment[Hash.Nh];
-} PrefixLeaf;
+leaf.value = Hash(0x01 || vrf_output || commitment)
 ~~~
 
-The `vrf_output` field contains the VRF output for the label-version pair.
-`VRF.Nh` denotes the output size of the cipher suite VRF in bytes. The
-`commitment` field contains the commitment to the corresponding `UpdateValue`
-structure.
+`vrf_output` contains the VRF output for the label-version pair and `commitment`
+contains the commitment to the corresponding `UpdateValue` structure.
 
 The value of a parent node in the prefix tree is computed by hashing together
 the values of its left and right children:
 
 ~~~ pseudocode
-parent.value = Hash(hashContent(parent.leftChild) ||
-                    hashContent(parent.rightChild))
-
-hashContent(node):
-  if node.type == emptyNode:
-    return 0 // all-zero vector of length Hash.Nh+1
-  else if node.type == leafNode:
-    return 0x01 || node.value
-  else if node.type == parentNode:
-    return 0x02 || node.value
+parent.value = Hash(0x02 || parent.leftChild.value || parent.rightChild.value)
 ~~~
 
+If one of the children does not exist, a stand-in value of an all-zero array of
+`Hash.Nh` bytes is used instead.
 
 # Tree Proofs
 
