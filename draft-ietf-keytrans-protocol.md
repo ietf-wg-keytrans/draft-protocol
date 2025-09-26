@@ -485,7 +485,7 @@ entries, the frontier would be entries: `31, 47, 49`.
 Example code for efficiently navigating the implicit binary search tree is
 provided in {{appendix-implicit-search-tree}}.
 
-## Algorithm {#update-algorithm}
+## Algorithm {#update-view-algorithm}
 
 Users retain the following information about the last tree head they've
 observed:
@@ -862,7 +862,7 @@ path and to its left. If, during a search for the label-version pair being
 monitored, the user would receive an inclusion proof for some version `v` from
 one of these log entries, then the lookup for version `v` is omitted.
 
-## Contact Algorithm {#contact-algorithm}
+## Contact Algorithm
 
 To monitor a given label, users maintain a small amount of state: a map from a
 position in the log to a version counter. The version counter is the greatest
@@ -984,7 +984,7 @@ recursive algorithm, starting with the root log entry:
 
 4. If the greatest version of the label present at this log entry is greater
    than the version advertised by the user, or if another stop condition has
-   occurred (such as meeting a maximum output size), stop.
+   occurred (such as reaching a maximum output size), stop.
 
 5. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from the
    Transparency Log for the current log entry where the target version is the
@@ -1018,7 +1018,7 @@ inserted correctly into the Transparency Log. Label owners MUST follow this
 process for every new version of a label that is created after their ownership
 begins.
 
-## Algorithm
+## Algorithm {#update-algorithm}
 
 Whenever a log entry is added to the Transparency Log that contains some new
 versions of a label, the Transparency Log informs the label owner of the
@@ -1328,7 +1328,7 @@ struct {
 } VrfInput;
 ~~~
 
-## Log Tree {#crypto-log-tree}
+## Log Tree
 
 The value of a leaf node in the log tree is computed as the hash, with the
 cipher suite hash function, of the following structure:
@@ -1564,7 +1564,7 @@ For a user to update their view of the tree, the following is provided:
 - If the user has not previously observed a tree head, the timestamp of each log
   entry along the frontier.
 - If the user has previously observed a tree head, the timestamps of each log
-  entry from the list computed in {{update-algorithm}}.
+  entry from the list computed in {{update-view-algorithm}}.
 
 Users verify that the rightmost timestamp is within the bounds defined by
 `max_ahead` and `max_behind`.
@@ -1600,7 +1600,7 @@ of updating the user's view of the tree, or are expected to have been retained
 by the user, and no additional timestamps are necessary to identify the starting
 log entry. Users verify the proof as described in {{greatest-version-search}}.
 
-### Monitor
+### Contact Monitoring
 
 For a user to monitor a label in the combined tree, the following is provided:
 
@@ -1609,16 +1609,40 @@ For a user to monitor a label in the combined tree, the following is provided:
     to determine where the monitoring algorithm would first reach a
     distinguished log entry. This may either be the log entry in the user's
     monitoring map, or some other log entry from the list computed in step 2 of
-    {{m-algorithm}}.
-  - Where necessary for the algorithm in {{m-algorithm}}, a binary ladder
-    ({{monitor-binary-ladder}}) targeting the version in the user's monitoring
-    map.
-- If the user owns the label:
-  - The timestamps needed by the algorithm in {{reasonable-monitoring-window}}
-    to conduct a depth-first search for each subsequent distinguished log entry.
-  - For each distinguished log entry, a binary ladder ({{search-binary-ladder}})
-    targeting the greatest version of the label that the log entry contains.
+    {{contact-algorithm}}.
+  - Where necessary for the algorithm in {{contact-algorithm}}, a `PrefixProof`
+    corresponding to a binary ladder.
 
+Users verify the proof as described in {{contact-algorithm}}.
+
+### Owner Initialization
+
+For a label owner to initialize their state to begin monitoring a label, the
+following is provided:
+
+- The timestamp of each log entry that is on the direct path of the user's
+  requested starting position and to its left.
+- For each log entry in the list computed in step 1 of the first algorithm in
+  {{owner-algorithm}}, a `PrefixProof` corresponding to a binary ladder.
+
+Users verify the proof as described in the first algorithm of
+{{owner-algorithm}}.
+
+### Owner Monitoring
+
+For a label owner to perform regular monitoring, the following is provided:
+
+- The timestamp for each log entry inspected by the second algorithm in
+  {{owner-algorithm}}.
+- For each log entry that reaches step 5 in the second algorithm in
+  {{owner-algorithm}}, a `PrefixProof` corresponding to a binary ladder.
+
+Users verify the proof as described in the second algorithm of
+{{owner-algorithm}}.
+
+### Updating a Label
+
+TODO
 
 # User Operations
 
@@ -1763,7 +1787,7 @@ struct {
 
 Each MonitorLabel structure in `labels` contains the label to monitor in
 `label`, and a list in the `entries` field corresponding to the map described in
-{{m-algorithm}}. If the user owns the label, they additionally indicate in
+{{contact-algorithm}}. If the user owns the label, they additionally indicate in
 `rightmost` the position of the rightmost distinguished log entry where they
 have verified that the greatest version of the label is correctly represented.
 
