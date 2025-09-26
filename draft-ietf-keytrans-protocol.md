@@ -494,7 +494,7 @@ observed:
 2. The head values of the log tree's **full subtrees**. The full subtrees are
    the balanced subtrees which are as large as possible, meaning that they do
    not have another balanced subtree as their parent.
-3. The timestamps of the log entries along the frontier.
+3. The log entries along the frontier.
 
 When users make queries to the Transparency Log, they advertise the size of the
 last tree head they observed. If the Transparency Log responds with an
@@ -513,13 +513,12 @@ following:
 
 Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
-greater than or equal to the one prior. This only requires users to verify
-a logarithmic number of the newly added log entries' timestamps and guarantees
+greater than or equal to the one prior. This only requires users to verify a
+logarithmic number of the newly added log entries' timestamps and guarantees
 that two users with overlapping views of the tree will detect any violations.
 While retaining only the rightmost log entry's timestamp would be sufficient for
-this purpose, users retain the timestamps of all log entries along the frontier.
-The additional timestamps are retained to make later parts of the protocol more
-efficient.
+this purpose, users retain all log entries along the frontier. The additional
+data is retained to make later parts of the protocol more efficient.
 
 The Transparency Log defines two durations: how far ahead and how far behind the
 current time the rightmost log entry's timestamp may be. Users verify this
@@ -527,9 +526,9 @@ against their local clock at the time they receive the query response.
 
 For users which have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
-timestamps of the log entries on the frontier. The user verifies that each
-timestamp is greater than or equal to the one prior and that the rightmost
-timestamp is within the defined bounds of the user's local clock.
+log entries along the frontier. The user verifies that the timestamp of each is
+greater than or equal to the one prior, and that the rightmost timestamp is
+within the defined bounds of the user's local clock.
 
 
 # Binary Ladder
@@ -1488,19 +1487,18 @@ that the result equals the root value of the prefix tree.
 
 ## Combined Tree {#proof-combined-tree}
 
-As users execute the algorithms for searching, monitoring, or updating their
-view of the tree, they inspect a series of log entries. For some of
-these, only the timestamp of the log entry is needed. For others,
-both the timestamp and a `PrefixProof` from the log entry's prefix tree are
-needed.
+As users execute the algorithms defined in {{updating-views-of-the-tree}},
+{{fixed-version-search}}, {{greatest-version-search}}, {{monitoring-the-tree}},
+and {{updating-labels}}, they inspect a series of log entries. For some of
+these, only the timestamp of the log entry is needed. For others, both the
+timestamp and a `PrefixProof` from the log entry's prefix tree are needed.
 
 This subsection defines a general structure, called a `CombinedTreeProof`, that
 contains the minimum set of timestamps and `PrefixProof` structures that a user
 needs for their execution of these algorithms. For the purposes of this
 protocol, the user always executes the algorithm to update their view of the
-tree, described in {{updating-views-of-the-tree}}, followed immediately by one
-of the algorithms from {{fixed-version-search}}, {{greatest-version-search}},
-{{monitoring-the-tree}}, or {{updating-labels}}.
+tree as described in {{updating-views-of-the-tree}}, followed immediately by one
+of the other algorithms.
 
 Proofs are encoded as follows:
 
@@ -1514,7 +1512,7 @@ struct {
 } CombinedTreeProof;
 ~~~
 
-The `timestamps` field contains the timestamps of specific log entries and the
+The `timestamps` field contains the timestamps of specific log entries, and the
 `prefix_proofs` field contains search proofs from the prefix trees of specific
 log entries. There is no explicit indication as to which log entry the elements
 correspond to, as they are provided in the order that the algorithm the user is
@@ -1528,8 +1526,10 @@ same `CombinedTreeProof`, it is only added to the `timestamps` array the first
 time. Additionally, when a user advertises a previously observed tree size in
 their request, log entry timestamps that the user is expected to have retained
 are always omitted from `timestamps`. This may result in there being elements of
-`prefix_proofs` or `prefix_roots` that correspond to log entries whose
-timestamps are not included in `timestamps`
+`prefix_proofs` that correspond to log entries whose timestamps are not included
+in `timestamps`. Users MUST verify that any such proof in `prefix_proof` is
+consistent with their retained prefix tree root hash for the log entry, due to
+the fact that the log entry will not be included in `inclusion`.
 
 If different algorithms in the same `CombinedTreeProof` require a search proof
 from the same log entry, the `prefix_proofs` array will contain multiple
@@ -1539,7 +1539,10 @@ prefix tree root hash.
 
 Users processing a `CombinedTreeProof` MUST verify that the `timestamps`,
 `prefix_proofs`, and `prefix_roots` fields contain exactly the expected number
-of entries -- no more and no less.
+of entries -- no more and no less. Additionally, users MUST verify that the
+timestamps explicitly included in `timestamps`, along with any retained
+timestamps, represent a monotonic series. That is, users verify that any given
+timestamp is greater than or equal to all observed timestamps to its left.
 
 Finally, the `inclusion` field contains the minimum set of intermediate node
 values from the log tree that would allow a user to compute:
@@ -1550,13 +1553,9 @@ values from the log tree that would allow a user to compute:
 
 from the following:
 
-- The values of all leaf nodes where either a search proof was provided in
-  `prefix_proofs` or the prefix tree root hash was provided directly in
-  `prefix_roots`, and
+- The values of all leaf nodes whose timestamp was provided in `timestamps`, and
 - If the user advertised a previously observed tree size in their request, any
   intermediate node values the user is expected to have retained.
-
-<!-- TODO: Always verify timestamps are monotonic -->
 
 ### Updating View
 
@@ -2051,7 +2050,7 @@ The signature algorithm and VRF algorithm for each cipher suite is as follows:
 | KT_128_SHA256_P256    | ecdsa_secp256r1_sha256 | ECVRF-P256-SHA256-TAI             |
 | KT_128_SHA256_Ed25519 | ed25519                | ECVRF-EDWARDS25519-SHA512-TAI[32] |
 
-The VRF algorithms are specified in {{RFC9381}}. For `KT_128_SHA256_Ed25519`,
+The VRF algorithms are specified in {{!RFC9381}}. For `KT_128_SHA256_Ed25519`,
 the final hash output of `ECVRF-EDWARDS25519-SHA512-TAI` is truncated to be 32
 bytes.
 
