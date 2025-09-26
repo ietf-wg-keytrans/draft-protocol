@@ -1566,9 +1566,8 @@ For a user to update their view of the tree, the following is provided:
 - If the user has previously observed a tree head, the timestamps of each log
   entry from the list computed in {{update-algorithm}}.
 
-Users verify that the timestamps represent a monotonic series, and that the
-rightmost timestamp is within the bounds defined by `max_ahead` and
-`max_behind`.
+Users verify that the rightmost timestamp is within the bounds defined by
+`max_ahead` and `max_behind`.
 
 ### Fixed-Version Search
 
@@ -1577,18 +1576,29 @@ following is provided:
 
 - For each log entry touched by the algorithm in {{fv-algorithm}}:
   - The log entry's timestamp.
-  - If the log entry has surpassed its maximum lifetime and is on the frontier,
-    the right child's timestamp.
-  - If it is not the case that the log entry has surpassed its maximum lifetime,
-    is on the frontier, and the log entry's right child has also surpassed its
-    maximum lifetime, then a `PrefixProof` corresponding to a binary ladder
-    ({{search-binary-ladder}}) in the log entry's prefix tree is provided.
-- If the `PrefixProof` from the first log entry containing the target
-  label-version pair didn't include a lookup for the target version, provide a
-  second `PrefixProof` from this log entry specifically looking up the target
-  version.
+  - If the log entry is expired and is on the frontier, the right child's
+    timestamp.
+  - If it is not the case that the log entry is expired, is on the frontier, and
+    its right child is also expired, then a `PrefixProof` corresponding to a
+    binary ladder in the log entry's prefix tree is provided.
+- If step 6.2 is reached, provide a second `PrefixProof` from the identified log
+  entry specifically looking up the target version.
 
 Users verify the output as specified in {{fv-algorithm}}.
+
+### Greatest-Version Search
+
+For a user to search the combined tree for the greatest version of a label, the
+following is provided:
+
+- From each log entry along the frontier, starting from the log entry identified
+  in {{greatest-version-search}}: a `PrefixProof` corresponding to a binary
+  ladder.
+
+Note that the frontier log entry timestamps are either already provided as part
+of updating the user's view of the tree, or are expected to have been retained
+by the user, and no additional timestamps are necessary to identify the starting
+log entry. Users verify the proof as described in {{greatest-version-search}}.
 
 ### Monitor
 
@@ -1608,20 +1618,6 @@ For a user to monitor a label in the combined tree, the following is provided:
     to conduct a depth-first search for each subsequent distinguished log entry.
   - For each distinguished log entry, a binary ladder ({{search-binary-ladder}})
     targeting the greatest version of the label that the log entry contains.
-
-### Greatest-Version Search
-
-For a user to search the combined tree for the greatest version of a label, the
-following is provided:
-
-- For each log entry along the frontier, starting from the log entry identified
-  in {{greatest-version-search}}: a binary ladder ({{search-binary-ladder}})
-  targeting the greatest version of the label that exists in the log overall.
-
-Note that the log entry timestamps are already provided as part of updating the
-user's view of the tree and that no additional timestamps are necessary to
-identify the starting log entry. Users verify the proof as described in
-{{greatest-version-search}}.
 
 
 # User Operations
