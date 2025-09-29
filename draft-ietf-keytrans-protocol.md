@@ -593,8 +593,9 @@ prefix tree is greater than, equal to, or less than their **target version**.
 
 This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
-purpose of searching the tree follow the series of lookups described in
-{{binary-ladder}}, but with two optimizations:
+purpose of searching the tree are called **search binary ladders** and follow
+the series of lookups described in {{binary-ladder}}, but with two
+optimizations:
 
 First, the series of lookups ends after the first inclusion proof for a version
 greater than the target version, or the first non-inclusion proof for a version
@@ -661,8 +662,8 @@ time starting back at step 1.
    expired, recurse to the right child. Note that a right child always exists,
    as the rightmost log entry can not exceed its maximum lifetime by definition.
 
-2. Obtain a binary ladder from the current log entry for the target version,
-   omitting redundant lookups as described in {{search-binary-ladder}}.
+2. Obtain a search binary ladder from the current log entry for the target
+   version, omitting redundant lookups as described in {{search-binary-ladder}}.
    Determine whether the binary ladder indicates a greatest version of the label
    that is greater than, equal to, or less than the target version.
 
@@ -777,9 +778,8 @@ root of the implicit binary search tree if there are no distinguished log
 entries, and then recurses down the remainder of the frontier, each time
 starting back at step 1:
 
-1. Obtain a binary ladder from the current log entry for the claimed greatest
-   version of the label, omitting redundant lookups as described in
-   {{search-binary-ladder}}.
+1. Obtain a search binary ladder from the current log entry for the claimed
+   greatest version of the label, omitting redundant lookups.
 2. If this is the rightmost log entry, verify that the binary ladder is
    consistent the claimed greatest version of the label. That is, verify that it
    contains inclusion proofs for all expected versions less than or equal to the
@@ -836,7 +836,7 @@ in {{updating-views-of-the-tree}}.
 MUST, if at all possible, happen more frequently than the log entry maximum
 lifetime.
 
-## Binary Ladder {#monitor-binary-ladder}
+## Binary Ladder
 
 Similar to the algorithm for searching the tree, the algorithm for monitoring
 the tree requires a way to prove that the greatest version of a label stored in
@@ -846,9 +846,9 @@ user is monitoring. Unlike in a search though, users already know that the
 target version of the label exists and only need proof that there has not been
 an unexpected downgrade.
 
-Binary ladders provided for the purpose of monitoring follow the series of
-lookups that would be made by the algorithm in {{binary-ladder}}. From this
-series of lookups, two optimizations are made:
+Binary ladders provided for the purpose of monitoring are called **monitoring
+binary ladders** and follow the series of lookups described in
+{{binary-ladder}}, but with two optimizations:
 
 First, any lookup for a version greater than the target version is omitted. As a
 result, all lookups in the binary ladder will result in an inclusion proof if
@@ -901,9 +901,9 @@ rightmost to leftmost log entry:
       2. If it had a version less than or equal to that of the current map
          entry, terminate and return an error to the user.
 
-   2. Obtain a binary ladder (as defined in {{monitor-binary-ladder}}) from this
-      log entry where the target version is the version currently in the map.
-      Verify that all expected lookups are present and all show inclusion.
+   2. Obtain a monitoring binary ladder from this log entry where the target
+      version is the version currently in the map. Verify that all expected
+      lookups are present and all show inclusion.
 
    3. If the above check fails, terminate and return an error to the user.
       Otherwise, remove the current position-version pair from the map and
@@ -949,20 +949,18 @@ the tree:
    one prior.
 
 3. Obtain from the Transparency Log VRF proofs for version zero of the label and
-   all other versions of the label that would appear in a binary ladder (as
-   defined in {{search-binary-ladder}}) where the target version was any of the
-   versions given in step 2.
+   all other versions of the label that would appear in a search binary ladder
+   where the target version was any of the versions given in step 2.
 
 4. Obtain from the Transparency Log the commitment to the label's value at each
    version where a VRF proof was provided in step 3 and the version is
    understood to exist based on the information provided in step 2.
 
-5. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from the
-   Transparency Log for each log entry in the list computed in step 1 where the
-   target version is the corresponding version given in step 2, or zero if no
-   version was given, without omitting redundant lookups. The user verifies that
-   each binary ladder is consistent with the claimed greatest version of the
-   label.
+5. Obtain a search binary ladder for each log entry in the list computed in step
+   1 where the target version is the corresponding version given in step 2, or
+   zero if no version was given, without omitting redundant lookups. The user
+   verifies that each binary ladder is consistent with the claimed greatest
+   version of the label.
 
 Once the label owner has initialized their state, they can begin regular
 monitoring. The label owner advertises the greatest version of the label that
@@ -986,10 +984,9 @@ recursive algorithm, starting with the root log entry:
    than the version advertised by the user, or if another stop condition has
    occurred (such as reaching a maximum output size), stop.
 
-5. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from the
-   Transparency Log for the current log entry where the target version is the
-   greatest version of the label that exists in the current log entry, without
-   omitting redundant lookups.
+5. Obtain a search binary ladder for the current log entry where the target
+   version is the greatest version of the label that exists in the current log
+   entry, without omitting redundant lookups.
 
 6. If the current log entry has a right child, recurse to the right child.
 
@@ -1030,8 +1027,8 @@ following:
 - If the Transparency Log is deployed with a Third-Party Manager, the signatures
   produced by the Service Operator over each new value.
 - VRF proofs for the following versions of the label:
-  - Compute the set of all versions that would be contained in a binary ladder
-    ({{search-binary-ladder}}) for the new greatest version of the label.
+  - Compute the set of all versions that would be contained in a search binary
+    ladder for the new greatest version of the label.
   - If more than one version of the label was added, additionally include each
     of these individual versions.
   - Of the versions matching the two criteria above, omit any versions that
@@ -1076,13 +1073,12 @@ algorithm:
    1. If a binary ladder would have already been received from this log entry in
       step 2.2 when processing a previous label update, skip this log entry.
 
-   2. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from this
-      log entry where the target version is the previous greatest version of the
-      label that existed. Lookups that would be omitted in a greatest-version
-      search for the label are also omitted here. Note that this means that
-      lookups that would occur in the rightmost distinguished log entry, or in
-      log entries that were skipped by step 2.1, will still be omitted as if the
-      log entries had been inspected.
+   2. Obtain a search binary ladder from this log entry where the target version
+      is the previous greatest version of the label that existed. Lookups that
+      would be omitted in a greatest-version search for the label are also
+      omitted here. Note that this means that lookups that would occur in the
+      rightmost distinguished log entry, or in log entries that were skipped by
+      step 2.1, will still be omitted as if the log entries had been inspected.
 
    3. Verify that the binary ladder terminates in a way that is consistent with
       the previous greatest version of the label being the greatest that
@@ -1188,7 +1184,7 @@ whether the Transparency Log is deployed in Contact Monitoring mode, or with a
 Third-Party Manager or Auditor. The `signature_public_key` field contains the
 public key to use for verifying signatures on the `TreeHeadTBS` structure. The
 `vrf_public_key` field contains the VRF public key to use for evaluating VRF
-proofs provided in the `BinaryLadderStep.proof` field described in {{search}}.  <!-- TODO: Check -->
+proofs provided in the `BinaryLadderStep.proof` field described in {{search}}.
 
 If the deployment mode specifies a Third-Party Manager, a public key is provided
 in `leaf_public_key`. This public key is used to verify the Service Operator's
@@ -1759,12 +1755,12 @@ struct {
   select (SearchRequest.version) {
     case absent:
       uint32 version;
-  }
-  BinaryLadderStep binary_ladder<0..2^8-1>;
-  CombinedTreeProof search;
-
+  };
   opaque opening[Nc];
   UpdateValue value;
+
+  BinaryLadderStep binary_ladder<0..2^8-1>;
+  CombinedTreeProof search;
 } SearchResponse;
 ~~~
 
@@ -1800,32 +1796,40 @@ Users verify a search response by following these steps:
 ## Update
 
 Users initiate an Update operation by submitting an UpdateRequest to the
-Transparency Log containing the new label and value to store.
+Transparency Log containing the label and the new values to store.
 
 ~~~ tls-presentation
+struct {
+  opaque value<0..2^32-1>;
+} LabelValue;
+
 struct {
   optional<uint64> last;
 
   opaque label<0..2^8-1>;
-  opaque value<0..2^32-1>;
+  LabelValue values<0..2^8-1>;
 } UpdateRequest;
 ~~~
 
 If the request passes application-layer policy checks, the Transparency Log adds
-a new label-version pair to the prefix tree, followed by adding a new entry to
-the log tree with an updated timestamp and prefix tree root. It returns
-an UpdateResponse structure:
+the new values for the label to the next log entry and returns an UpdateResponse
+structure:
 
 ~~~ tls-presentation
+struct {
+  opaque opening[Nc];
+  UpdatePrefix prefix;
+} UpdateInfo;
+
 struct {
   FullTreeHead full_tree_head;
 
   uint32 version;
+  uint64 position;
+  UpdateInfo info<0..2^8-1>;
+
   BinaryLadderStep binary_ladder<0..2^8-1>;
   CombinedTreeProof search;
-
-  opaque opening[Nc];
-  UpdatePrefix prefix;
 } UpdateResponse;
 ~~~
 
