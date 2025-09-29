@@ -1031,23 +1031,76 @@ following:
   produced by the Service Operator over each new value.
 - VRF proofs for the following versions of the label:
   - Compute the set of all versions that would be contained in a binary ladder
-    for the new greatest version of the label.
+    ({{search-binary-ladder}}) for the new greatest version of the label.
   - If more than one version of the label was added, additionally include each
     of these individual versions.
   - Of the versions matching the two criteria above, omit any versions that
-    would contained in a binary ladder for the previous greatest version of the
-    label, as the label owner is expected to already know the VRF outputs for
-    these versions.
+    would be contained in a binary ladder for the previous greatest version of
+    the label, as the label owner is expected to already know the VRF outputs
+    for these versions.
 
-To ensure that the new versions of the label were inserted correctly, the label
-owner considers the Transparency Log as it existed at two points in time. The
-first is the **previous tree**, which is defined as the combined tree just
-before the log entry with the new versions was added. The second is the
-**current tree**, which is defined as the combined tree as it is currently
-presented to the user, containing the new log entry and potentially other log
-entries to its right.
+The user verifies this information as follows:
 
-TODO
+1. Verify that the new greatest version of the label is greater than the
+   previously known greatest version.
+2. Verify that the log entry where the new versions were inserted is to the
+   right of where the previous greatest version of the label was inserted, or
+   the starting position chosen in {{owner-algorithm}} if this is the first
+   version inserted since the user became the label owner.
+3. Verify that the number of commitment openings provided is equal to the new
+   greatest version minus the previous greatest version, or is equal to the new
+   greatest version plus one if there were no previous versions.
+4. If the Transparency Log is deployed with a Third-Party Manager, verify that
+   the number of signatures provided matches the number of commitments and that
+   the signatures are valid.
+5. Verify that the expected number of VRF proofs was provided, and that the
+   proofs properly evaluate into a VRF output.
+
+To further ensure that the new versions of the label were inserted correctly,
+the label owner considers the Transparency Log as it existed at two points in
+time. The first is the **previous tree**, which is defined as the combined tree
+up to but excluding the log entry where the new versions were added. The second
+is the **current tree**, which is defined as the combined tree as it is
+currently presented to the user, containing the new log entry and potentially
+other log entries to its right. Given this, the user executes the following
+algorithm:
+
+1. Starting from the root log entry of the previous tree, proceed
+   down the frontier of the previous tree and identify the first log entry
+   that is non-distinguished in the current tree. If there is none, skip to step
+   3. Otherwise, move on to step 2.
+
+2. Starting from the identified log entry, proceed down the remainder of the
+   previous tree's frontier from left to right:
+
+   1. If a binary ladder would have already been received from this log entry in
+      step 2.2 when processing a previous label update, skip this log entry.
+
+   2. Obtain a binary ladder (as defined in {{search-binary-ladder}}) from this
+      log entry where the target version is the previous greatest version of the
+      label that existed. Lookups that would be omitted in a greatest-version
+      search for the label are also omitted here. Note that this means that
+      lookups that would occur in the rightmost distinguished log entry, or in
+      log entries that were skipped by step 2.1, will still be omitted as if the
+      log entries had been inspected.
+
+   3. Verify that the binary ladder terminates in a way that is consistent with
+      the previous greatest version of the label being the greatest that
+      existed.
+
+3. If the log entry where the new versions were added is distinguished in the
+   current tree, obtain a `PrefixProof` from it with lookups corresponding only
+   to new versions of the label that would not be looked up in a search binary
+   ladder for the new greatest version. Verify that all lookups result in an
+   inclusion proof.
+
+   If the log entry is not distinguished, obtain a `PrefixProof` from it with
+   lookups corresponding to a search binary ladder where the target version is
+   the new greatest version of the label, omitting redundant lookups,
+   additionally including all newly added versions of the label. Verify that the
+   binary ladder lookups indicate are consistent with the new greatest version
+   of the label being the greatest that exists, and that all lookups for new but
+   lesser versions result in an inclusion proof.
 
 # Cryptographic Computations
 
@@ -1642,17 +1695,35 @@ Users verify the proof as described in the second algorithm of
 
 ### Updating a Label
 
-TODO
+For a label owner to verify that some new versions of a label have been
+correctly inserted, the following is provided:
+
+- The timestamps necessary to identify the first non-distinguished log entry on
+  the previous tree's frontier, as described in the algorithm in
+  {{update-algorithm}}. This search proceeds in a depth-first manner from the
+  root log entry of the previous tree. When the search recurses from a log entry
+  that is on the frontier to the right, the timestamp of the log entry is
+  provided. When the search recurses to the left, from a log entry that is to
+  the right of the rightmost log entry in the previous tree, only the timestamp
+  of the leftmost log entry inspected before returning to the previous tree's
+  frontier is provided.
+- For each log entry that reaches step 2.2 of the algorithm in
+  {{update-algorithm}}, a `PrefixProof` corresponding to a binary ladder.
+- For the log entry where the new versions were added, a `PrefixProof`
+  containing the lookups specified in step 3 of the algorithm in
+  {{update-algorithm}}.
+
+Users verify the proof as described in {{update-algorithm}}.
 
 # User Operations
 
 The basic user operations are organized as a request-response protocol between a
 user and the Transparency Log.
 
-Users MUST retain the most recent `TreeHead` they've successfully
-verified as part of any query response and populate the `last` field of any
-query request with the `tree_size` from this `TreeHead`. This ensures that all
-operations performed by the user return consistent results.
+Users MUST retain the most recent `TreeHead` they've successfully verified as
+part of any query response and populate the `last` field of any query request
+with the `tree_size` from this `TreeHead`. This ensures that all operations
+performed by the user return consistent results.
 
 Modifications to a user's state MUST only be persisted once the query response
 has been fully verified. Queries that fail full verification MUST NOT modify the
