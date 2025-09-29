@@ -2149,8 +2149,9 @@ if the greatest version of the label that's present in a given version of the
 prefix tree is greater than, equal to, or less than their <strong>target version</strong>.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 <p id="section-6.1-2">This is accomplished by having the Transparency Log provide a binary ladder from
 each log entry in the user's search path. Binary ladders provided for the
-purpose of searching the tree follow the series of lookups described in
-<a href="#binary-ladder" class="auto internal xref">Section 5</a>, but with two optimizations:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
+purpose of searching the tree are called <strong>search binary ladders</strong> and follow
+the series of lookups described in <a href="#binary-ladder" class="auto internal xref">Section 5</a>, but with two
+optimizations:<a href="#section-6.1-2" class="pilcrow">¶</a></p>
 <p id="section-6.1-3">First, the series of lookups ends after the first inclusion proof for a version
 greater than the target version, or the first non-inclusion proof for a version
 less than or equal to the target version. Providing additional lookups is
@@ -2221,8 +2222,8 @@ expired, recurse to the right child. Note that a right child always exists,
 as the rightmost log entry can not exceed its maximum lifetime by definition.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
-            <p id="section-6.3-2.2.1">Obtain a binary ladder from the current log entry for the target version,
-omitting redundant lookups as described in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>.
+            <p id="section-6.3-2.2.1">Obtain a search binary ladder from the current log entry for the target
+version, omitting redundant lookups as described in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>.
 Determine whether the binary ladder indicates a greatest version of the label
 that is greater than, equal to, or less than the target version.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
@@ -2382,9 +2383,8 @@ entries, and then recurses down the remainder of the frontier, each time
 starting back at step 1:<a href="#section-7.2-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-7.2-2">
 <li id="section-7.2-2.1">
-            <p id="section-7.2-2.1.1">Obtain a binary ladder from the current log entry for the claimed greatest
-version of the label, omitting redundant lookups as described in
-<a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>.<a href="#section-7.2-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-7.2-2.1.1">Obtain a search binary ladder from the current log entry for the claimed
+greatest version of the label, omitting redundant lookups.<a href="#section-7.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-7.2-2.2">
             <p id="section-7.2-2.2.1">If this is the rightmost log entry, verify that the binary ladder is
@@ -2445,7 +2445,7 @@ in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a
 <p id="section-8-6">"Regular" monitoring <span class="bcp14">SHOULD</span> be performed at least as frequently as the RMW and
 <span class="bcp14">MUST</span>, if at all possible, happen more frequently than the log entry maximum
 lifetime.<a href="#section-8-6" class="pilcrow">¶</a></p>
-<div id="monitor-binary-ladder">
+<div id="binary-ladder-1">
 <section id="section-8.1">
         <h3 id="name-binary-ladder-3">
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-binary-ladder-3" class="section-name selfRef">Binary Ladder</a>
@@ -2457,9 +2457,9 @@ version</strong>. The target version in this case is the version of the label th
 user is monitoring. Unlike in a search though, users already know that the
 target version of the label exists and only need proof that there has not been
 an unexpected downgrade.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">Binary ladders provided for the purpose of monitoring follow the series of
-lookups that would be made by the algorithm in <a href="#binary-ladder" class="auto internal xref">Section 5</a>. From this
-series of lookups, two optimizations are made:<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">Binary ladders provided for the purpose of monitoring are called <strong>monitoring
+binary ladders</strong> and follow the series of lookups described in
+<a href="#binary-ladder" class="auto internal xref">Section 5</a>, but with two optimizations:<a href="#section-8.1-2" class="pilcrow">¶</a></p>
 <p id="section-8.1-3">First, any lookup for a version greater than the target version is omitted. As a
 result, all lookups in the binary ladder will result in an inclusion proof if
 the Transparency Log is behaving honestly.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
@@ -2533,9 +2533,9 @@ entry, terminate and return an error to the user.<a href="#section-8.2-3.4.2.1.2
                 </ol>
 </li>
               <li id="section-8.2-3.4.2.2">
-                <p id="section-8.2-3.4.2.2.1">Obtain a binary ladder (as defined in <a href="#monitor-binary-ladder" class="auto internal xref">Section 8.1</a>) from this
-log entry where the target version is the version currently in the map.
-Verify that all expected lookups are present and all show inclusion.<a href="#section-8.2-3.4.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-8.2-3.4.2.2.1">Obtain a monitoring binary ladder from this log entry where the target
+version is the version currently in the map. Verify that all expected
+lookups are present and all show inclusion.<a href="#section-8.2-3.4.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-8.2-3.4.2.3">
                 <p id="section-8.2-3.4.2.3.1">If the above check fails, terminate and return an error to the user.
@@ -2590,9 +2590,8 @@ one prior.<a href="#section-8.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-2.3">
             <p id="section-8.3-2.3.1">Obtain from the Transparency Log VRF proofs for version zero of the label and
-all other versions of the label that would appear in a binary ladder (as
-defined in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>) where the target version was any of the
-versions given in step 2.<a href="#section-8.3-2.3.1" class="pilcrow">¶</a></p>
+all other versions of the label that would appear in a search binary ladder
+where the target version was any of the versions given in step 2.<a href="#section-8.3-2.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-2.4">
             <p id="section-8.3-2.4.1">Obtain from the Transparency Log the commitment to the label's value at each
@@ -2600,12 +2599,11 @@ version where a VRF proof was provided in step 3 and the version is
 understood to exist based on the information provided in step 2.<a href="#section-8.3-2.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-2.5">
-            <p id="section-8.3-2.5.1">Obtain a binary ladder (as defined in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>) from the
-Transparency Log for each log entry in the list computed in step 1 where the
-target version is the corresponding version given in step 2, or zero if no
-version was given, without omitting redundant lookups. The user verifies that
-each binary ladder is consistent with the claimed greatest version of the
-label.<a href="#section-8.3-2.5.1" class="pilcrow">¶</a></p>
+            <p id="section-8.3-2.5.1">Obtain a search binary ladder for each log entry in the list computed in step
+1 where the target version is the corresponding version given in step 2, or
+zero if no version was given, without omitting redundant lookups. The user
+verifies that each binary ladder is consistent with the claimed greatest
+version of the label.<a href="#section-8.3-2.5.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-8.3-3">Once the label owner has initialized their state, they can begin regular
@@ -2641,10 +2639,9 @@ than the version advertised by the user, or if another stop condition has
 occurred (such as reaching a maximum output size), stop.<a href="#section-8.3-4.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-4.5">
-            <p id="section-8.3-4.5.1">Obtain a binary ladder (as defined in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>) from the
-Transparency Log for the current log entry where the target version is the
-greatest version of the label that exists in the current log entry, without
-omitting redundant lookups.<a href="#section-8.3-4.5.1" class="pilcrow">¶</a></p>
+            <p id="section-8.3-4.5.1">Obtain a search binary ladder for the current log entry where the target
+version is the greatest version of the label that exists in the current log
+entry, without omitting redundant lookups.<a href="#section-8.3-4.5.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-4.6">
             <p id="section-8.3-4.6.1">If the current log entry has a right child, recurse to the right child.<a href="#section-8.3-4.6.1" class="pilcrow">¶</a></p>
@@ -2704,8 +2701,8 @@ produced by the Service Operator over each new value.<a href="#section-9.1-2.4.1
             <p id="section-9.1-2.5.1">VRF proofs for the following versions of the label:<a href="#section-9.1-2.5.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-9.1-2.5.2.1">
-                <p id="section-9.1-2.5.2.1.1">Compute the set of all versions that would be contained in a binary ladder
-(<a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>) for the new greatest version of the label.<a href="#section-9.1-2.5.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-9.1-2.5.2.1.1">Compute the set of all versions that would be contained in a search binary
+ladder for the new greatest version of the label.<a href="#section-9.1-2.5.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-9.1-2.5.2.2">
                 <p id="section-9.1-2.5.2.2.1">If more than one version of the label was added, additionally include each
@@ -2775,13 +2772,12 @@ previous tree's frontier from left to right:<a href="#section-9.1-6.2.1" class="
 step 2.2 when processing a previous label update, skip this log entry.<a href="#section-9.1-6.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-9.1-6.2.2.2">
-                <p id="section-9.1-6.2.2.2.1">Obtain a binary ladder (as defined in <a href="#search-binary-ladder" class="auto internal xref">Section 6.1</a>) from this
-log entry where the target version is the previous greatest version of the
-label that existed. Lookups that would be omitted in a greatest-version
-search for the label are also omitted here. Note that this means that
-lookups that would occur in the rightmost distinguished log entry, or in
-log entries that were skipped by step 2.1, will still be omitted as if the
-log entries had been inspected.<a href="#section-9.1-6.2.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-9.1-6.2.2.2.1">Obtain a search binary ladder from this log entry where the target version
+is the previous greatest version of the label that existed. Lookups that
+would be omitted in a greatest-version search for the label are also
+omitted here. Note that this means that lookups that would occur in the
+rightmost distinguished log entry, or in log entries that were skipped by
+step 2.1, will still be omitted as if the log entries had been inspected.<a href="#section-9.1-6.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-9.1-6.2.2.3">
                 <p id="section-9.1-6.2.2.3.1">Verify that the binary ladder terminates in a way that is consistent with
@@ -3628,12 +3624,12 @@ struct {
   select (SearchRequest.version) {
     case absent:
       uint32 version;
-  }
-  BinaryLadderStep binary_ladder&lt;0..2^8-1&gt;;
-  CombinedTreeProof search;
-
+  };
   opaque opening[Nc];
   UpdateValue value;
+
+  BinaryLadderStep binary_ladder&lt;0..2^8-1&gt;;
+  CombinedTreeProof search;
 } SearchResponse;
 </pre><a href="#section-12.1-4" class="pilcrow">¶</a>
 </div>
@@ -3681,32 +3677,40 @@ described in <a href="#full-tree-head-verification" class="auto internal xref">S
 <a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-update" class="section-name selfRef">Update</a>
         </h3>
 <p id="section-12.2-1">Users initiate an Update operation by submitting an UpdateRequest to the
-Transparency Log containing the new label and value to store.<a href="#section-12.2-1" class="pilcrow">¶</a></p>
+Transparency Log containing the label and the new values to store.<a href="#section-12.2-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.2-2">
 <pre>
+struct {
+  opaque value&lt;0..2^32-1&gt;;
+} LabelValue;
+
 struct {
   optional&lt;uint64&gt; last;
 
   opaque label&lt;0..2^8-1&gt;;
-  opaque value&lt;0..2^32-1&gt;;
+  LabelValue values&lt;0..2^8-1&gt;;
 } UpdateRequest;
 </pre><a href="#section-12.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-12.2-3">If the request passes application-layer policy checks, the Transparency Log adds
-a new label-version pair to the prefix tree, followed by adding a new entry to
-the log tree with an updated timestamp and prefix tree root. It returns
-an UpdateResponse structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
+the new values for the label to the next log entry and returns an UpdateResponse
+structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.2-4">
 <pre>
+struct {
+  opaque opening[Nc];
+  UpdatePrefix prefix;
+} UpdateInfo;
+
 struct {
   FullTreeHead full_tree_head;
 
   uint32 version;
+  uint64 position;
+  UpdateInfo info&lt;0..2^8-1&gt;;
+
   BinaryLadderStep binary_ladder&lt;0..2^8-1&gt;;
   CombinedTreeProof search;
-
-  opaque opening[Nc];
-  UpdatePrefix prefix;
 } UpdateResponse;
 </pre><a href="#section-12.2-4" class="pilcrow">¶</a>
 </div>
