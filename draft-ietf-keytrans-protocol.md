@@ -1459,10 +1459,10 @@ balanced subtrees that allows the user to compute the root value when combined
 with the leaf and retained values. This proof is encoded as follows:
 
 ~~~ tls-presentation
-opaque NodeValue[Hash.Nh];
+opaque HashValue[Hash.Nh];
 
 struct {
-  NodeValue elements<0..2^16-1>;
+  HashValue elements<0..2^16-1>;
 } InclusionProof;
 ~~~
 
@@ -1506,7 +1506,7 @@ struct {
 
 struct {
   PrefixSearchResult results<0..2^8-1>;
-  NodeValue elements<0..2^16-1>;
+  HashValue elements<0..2^16-1>;
 } PrefixProof;
 ~~~
 
@@ -1559,7 +1559,7 @@ Proofs are encoded as follows:
 struct {
   uint64 timestamps<0..2^8-1>;
   PrefixProof prefix_proofs<0..2^8-1>;
-  NodeValue prefix_roots<0..2^8-1>;
+  HashValue prefix_roots<0..2^8-1>;
 
   InclusionProof inclusion;
 } CombinedTreeProof;
@@ -1732,7 +1732,7 @@ user's protocol state in any way.
 ## Search
 
 Users initiate a Search operation by submitting a SearchRequest to the
-Transparency Log containing the label that they're interested in. Users can
+Transparency Log containing the label that they wish to search for. Users can
 optionally specify a version of the label that they'd like to receive, if not
 the greatest one.
 
@@ -1750,13 +1750,16 @@ In turn, the Transparency Log responds with a SearchResponse structure:
 ~~~ tls-presentation
 struct {
   opaque proof[VRF.Np];
-  opaque commitment[Hash.Nh];
+  optional<HashValue> commitment;
 } BinaryLadderStep;
 
 struct {
   FullTreeHead full_tree_head;
 
-  optional<uint32> version;
+  select (SearchRequest.version) {
+    case absent:
+      uint32 version;
+  }
   BinaryLadderStep binary_ladder<0..2^8-1>;
   CombinedTreeProof search;
 
@@ -1765,33 +1768,34 @@ struct {
 } SearchResponse;
 ~~~
 
+If no target version was specified in `SearchRequest.version` for a
+fixed-version search, the greatest version of the label is provided in
+`SearchResponse.version`.
+
 Each `BinaryLadderStep` structure contains information related to one version of
-the label that's in the binary ladder. The `proof` field contains the VRF
-proof, and `commitment` contains the commitment to the label's value at that
-version. The `binary_ladder` field contains these structures in the same order
-that the versions are output by the algorithm in {{binary-ladder}}.
+the label in the binary ladder for the target version, listed in the same order
+that the versions are output by the algorithm in {{binary-ladder}}. The `proof`
+field contains the VRF proof, where `VRF.Np` denotes the proof size of the VRF
+algorithm. The `commitment` field contains the commitment to the label's value
+at that version. The `commitment` field is omitted only for versions of the
+label that don't exist and for the target version of the label, as the
+commitment to the target version is computed from `opening` and `value`.
 
 The `search` field contains the output of updating the user's view of the tree
-to match `FullTreeHead.tree_head.size` followed by either a fixed-version or
-greatest-version search for the requested label, depending on whether `version`
-was provided in `SearchRequest` or not. If searching for the greatest version of
-the label, this version is provided in `SearchResponse.version`; otherwise, the
-field is empty.
+to match `TreeHead.tree_size` followed by either a fixed-version or
+greatest-version search for the requested label.
 
 Users verify a search response by following these steps:
 
-1. Compute the VRF output for each version of the label from the proofs in
-   `binary_ladder`.
-2. Verify the proof in `search` as described in {{proof-combined-tree}}.
-3. Compute a candidate root value for the tree from the proof in
+1. Verify `value` as described in {{update-format}}.
+2. Verify that the expected number of entries is present in `binary_ladder` and
+   compute the VRF output for each version of the label from the provided
+   proofs.
+3. Verify the proof in `search` as described in {{proof-combined-tree}}.
+4. Compute a candidate root value for the tree from the proof in
    `search.inclusion` and any previously retained full subtrees of the log tree.
-4. With the candidate root value for the tree, verify `FullTreeHead`.
-5. Verify that the commitment to the target version of the label opens to
-   `SearchResponse.value` with opening `SearchResponse.opening`.
-
-Depending on the deployment mode of the Transparency Log, the `value` field may
-or may not require additional verification, specified in {{update-format}},
-before its contents may be consumed.
+5. With the candidate root value for the tree, verify `FullTreeHead` as
+   described in {{full-tree-head-verification}}.
 
 ## Update
 
