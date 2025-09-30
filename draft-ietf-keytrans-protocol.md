@@ -1492,6 +1492,11 @@ enum {
 } PrefixSearchResultType;
 
 struct {
+  opaque vrf_output[VRF.Nh];
+  opaque commitment[Nc];
+} PrefixLeaf;
+
+struct {
   PrefixSearchResultType result_type;
   select (PrefixSearchResult.result_type) {
     case nonInclusionLeaf:
@@ -1781,7 +1786,7 @@ The `search` field contains the output of updating the user's view of the tree
 to match `TreeHead.tree_size` followed by either a fixed-version or
 greatest-version search for the requested label.
 
-Users verify a search response by following these steps:
+Users verify a `SearchResponse` by following these steps:
 
 1. Verify `value` as described in {{update-format}}.
 2. Verify that the expected number of entries is present in `binary_ladder` and
@@ -1812,8 +1817,9 @@ struct {
 ~~~
 
 If the request passes application-layer policy checks, the Transparency Log adds
-the new values for the label to the next log entry and returns an UpdateResponse
-structure:
+the new values for the label to the next log entry, assigning version counters
+in the same order that the values are given in `values`. The Transparency Log
+then returns an UpdateResponse structure:
 
 ~~~ tls-presentation
 struct {
@@ -1832,6 +1838,23 @@ struct {
   CombinedTreeProof search;
 } UpdateResponse;
 ~~~
+
+The `opening` field of an `UpdateInfo` structure contains the commitment opening
+that was chosen for a specific new version of the label and, if in Third-Party
+Management mode, the `prefix` field contains the Service Operator's signature
+over the new value.
+
+The `version` field of `UpdateResponse` contains the new greatest version of the
+label. The `position` field contains the index of the log entry that where the
+new versions of the label were inserted. The `info` field contains an
+`UpdateInfo` for each new version of the label, in the same order as they were
+given in `UpdateRequest.values`.
+
+The `binary_ladder` field contains VRF proofs and commitments as described
+
+Users verify an `UpdateResponse` by following these steps:
+
+
 
 Users verify the UpdateResponse as if it were a SearchResponse for the greatest
 version of `label`. To aid verification, the update response provides the
@@ -1948,13 +1971,13 @@ malicious results.
 
 With the Third-Party Management deployment mode, a third party is responsible
 for the majority of the work of storing and operating the Transparency Log. The
-Service Operator serves only to enforce access control, authenticate the
-addition of new entries, and prevent the creation of forks by the Third-Party
+Service Operator serves only to enforce access control, authorize the addition
+of new versions of labels, and prevent the creation of forks by the Third-Party
 Manager. Critically, the Service Operator is trusted to ensure that only one
 value for each version of a label is authorized.
 
 All user queries specified in {{user-operations}} are initially sent by users
-directly to the Service Operator to be forwarded to the Third-Party Manager if
+directly to the Service Operator and are forwarded to the Third-Party Manager if
 they pass access control. While other operations are forwarded by the Service
 Operator unchanged, `UpdateRequest` structures are forwarded to the Third-Party
 Manager with the Service Operator's signature attached:
@@ -1975,11 +1998,11 @@ signatures from a Third-Party Auditor attesting to the fact that the
 Service Operator is constructing the tree correctly. These signatures are
 provided to users along with the responses to their queries.
 
-For each new log entry the Service Operator adds to the log, it produces a
+For each new log entry that the Service Operator adds to the log, it produces a
 corresponding `AuditorUpdate` structure and sends this to the Third-Party
-Auditor. The Third-Party Auditor MUST receive and successfully verify an
-`AuditorUpdate` structure for a log entry before providing the Service Operator
-with an `AuditorTreeHead` structure whose `size` field would include the log
+Auditor. The auditor MUST receive and successfully verify an `AuditorUpdate`
+structure for a log entry before providing the Service Operator with an
+`AuditorTreeHead` structure whose `tree_size` field would include that log
 entry.
 
 ~~~ tls-presentation
@@ -2118,8 +2141,7 @@ The columns in the registry are as follows:
     be provided.
   - N: Indicates that the item's associated mechanism has not been evaluated and
     is not RECOMMENDED (as opposed to being NOT RECOMMENDED). This does not
-    mean that the mechanism is flawed. For example, an item may be marked as "N"
-    because it has usage constraints or limited applicability.
+    mean that the mechanism is flawed.
   - D: Indicates that the item is discouraged and SHOULD NOT be
     used. This marking could be used to identify mechanisms that might result in
     problems if they are used, such as a weak cryptographic algorithm or a
@@ -2135,23 +2157,29 @@ Initial contents:
 | 0x0002          | KT_128_SHA256_Ed25519       | Y | RFC XXXX |
 | 0xF000 - 0xFFFF | Reserved for Private Use    | - | RFC XXXX |
 
-All cipher suites currently specified share the following primitives and
+Both cipher suites currently specified share the following primitives and
 parameters:
 
 - The hash algorithm is SHA-256, as defined in {{SHS}}.
 - `Nc`: 16
 - `Kc`: The byte sequence equal to the hex-encoded string `d821f8790d97709796b4d7903357c3f5`
 
-The signature algorithm and VRF algorithm for each cipher suite is as follows:
+The KT_128_SHA256_P256 cipher suite is as follows:
 
-| Name                  | Signature              | VRF Algorithm                     |
-|:----------------------|:-----------------------|:----------------------------------|
-| KT_128_SHA256_P256    | ecdsa_secp256r1_sha256 | ECVRF-P256-SHA256-TAI             |
-| KT_128_SHA256_Ed25519 | ed25519                | ECVRF-EDWARDS25519-SHA512-TAI[32] |
+- The signature algorithm is ECDSA over the NIST curve P-256. Messages are
+  hashed with SHA-256 before being signed. Public keys are encoded as an
+  uncompressed point as defined in SEC 1, Version 2.0, Section 2.3.3. Signatures
+  are encoded as the concatenation of two 256-bit big endian integers r and s.
+- The VRF algorithm is ECVRF-P256-SHA256-TAI as defined in {{!RFC9381}}. Public
+  keys are encoded as a compressed point as defined in SEC 1, Version 2.0,
+  Section 2.3.3.
 
-The VRF algorithms are specified in {{!RFC9381}}. For `KT_128_SHA256_Ed25519`,
-the final hash output of `ECVRF-EDWARDS25519-SHA512-TAI` is truncated to be 32
-bytes.
+The KT_128_SHA256_Ed25519 cipher suite is as follows:
+
+- The signature algorithm is Ed25519 as defined in {{!RFC8032}}. Public key and
+  signature encodings are as defined in {{RFC8032}}.
+- The VRF algorithm is ECVRF-EDWARDS25519-SHA512-TAI as defined in {{!RFC9381}}
+  with the output truncated to 32 bytes.
 
 ## KT Designated Expert Pool {#de}
 
