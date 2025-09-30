@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 2 April 2026</td>
+<td class="center">Expires 3 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-29" class="published">29 September 2025</time>
+<time datetime="2025-09-30" class="published">30 September 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-02">2 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-03">3 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 2 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 3 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -3276,6 +3276,11 @@ enum {
 } PrefixSearchResultType;
 
 struct {
+  opaque vrf_output[VRF.Nh];
+  opaque commitment[Nc];
+} PrefixLeaf;
+
+struct {
   PrefixSearchResultType result_type;
   select (PrefixSearchResult.result_type) {
     case nonInclusionLeaf:
@@ -3647,7 +3652,7 @@ commitment to the target version is computed from <code>opening</code> and <code
 <p id="section-12.1-7">The <code>search</code> field contains the output of updating the user's view of the tree
 to match <code>TreeHead.tree_size</code> followed by either a fixed-version or
 greatest-version search for the requested label.<a href="#section-12.1-7" class="pilcrow">¶</a></p>
-<p id="section-12.1-8">Users verify a search response by following these steps:<a href="#section-12.1-8" class="pilcrow">¶</a></p>
+<p id="section-12.1-8">Users verify a <code>SearchResponse</code> by following these steps:<a href="#section-12.1-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.1-9">
 <li id="section-12.1-9.1">
             <p id="section-12.1-9.1.1">Verify <code>value</code> as described in <a href="#update-format" class="auto internal xref">Section 10.5</a>.<a href="#section-12.1-9.1.1" class="pilcrow">¶</a></p>
@@ -3693,8 +3698,9 @@ struct {
 </pre><a href="#section-12.2-2" class="pilcrow">¶</a>
 </div>
 <p id="section-12.2-3">If the request passes application-layer policy checks, the Transparency Log adds
-the new values for the label to the next log entry and returns an UpdateResponse
-structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
+the new values for the label to the next log entry, assigning version counters
+in the same order that the values are given in <code>values</code>. The Transparency Log
+then returns an UpdateResponse structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.2-4">
 <pre>
 struct {
@@ -3714,9 +3720,20 @@ struct {
 } UpdateResponse;
 </pre><a href="#section-12.2-4" class="pilcrow">¶</a>
 </div>
-<p id="section-12.2-5">Users verify the UpdateResponse as if it were a SearchResponse for the greatest
+<p id="section-12.2-5">The <code>opening</code> field of an <code>UpdateInfo</code> structure contains the commitment opening
+that was chosen for a specific new version of the label and, if in Third-Party
+Management mode, the <code>prefix</code> field contains the Service Operator's signature
+over the new value.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
+<p id="section-12.2-6">The <code>version</code> field of <code>UpdateResponse</code> contains the new greatest version of the
+label. The <code>position</code> field contains the index of the log entry that where the
+new versions of the label were inserted. The <code>info</code> field contains an
+<code>UpdateInfo</code> for each new version of the label, in the same order as they were
+given in <code>UpdateRequest.values</code>.<a href="#section-12.2-6" class="pilcrow">¶</a></p>
+<p id="section-12.2-7">The <code>binary_ladder</code> field contains VRF proofs and commitments as described<a href="#section-12.2-7" class="pilcrow">¶</a></p>
+<p id="section-12.2-8">Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-12.2-8" class="pilcrow">¶</a></p>
+<p id="section-12.2-9">Users verify the UpdateResponse as if it were a SearchResponse for the greatest
 version of <code>label</code>. To aid verification, the update response provides the
-<code>UpdatePrefix</code> structure necessary to reconstruct the <code>UpdateValue</code>.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
+<code>UpdatePrefix</code> structure necessary to reconstruct the <code>UpdateValue</code>.<a href="#section-12.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="monitor">
@@ -3847,12 +3864,12 @@ malicious results.<a href="#section-13-1" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-13.1-1">With the Third-Party Management deployment mode, a third party is responsible
 for the majority of the work of storing and operating the Transparency Log. The
-Service Operator serves only to enforce access control, authenticate the
-addition of new entries, and prevent the creation of forks by the Third-Party
+Service Operator serves only to enforce access control, authorize the addition
+of new versions of labels, and prevent the creation of forks by the Third-Party
 Manager. Critically, the Service Operator is trusted to ensure that only one
 value for each version of a label is authorized.<a href="#section-13.1-1" class="pilcrow">¶</a></p>
 <p id="section-13.1-2">All user queries specified in <a href="#user-operations" class="auto internal xref">Section 12</a> are initially sent by users
-directly to the Service Operator to be forwarded to the Third-Party Manager if
+directly to the Service Operator and are forwarded to the Third-Party Manager if
 they pass access control. While other operations are forwarded by the Service
 Operator unchanged, <code>UpdateRequest</code> structures are forwarded to the Third-Party
 Manager with the Service Operator's signature attached:<a href="#section-13.1-2" class="pilcrow">¶</a></p>
@@ -3876,11 +3893,11 @@ struct {
 signatures from a Third-Party Auditor attesting to the fact that the
 Service Operator is constructing the tree correctly. These signatures are
 provided to users along with the responses to their queries.<a href="#section-13.2-1" class="pilcrow">¶</a></p>
-<p id="section-13.2-2">For each new log entry the Service Operator adds to the log, it produces a
+<p id="section-13.2-2">For each new log entry that the Service Operator adds to the log, it produces a
 corresponding <code>AuditorUpdate</code> structure and sends this to the Third-Party
-Auditor. The Third-Party Auditor <span class="bcp14">MUST</span> receive and successfully verify an
-<code>AuditorUpdate</code> structure for a log entry before providing the Service Operator
-with an <code>AuditorTreeHead</code> structure whose <code>size</code> field would include the log
+Auditor. The auditor <span class="bcp14">MUST</span> receive and successfully verify an <code>AuditorUpdate</code>
+structure for a log entry before providing the Service Operator with an
+<code>AuditorTreeHead</code> structure whose <code>tree_size</code> field would include that log
 entry.<a href="#section-13.2-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-13.2-3">
 <pre>
@@ -4048,8 +4065,7 @@ be provided.<a href="#section-15.1-4.3.2.1.1" class="pilcrow">¶</a></p>
               <li class="normal" id="section-15.1-4.3.2.2">
                 <p id="section-15.1-4.3.2.2.1">N: Indicates that the item's associated mechanism has not been evaluated and
 is not <span class="bcp14">RECOMMENDED</span> (as opposed to being <span class="bcp14">NOT RECOMMENDED</span>). This does not
-mean that the mechanism is flawed. For example, an item may be marked as "N"
-because it has usage constraints or limited applicability.<a href="#section-15.1-4.3.2.2.1" class="pilcrow">¶</a></p>
+mean that the mechanism is flawed.<a href="#section-15.1-4.3.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li class="normal" id="section-15.1-4.3.2.3">
                 <p id="section-15.1-4.3.2.3.1">D: Indicates that the item is discouraged and <span class="bcp14">SHOULD NOT</span> be
@@ -4101,7 +4117,7 @@ mechanism that might cause interoperability problems in deployment.<a href="#sec
             </tr>
           </tbody>
         </table>
-<p id="section-15.1-7">All cipher suites currently specified share the following primitives and
+<p id="section-15.1-7">Both cipher suites currently specified share the following primitives and
 parameters:<a href="#section-15.1-7" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-15.1-8.1">
@@ -4114,32 +4130,31 @@ parameters:<a href="#section-15.1-7" class="pilcrow">¶</a></p>
             <p id="section-15.1-8.3.1"><code>Kc</code>: The byte sequence equal to the hex-encoded string <code>d821f8790d97709796b4d7903357c3f5</code><a href="#section-15.1-8.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
-<p id="section-15.1-9">The signature algorithm and VRF algorithm for each cipher suite is as follows:<a href="#section-15.1-9" class="pilcrow">¶</a></p>
-<table class="center" id="table-2">
-          <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
-<thead>
-            <tr>
-              <th class="text-left" rowspan="1" colspan="1">Name</th>
-              <th class="text-left" rowspan="1" colspan="1">Signature</th>
-              <th class="text-left" rowspan="1" colspan="1">VRF Algorithm</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_P256</td>
-              <td class="text-left" rowspan="1" colspan="1">ecdsa_secp256r1_sha256</td>
-              <td class="text-left" rowspan="1" colspan="1">ECVRF-P256-SHA256-TAI</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">KT_128_SHA256_Ed25519</td>
-              <td class="text-left" rowspan="1" colspan="1">ed25519</td>
-              <td class="text-left" rowspan="1" colspan="1">ECVRF-EDWARDS25519-SHA512-TAI[32]</td>
-            </tr>
-          </tbody>
-        </table>
-<p id="section-15.1-11">The VRF algorithms are specified in <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span>. For <code>KT_128_SHA256_Ed25519</code>,
-the final hash output of <code>ECVRF-EDWARDS25519-SHA512-TAI</code> is truncated to be 32
-bytes.<a href="#section-15.1-11" class="pilcrow">¶</a></p>
+<p id="section-15.1-9">The KT_128_SHA256_P256 cipher suite is as follows:<a href="#section-15.1-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-15.1-10.1">
+            <p id="section-15.1-10.1.1">The signature algorithm is ECDSA over the NIST curve P-256. Messages are
+hashed with SHA-256 before being signed. Public keys are encoded as an
+uncompressed point as defined in SEC 1, Version 2.0, Section 2.3.3. Signatures
+are encoded as the concatenation of two 256-bit big endian integers r and s.<a href="#section-15.1-10.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-15.1-10.2">
+            <p id="section-15.1-10.2.1">The VRF algorithm is ECVRF-P256-SHA256-TAI as defined in <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span>. Public
+keys are encoded as a compressed point as defined in SEC 1, Version 2.0,
+Section 2.3.3.<a href="#section-15.1-10.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-15.1-11">The KT_128_SHA256_Ed25519 cipher suite is as follows:<a href="#section-15.1-11" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-15.1-12.1">
+            <p id="section-15.1-12.1.1">The signature algorithm is Ed25519 as defined in <span>[<a href="#RFC8032" class="cite xref">RFC8032</a>]</span>. Public key and
+signature encodings are as defined in <span>[<a href="#RFC8032" class="cite xref">RFC8032</a>]</span>.<a href="#section-15.1-12.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-15.1-12.2">
+            <p id="section-15.1-12.2.1">The VRF algorithm is ECVRF-EDWARDS25519-SHA512-TAI as defined in <span>[<a href="#RFC9381" class="cite xref">RFC9381</a>]</span>
+with the output truncated to 32 bytes.<a href="#section-15.1-12.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
 </section>
 </div>
 <div id="de">
@@ -4198,6 +4213,10 @@ a particular KT DE, that KT DE <span class="bcp14">SHOULD</span> defer to the ju
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
 <span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8032">[RFC8032]</dt>
+        <dd>
+<span class="refAuthor">Josefsson, S.</span> and <span class="refAuthor">I. Liusvaara</span>, <span class="refTitle">"Edwards-Curve Digital Signature Algorithm (EdDSA)"</span>, <span class="seriesInfo">RFC 8032</span>, <span class="seriesInfo">DOI 10.17487/RFC8032</span>, <time datetime="2017-01" class="refDate">January 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8032">https://www.rfc-editor.org/rfc/rfc8032</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8126">[RFC8126]</dt>
         <dd>
