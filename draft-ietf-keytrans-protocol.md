@@ -1065,8 +1065,8 @@ its right. Given this, the user executes the following algorithm:
 
 1. Starting from the root log entry of the previous tree, proceed down the
    frontier of the previous tree and identify the first log entry that is not
-   distinguished in the current tree and move on to step 2. If there is no
-   non-distinguished log entry, skip to step 3.
+   distinguished in the current tree. This may be the root itself. If there is
+   no non-distinguished log entry, skip to step 3.
 
 2. Starting from the identified log entry, proceed down the remainder of the
    previous tree's frontier from left to right:
@@ -1091,13 +1091,13 @@ its right. Given this, the user executes the following algorithm:
    ladder for the new greatest version. Verify that all lookups result in an
    inclusion proof.
 
-   If the log entry is not distinguished, obtain a `PrefixProof` from it with
-   lookups corresponding to a search binary ladder where the target version is
-   the new greatest version of the label, omitting redundant lookups,
-   additionally including all newly added versions of the label. Verify that the
-   binary ladder lookups indicate are consistent with the new greatest version
-   of the label being the greatest that exists, and that all lookups for new but
-   lesser versions result in an inclusion proof.
+   If the log entry is not distinguished in the current tree, obtain a
+   `PrefixProof` from it with lookups corresponding to a search binary ladder
+   where the target version is the new greatest version of the label, omitting
+   redundant lookups, additionally including all newly added versions of the
+   label. Verify that the binary ladder lookups are consistent with the new
+   greatest version of the label being the greatest that exists, and that all
+   lookups for new but lesser versions result in an inclusion proof.
 
 # Cryptographic Computations
 
@@ -1118,8 +1118,15 @@ hash trees. The signature algorithm is used for signatures from both the Service
 Operator and the Third Party, if one is present. The VRF is used for preserving
 the privacy of labels.
 
-Cipher suites are represented with the CipherSuite type. The cipher suites are
-defined in {{kt-cipher-suites}}.
+Throughout the document, the following shorthands are used to denote different
+parameters of the current cipher suite:
+
+- `Hash.Nh` denotes the hash function's output length in bytes.
+- `VRF.Nh` denotes the VRF algorithm's output length in bytes.
+- `VRF.Np` denotes the VRF algorithm's proof size in bytes.
+
+Cipher suites are represented with the CipherSuite type and are defined in
+{{kt-cipher-suites}}.
 
 ## Tree Head Signature
 
@@ -1208,8 +1215,7 @@ for log entries, per {{maximum-lifetime}}, this duration in milliseconds is
 stored in the `maximum_lifetime` field.
 
 Finally, the `root` field contains the root value of the log tree with
-`tree_size` leaves. `Hash.Nh` is the output size of the cipher suite's
-hash function in bytes.
+`tree_size` leaves.
 
 ## Auditor Tree Head Signature
 
@@ -1442,11 +1448,11 @@ consistency proofs into a single batch proof. Recalling from the discussion in
 
 - Whenever the Transparency Log serves an inclusion proof for a leaf of the log
   tree, it provides the minimum set of head values from balanced subtrees that
-  allow the user to compute the root value when combined with the leaf's value.
+  allows the user to compute the root value when combined with the leaf's value.
 - Whenever the Transparency Log serves a consistency proof, the user is expected
   to have retained the head values of the full subtrees of the previous version
   of the log. The Transparency Log provides the minimum set of head values from
-  balanced subtrees that allow the user to compute the new root value when
+  balanced subtrees that allows the user to compute the new root value when
   combined with the retained values.
 
 These two proof types are composed together as such: considering the leaf values
@@ -1494,7 +1500,7 @@ enum {
 
 struct {
   opaque vrf_output[VRF.Nh];
-  opaque commitment[Nc];
+  opaque commitment[Hash.Nh];
 } PrefixLeaf;
 
 struct {
@@ -1635,7 +1641,7 @@ following is provided:
     timestamp.
   - If it is not the case that the log entry is expired, is on the frontier, and
     its right child is also expired, then a `PrefixProof` corresponding to a
-    binary ladder in the log entry's prefix tree is provided.
+    search binary ladder in the log entry's prefix tree is provided.
 - If step 6.2 is reached, provide a second `PrefixProof` from the identified log
   entry specifically looking up the target version.
 
@@ -1647,13 +1653,12 @@ For a user to search the combined tree for the greatest version of a label, the
 following is provided:
 
 - From each log entry along the frontier, starting from the log entry identified
-  in {{greatest-version-search}}: a `PrefixProof` corresponding to a binary
-  ladder.
+  in {{gv-algorithm}}, a `PrefixProof` corresponding to a search binary ladder.
 
 Note that the frontier log entry timestamps are either already provided as part
 of updating the user's view of the tree, or are expected to have been retained
 by the user, and no additional timestamps are necessary to identify the starting
-log entry. Users verify the proof as described in {{greatest-version-search}}.
+log entry. Users verify the proof as described in {{gv-algorithm}}.
 
 ### Contact Monitoring
 
@@ -1666,7 +1671,7 @@ For a user to monitor a label in the combined tree, the following is provided:
     monitoring map, or some other log entry from the list computed in step 2 of
     {{contact-algorithm}}.
   - Where necessary for the algorithm in {{contact-algorithm}}, a `PrefixProof`
-    corresponding to a binary ladder.
+    corresponding to a monitoring binary ladder.
 
 Users verify the proof as described in {{contact-algorithm}}.
 
@@ -1675,10 +1680,11 @@ Users verify the proof as described in {{contact-algorithm}}.
 For a label owner to initialize their state to begin monitoring a label, the
 following is provided:
 
-- The timestamp of each log entry that is on the direct path of the user's
-  requested starting position and to its left.
+- In reverse order (from top to bottom), the timestamp of each log entry that is
+  on the direct path of the user's requested starting position and to its left,
+  stopping just after the first unexpired log entry (if any).
 - For each log entry in the list computed in step 1 of the first algorithm in
-  {{owner-algorithm}}, a `PrefixProof` corresponding to a binary ladder.
+  {{owner-algorithm}}, a `PrefixProof` corresponding to a search binary ladder.
 
 Users verify the proof as described in the first algorithm of
 {{owner-algorithm}}.
@@ -1687,8 +1693,11 @@ Users verify the proof as described in the first algorithm of
 
 For a label owner to perform regular monitoring, the following is provided:
 
-- The timestamp for each log entry inspected by the second algorithm in
-  {{owner-algorithm}}.
+- The timestamp for each log entry that is on the direct path of the root of the
+  previous tree, for the purpose of determining if the root log entry is
+  distinguished.
+- The timestamp for each log entry that causes the second algorithm in
+  {{owner-algorithm}} to recurse either left or right.
 - For each log entry that reaches step 5 in the second algorithm in
   {{owner-algorithm}}, a `PrefixProof` corresponding to a binary ladder.
 
@@ -1777,11 +1786,10 @@ fixed-version search, the greatest version of the label is provided in
 Each `BinaryLadderStep` structure contains information related to one version of
 the label in the binary ladder for the target version, listed in the same order
 that the versions are output by the algorithm in {{binary-ladder}}. The `proof`
-field contains the VRF proof, where `VRF.Np` denotes the proof size of the VRF
-algorithm. The `commitment` field contains the commitment to the label's value
-at that version. The `commitment` field is omitted only for versions of the
-label that don't exist and for the target version of the label, as the
-commitment to the target version is computed from `opening` and `value`.
+field contains the VRF proof. The `commitment` field contains the commitment to
+the label's value at that version. The `commitment` field is omitted only for
+versions of the label that don't exist and for the target version of the label,
+as the commitment to the target version is computed from `opening` and `value`.
 
 The `search` field contains the output of updating the user's view of the tree
 to match `TreeHead.tree_size` followed by either a fixed-version or
@@ -2023,7 +2031,7 @@ the prefix tree in the corresponding log entry. The `removed` field contains the
 list of `PrefixLeaf` structures that were removed from the prefix tree.
 
 The `proof` field contains a batch lookup proof in the previous log entry's
-prefix tree for all search keys referenced by `added` or `removed. The
+prefix tree for all search keys referenced by `added` or `removed`. The
 `proof.results` field contains the result of the search for each element of
 `added` in the order provided, followed by the result of the search for each
 element of `removed` in the order provided.
