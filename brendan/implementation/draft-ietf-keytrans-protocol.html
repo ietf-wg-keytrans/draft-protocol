@@ -1051,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">September 2025</td>
+<td class="right">October 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 3 April 2026</td>
+<td class="center">Expires 5 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-09-30" class="published">30 September 2025</time>
+<time datetime="2025-10-02" class="published">2 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-03">3 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-05">5 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 3 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 5 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2757,8 +2757,8 @@ its right. Given this, the user executes the following algorithm:<a href="#secti
 <li id="section-9.1-6.1">
             <p id="section-9.1-6.1.1">Starting from the root log entry of the previous tree, proceed down the
 frontier of the previous tree and identify the first log entry that is not
-distinguished in the current tree and move on to step 2. If there is no
-non-distinguished log entry, skip to step 3.<a href="#section-9.1-6.1.1" class="pilcrow">¶</a></p>
+distinguished in the current tree. This may be the root itself. If there is
+no non-distinguished log entry, skip to step 3.<a href="#section-9.1-6.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-9.1-6.2">
             <p id="section-9.1-6.2.1">Starting from the identified log entry, proceed down the remainder of the
@@ -2790,13 +2790,13 @@ to new versions of the label that would not be looked up in a search binary
 ladder for the new greatest version. Verify that all lookups result in an
 inclusion proof.<a href="#section-9.1-6.3.1" class="pilcrow">¶</a></p>
 <p id="section-9.1-6.3.2">
-If the log entry is not distinguished, obtain a <code>PrefixProof</code> from it with
-lookups corresponding to a search binary ladder where the target version is
-the new greatest version of the label, omitting redundant lookups,
-additionally including all newly added versions of the label. Verify that the
-binary ladder lookups indicate are consistent with the new greatest version
-of the label being the greatest that exists, and that all lookups for new but
-lesser versions result in an inclusion proof.<a href="#section-9.1-6.3.2" class="pilcrow">¶</a></p>
+If the log entry is not distinguished in the current tree, obtain a
+<code>PrefixProof</code> from it with lookups corresponding to a search binary ladder
+where the target version is the new greatest version of the label, omitting
+redundant lookups, additionally including all newly added versions of the
+label. Verify that the binary ladder lookups are consistent with the new
+greatest version of the label being the greatest that exists, and that all
+lookups for new but lesser versions result in an inclusion proof.<a href="#section-9.1-6.3.2" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -2837,8 +2837,21 @@ cryptographic computations:<a href="#section-10.1-1" class="pilcrow">¶</a></p>
 hash trees. The signature algorithm is used for signatures from both the Service
 Operator and the Third Party, if one is present. The VRF is used for preserving
 the privacy of labels.<a href="#section-10.1-3" class="pilcrow">¶</a></p>
-<p id="section-10.1-4">Cipher suites are represented with the CipherSuite type. The cipher suites are
-defined in <a href="#kt-cipher-suites" class="auto internal xref">Section 15.1</a>.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
+<p id="section-10.1-4">Throughout the document, the following shorthands are used to denote different
+parameters of the current cipher suite:<a href="#section-10.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-10.1-5.1">
+            <p id="section-10.1-5.1.1"><code>Hash.Nh</code> denotes the hash function's output length in bytes.<a href="#section-10.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.1-5.2">
+            <p id="section-10.1-5.2.1"><code>VRF.Nh</code> denotes the VRF algorithm's output length in bytes.<a href="#section-10.1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-10.1-5.3">
+            <p id="section-10.1-5.3.1"><code>VRF.Np</code> denotes the VRF algorithm's proof size in bytes.<a href="#section-10.1-5.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-10.1-6">Cipher suites are represented with the CipherSuite type and are defined in
+<a href="#kt-cipher-suites" class="auto internal xref">Section 15.1</a>.<a href="#section-10.1-6" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="tree-head-signature">
@@ -2926,8 +2939,7 @@ milliseconds. If the Transparency Log has chosen to define a maximum lifetime
 for log entries, per <a href="#maximum-lifetime" class="auto internal xref">Section 6.2</a>, this duration in milliseconds is
 stored in the <code>maximum_lifetime</code> field.<a href="#section-10.2-9" class="pilcrow">¶</a></p>
 <p id="section-10.2-10">Finally, the <code>root</code> field contains the root value of the log tree with
-<code>tree_size</code> leaves. <code>Hash.Nh</code> is the output size of the cipher suite's
-hash function in bytes.<a href="#section-10.2-10" class="pilcrow">¶</a></p>
+<code>tree_size</code> leaves.<a href="#section-10.2-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="auditor-tree-head-signature">
@@ -3216,13 +3228,13 @@ consistency proofs into a single batch proof. Recalling from the discussion in
 <li class="normal" id="section-11.1-2.1">
             <p id="section-11.1-2.1.1">Whenever the Transparency Log serves an inclusion proof for a leaf of the log
 tree, it provides the minimum set of head values from balanced subtrees that
-allow the user to compute the root value when combined with the leaf's value.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
+allows the user to compute the root value when combined with the leaf's value.<a href="#section-11.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-11.1-2.2">
             <p id="section-11.1-2.2.1">Whenever the Transparency Log serves a consistency proof, the user is expected
 to have retained the head values of the full subtrees of the previous version
 of the log. The Transparency Log provides the minimum set of head values from
-balanced subtrees that allow the user to compute the new root value when
+balanced subtrees that allows the user to compute the new root value when
 combined with the retained values.<a href="#section-11.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
@@ -3274,7 +3286,7 @@ enum {
 
 struct {
   opaque vrf_output[VRF.Nh];
-  opaque commitment[Nc];
+  opaque commitment[Hash.Nh];
 } PrefixLeaf;
 
 struct {
@@ -3443,7 +3455,7 @@ timestamp.<a href="#section-11.3.2-2.1.2.2.1" class="pilcrow">¶</a></p>
                 <li class="normal" id="section-11.3.2-2.1.2.3">
                   <p id="section-11.3.2-2.1.2.3.1">If it is not the case that the log entry is expired, is on the frontier, and
 its right child is also expired, then a <code>PrefixProof</code> corresponding to a
-binary ladder in the log entry's prefix tree is provided.<a href="#section-11.3.2-2.1.2.3.1" class="pilcrow">¶</a></p>
+search binary ladder in the log entry's prefix tree is provided.<a href="#section-11.3.2-2.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
@@ -3465,14 +3477,13 @@ following is provided:<a href="#section-11.3.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.3-2.1">
               <p id="section-11.3.3-2.1.1">From each log entry along the frontier, starting from the log entry identified
-in <a href="#greatest-version-search" class="auto internal xref">Section 7</a>: a <code>PrefixProof</code> corresponding to a binary
-ladder.<a href="#section-11.3.3-2.1.1" class="pilcrow">¶</a></p>
+in <a href="#gv-algorithm" class="auto internal xref">Section 7.2</a>, a <code>PrefixProof</code> corresponding to a search binary ladder.<a href="#section-11.3.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-11.3.3-3">Note that the frontier log entry timestamps are either already provided as part
 of updating the user's view of the tree, or are expected to have been retained
 by the user, and no additional timestamps are necessary to identify the starting
-log entry. Users verify the proof as described in <a href="#greatest-version-search" class="auto internal xref">Section 7</a>.<a href="#section-11.3.3-3" class="pilcrow">¶</a></p>
+log entry. Users verify the proof as described in <a href="#gv-algorithm" class="auto internal xref">Section 7.2</a>.<a href="#section-11.3.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="contact-monitoring">
@@ -3494,7 +3505,7 @@ monitoring map, or some other log entry from the list computed in step 2 of
 </li>
                 <li class="normal" id="section-11.3.4-2.1.2.2">
                   <p id="section-11.3.4-2.1.2.2.1">Where necessary for the algorithm in <a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>, a <code>PrefixProof</code>
-corresponding to a binary ladder.<a href="#section-11.3.4-2.1.2.2.1" class="pilcrow">¶</a></p>
+corresponding to a monitoring binary ladder.<a href="#section-11.3.4-2.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
@@ -3511,12 +3522,13 @@ corresponding to a binary ladder.<a href="#section-11.3.4-2.1.2.2.1" class="pilc
 following is provided:<a href="#section-11.3.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.5-2.1">
-              <p id="section-11.3.5-2.1.1">The timestamp of each log entry that is on the direct path of the user's
-requested starting position and to its left.<a href="#section-11.3.5-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.5-2.1.1">In reverse order (from top to bottom), the timestamp of each log entry that is
+on the direct path of the user's requested starting position and to its left,
+stopping just after the first unexpired log entry (if any).<a href="#section-11.3.5-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-11.3.5-2.2">
               <p id="section-11.3.5-2.2.1">For each log entry in the list computed in step 1 of the first algorithm in
-<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, a <code>PrefixProof</code> corresponding to a binary ladder.<a href="#section-11.3.5-2.2.1" class="pilcrow">¶</a></p>
+<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, a <code>PrefixProof</code> corresponding to a search binary ladder.<a href="#section-11.3.5-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-11.3.5-3">Users verify the proof as described in the first algorithm of
@@ -3531,12 +3543,17 @@ requested starting position and to its left.<a href="#section-11.3.5-2.1.1" clas
 <p id="section-11.3.6-1">For a label owner to perform regular monitoring, the following is provided:<a href="#section-11.3.6-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.6-2.1">
-              <p id="section-11.3.6-2.1.1">The timestamp for each log entry inspected by the second algorithm in
-<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-11.3.6-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.6-2.1.1">The timestamp for each log entry that is on the direct path of the root of the
+previous tree, for the purpose of determining if the root log entry is
+distinguished.<a href="#section-11.3.6-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-11.3.6-2.2">
-              <p id="section-11.3.6-2.2.1">For each log entry that reaches step 5 in the second algorithm in
-<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, a <code>PrefixProof</code> corresponding to a binary ladder.<a href="#section-11.3.6-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.6-2.2.1">The timestamp for each log entry that causes the second algorithm in
+<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a> to recurse either left or right.<a href="#section-11.3.6-2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li class="normal" id="section-11.3.6-2.3">
+              <p id="section-11.3.6-2.3.1">For each log entry that reaches step 5 in the second algorithm in
+<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, a <code>PrefixProof</code> corresponding to a binary ladder.<a href="#section-11.3.6-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 <p id="section-11.3.6-3">Users verify the proof as described in the second algorithm of
@@ -3641,11 +3658,10 @@ fixed-version search, the greatest version of the label is provided in
 <p id="section-12.1-6">Each <code>BinaryLadderStep</code> structure contains information related to one version of
 the label in the binary ladder for the target version, listed in the same order
 that the versions are output by the algorithm in <a href="#binary-ladder" class="auto internal xref">Section 5</a>. The <code>proof</code>
-field contains the VRF proof, where <code>VRF.Np</code> denotes the proof size of the VRF
-algorithm. The <code>commitment</code> field contains the commitment to the label's value
-at that version. The <code>commitment</code> field is omitted only for versions of the
-label that don't exist and for the target version of the label, as the
-commitment to the target version is computed from <code>opening</code> and <code>value</code>.<a href="#section-12.1-6" class="pilcrow">¶</a></p>
+field contains the VRF proof. The <code>commitment</code> field contains the commitment to
+the label's value at that version. The <code>commitment</code> field is omitted only for
+versions of the label that don't exist and for the target version of the label,
+as the commitment to the target version is computed from <code>opening</code> and <code>value</code>.<a href="#section-12.1-6" class="pilcrow">¶</a></p>
 <p id="section-12.1-7">The <code>search</code> field contains the output of updating the user's view of the tree
 to match <code>TreeHead.tree_size</code> followed by either a fixed-version or
 greatest-version search for the requested label.<a href="#section-12.1-7" class="pilcrow">¶</a></p>
@@ -3913,10 +3929,10 @@ struct {
 the prefix tree in the corresponding log entry. The <code>removed</code> field contains the
 list of <code>PrefixLeaf</code> structures that were removed from the prefix tree.<a href="#section-13.2-4" class="pilcrow">¶</a></p>
 <p id="section-13.2-5">The <code>proof</code> field contains a batch lookup proof in the previous log entry's
-prefix tree for all search keys referenced by <code>added</code> or <code>removed. The
-</code>proof.results<code> field contains the result of the search for each element of
-</code>added<code> in the order provided, followed by the result of the search for each
-element of </code>removed` in the order provided.<a href="#section-13.2-5" class="pilcrow">¶</a></p>
+prefix tree for all search keys referenced by <code>added</code> or <code>removed</code>. The
+<code>proof.results</code> field contains the result of the search for each element of
+<code>added</code> in the order provided, followed by the result of the search for each
+element of <code>removed</code> in the order provided.<a href="#section-13.2-5" class="pilcrow">¶</a></p>
 <p id="section-13.2-6">An auditor processes a single <code>AuditorUpdate</code> by following these steps:<a href="#section-13.2-6" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-13.2-7">
 <li id="section-13.2-7.1">
