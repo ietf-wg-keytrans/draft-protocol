@@ -1967,6 +1967,86 @@ conducting other queries. In particular, VRF proofs for different versions of
 each label are not provided, given that these can be cached from the
 original Search or Update query.
 
+## Credentials
+
+**Credentials** are proofs that are designed to be sent directly between users
+and verified without direct interaction with the Transparency Log. They are
+frequently useful in applications where anonymity is important, as they
+generally prevent users from needing to make direct requests to the Transparency
+Log regarding their contacts.
+
+Credentials are encoded as follows:
+
+~~~ tls-presentation
+enum {
+  reserved(0),
+  standard(1),
+  provisional(2),
+  (255)
+} CredentialType;
+
+struct {
+  CredentialType credential_type;
+
+  uint32 version;
+  opaque opening[Nc];
+  UpdateValue value;
+
+  BinaryLadderStep binary_ladder<0..2^8-1>;
+  select (Credential.credential_type) {
+    case standard:
+      uint64 tree_size;
+      PrefixProof distinguished;
+    case provisional:
+      FullTreeHead full_tree_head;
+      CombinedTreeProof search;
+  };
+} Credential;
+~~~
+
+The `credential_type` field specifies whether the credential is of the
+`standard` type, meaning that the target label-version pair is included in a
+distinguished log entry, or is of the `provisional` type, meaning that it is
+not. All of the fields `version` through `binary_ladder` are the same as they
+would be in a `SearchResponse` for a greatest-version search, as described in
+{{search}}.
+
+If the credential is a standard type, the `tree_size` and `distinguished` fields
+are present. The `tree_size` field contains the minimum tree size that the
+verifier should be aware of. The `distinguished` field contains lookups
+corresponding to a search binary ladder for the target version of the label in a
+recently issued distinguished log entry. Applications define their own policy
+for what constitutes a "recently issued" distinguished log entry. Users learn of
+and retain all of the recently issued distinguished log entries by monitoring
+their own labels, or by monitoring a neutral label provided for this purpose,
+using the algorithm in {{owner-algorithm}}. Once a distinguished log entry is no
+longer considered "recent", users may delete their knowledge of it as the
+associated credentials are considered expired.
+
+Users follow these steps to verify a standard credential:
+
+1. Verify that they have executed the algorithm in {{owner-algorithm}} such that
+   it reached the rightmost distinguished log entry when the tree size was
+   greater than or equal to `tree_size`.
+2. Verify that the binary ladder lookups in `distinguished` terminate in a way
+   that is consistent with the target version of the label being the greatest
+   that exists.
+3. Verify that the prefix tree root value produced by evaluating `distinguished`
+   matches the prefix tree root value of one of the recently issued
+   distinguished log entries.
+
+If the credential is a provisional type, the `full_tree_head` and `search`
+fields are present. These fields correspond to the same values as they would in
+a `SearchResponse` for a greatest-version search for the label where
+`SearchRequest.last` was not present. Users verify the `Credential` as they
+would a greatest-version search, and additionally verify that the terminal node
+of the search is to the right of the rightmost distinguished log entry.
+
+TODO
+
+Verifying a credential MUST NOT have any effect on the state used for the user's
+direct interactions with the Transparency Log, or on the verification of other
+credentials (even for the same label).
 
 # Third Parties
 
