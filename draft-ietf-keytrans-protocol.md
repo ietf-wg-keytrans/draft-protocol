@@ -619,8 +619,8 @@ context.
 
 A Transparency Log operator MAY define a maximum lifetime for log entries. If
 defined, it MUST be greater than zero milliseconds. Whether a log entry is
-expired is determined by subtracting the timestamp of the rightmost log entry
-from the timestamp of the log entry in question and checking if the result is
+expired is determined by subtracting the timestamp of the log entry in question
+from the timestamp of the rightmost log entry and checking if the result is
 greater than or equal to the defined duration.
 
 A user executing a search may arrive at an expired log entry by either of two
@@ -1393,12 +1393,12 @@ cipher suite hash function, of the following structure:
 struct {
   uint64 timestamp;
   opaque prefix_tree[Hash.Nh];
-} LogLeaf;
+} LogEntry;
 ~~~
 
 The `timestamp` field contains the timestamp that the leaf was created in
 milliseconds since the Unix epoch. The `prefix_tree` field contains the updated
-root hash of the prefix tree after making any desired modifications.
+root value of the prefix tree after making any desired modifications.
 
 The value of a parent node in the log tree is computed by hashing together the
 values of its left and right children:
