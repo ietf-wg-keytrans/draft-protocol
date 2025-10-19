@@ -16,22 +16,21 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.30.2" name="generator">
+<meta content="xml2rfc 3.31.0" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.30.2
-    Python 3.12.11
+  xml2rfc 3.31.0
+    Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
     lxml 5.3.1
-    platformdirs 4.4.0
+    platformdirs 4.5.0
     pycountry 24.6.1
     PyYAML 6.0.2
     requests 2.32.5
-    setuptools 80.9.0
     wcwidth 0.2.14
 -->
 <link href="draft-ietf-keytrans-protocol.xml" rel="alternate" type="application/rfc+xml">
@@ -1055,7 +1054,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 6 April 2026</td>
+<td class="center">Expires 22 April 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-03" class="published">3 October 2025</time>
+<time datetime="2025-10-19" class="published">19 October 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-06">6 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-04-22">22 April 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1130,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 6 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 22 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2180,8 +2179,8 @@ context.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
         </h3>
 <p id="section-6.2-1">A Transparency Log operator <span class="bcp14">MAY</span> define a maximum lifetime for log entries. If
 defined, it <span class="bcp14">MUST</span> be greater than zero milliseconds. Whether a log entry is
-expired is determined by subtracting the timestamp of the rightmost log entry
-from the timestamp of the log entry in question and checking if the result is
+expired is determined by subtracting the timestamp of the log entry in question
+from the timestamp of the rightmost log entry and checking if the result is
 greater than or equal to the defined duration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">A user executing a search may arrive at an expired log entry by either of two
 ways: The user may have inspected a log entry which is <strong>not</strong> expired and
@@ -3164,12 +3163,12 @@ cipher suite hash function, of the following structure:<a href="#section-10.8-1"
 struct {
   uint64 timestamp;
   opaque prefix_tree[Hash.Nh];
-} LogLeaf;
+} LogEntry;
 </pre><a href="#section-10.8-2" class="pilcrow">¶</a>
 </div>
 <p id="section-10.8-3">The <code>timestamp</code> field contains the timestamp that the leaf was created in
 milliseconds since the Unix epoch. The <code>prefix_tree</code> field contains the updated
-root hash of the prefix tree after making any desired modifications.<a href="#section-10.8-3" class="pilcrow">¶</a></p>
+root value of the prefix tree after making any desired modifications.<a href="#section-10.8-3" class="pilcrow">¶</a></p>
 <p id="section-10.8-4">The value of a parent node in the log tree is computed by hashing together the
 values of its left and right children:<a href="#section-10.8-4" class="pilcrow">¶</a></p>
 <div class="lang-pseudocode sourcecode" id="section-10.8-5">
@@ -3355,7 +3354,7 @@ contains the minimum set of timestamps and <code>PrefixProof</code> structures t
 needs for their execution of these algorithms. For the purposes of this
 protocol, the user always executes the algorithm to update their view of the
 tree as described in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>, followed immediately by one
-of the other algorithms.<a href="#section-11.3-2" class="pilcrow">¶</a></p>
+or more of the other algorithms.<a href="#section-11.3-2" class="pilcrow">¶</a></p>
 <p id="section-11.3-3">Proofs are encoded as follows:<a href="#section-11.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls sourcecode" id="section-11.3-4">
 <pre>
@@ -3906,15 +3905,15 @@ distinguished log entry, or is of the <code>provisional</code> type, meaning tha
 not. All of the fields <code>version</code> through <code>binary_ladder</code> are the same as they
 would be in a <code>SearchResponse</code> for a greatest-version search, as described in
 <a href="#search" class="auto internal xref">Section 12.1</a>.<a href="#section-12.4-4" class="pilcrow">¶</a></p>
-<p id="section-12.4-5">If the credential is a standard type, the <code>tree_size</code> and <code>distinguished</code> fields
-are present. The <code>tree_size</code> field contains the minimum tree size that the
-verifier should be aware of. The <code>distinguished</code> field contains lookups
-corresponding to a search binary ladder for the target version of the label in a
-recently issued distinguished log entry. Applications define their own policy
-for what constitutes a "recently issued" distinguished log entry. Users learn of
-and retain all of the recently issued distinguished log entries by monitoring
-their own labels, or by monitoring a neutral label provided for this purpose,
-using the algorithm in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>. Once a distinguished log entry is no
+<p id="section-12.4-5">If the credential is standard, the <code>tree_size</code> and <code>distinguished</code> fields are
+present. The <code>tree_size</code> field contains the minimum tree size that the verifier
+should be aware of. The <code>distinguished</code> field contains lookups corresponding to
+a search binary ladder for the target version of the label in a recently issued
+distinguished log entry. Applications define their own policy for what
+constitutes a "recently issued" distinguished log entry. Users learn of and
+retain all of the recently issued distinguished log entries by monitoring their
+own labels, or by monitoring a neutral label provided for this purpose, using
+the algorithm in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>. Once a distinguished log entry is no
 longer considered "recent", users may delete their knowledge of it as the
 associated credentials are considered expired.<a href="#section-12.4-5" class="pilcrow">¶</a></p>
 <p id="section-12.4-6">Users follow these steps to verify a standard credential:<a href="#section-12.4-6" class="pilcrow">¶</a></p>
@@ -3926,7 +3925,7 @@ greater than or equal to <code>tree_size</code>.<a href="#section-12.4-7.1.1" cl
 </li>
           <li id="section-12.4-7.2">
             <p id="section-12.4-7.2.1">Verify that the binary ladder lookups in <code>distinguished</code> terminate in a way
-that is consistent with the target version of the label being the greatest
+that is consistent with <code>version</code> being the greatest version of the label
 that exists.<a href="#section-12.4-7.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.4-7.3">
@@ -3935,16 +3934,23 @@ matches the prefix tree root value of one of the recently issued
 distinguished log entries.<a href="#section-12.4-7.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-12.4-8">If the credential is a provisional type, the <code>full_tree_head</code> and <code>search</code>
-fields are present. These fields correspond to the same values as they would in
-a <code>SearchResponse</code> for a greatest-version search for the label where
+<p id="section-12.4-8">If the credential is provisional, the <code>full_tree_head</code> and <code>search</code> fields are
+present. These fields correspond to the same values as they would in a
+<code>SearchResponse</code> for a greatest-version search for the label where
 <code>SearchRequest.last</code> was not present. Users verify the <code>Credential</code> as they
 would a greatest-version search, and additionally verify that the terminal node
 of the search is to the right of the rightmost distinguished log entry.<a href="#section-12.4-8" class="pilcrow">¶</a></p>
-<p id="section-12.4-9">TODO<a href="#section-12.4-9" class="pilcrow">¶</a></p>
-<p id="section-12.4-10">Verifying a credential <span class="bcp14">MUST NOT</span> have any effect on the state used for the user's
+<p id="section-12.4-9">Verifying a credential <span class="bcp14">MUST NOT</span> have any effect on the state used for the user's
 direct interactions with the Transparency Log, or on the verification of other
-credentials (even for the same label).<a href="#section-12.4-10" class="pilcrow">¶</a></p>
+credentials (even for the same label). In particular, the view of the tree
+presented in a provisional credential <span class="bcp14">MUST NOT</span> cause a user to change its view
+of the tree for any other purpose.<a href="#section-12.4-9" class="pilcrow">¶</a></p>
+<p id="section-12.4-10">A provisional credential is considered expired once the timestamp of the
+rightmost log entry exceeds the bound defined by <code>max_behind</code>. Before a
+provisional credential expires, the user that provided it <span class="bcp14">MUST</span> provide a
+<code>CredentialUpdate</code> structure. This converts the provisional credential into a
+standard credential:<a href="#section-12.4-10" class="pilcrow">¶</a></p>
+<p id="section-12.4-11">TODO<a href="#section-12.4-11" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>

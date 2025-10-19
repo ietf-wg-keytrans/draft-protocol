@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 6 April 2026                                     3 October 2025
+Expires: 22 April 2026                                   19 October 2025
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 6 April 2026.
+   This Internet-Draft will expire on 22 April 2026.
 
 Copyright Notice
 
@@ -715,9 +715,9 @@ Table of Contents
    A Transparency Log operator MAY define a maximum lifetime for log
    entries.  If defined, it MUST be greater than zero milliseconds.
    Whether a log entry is expired is determined by subtracting the
-   timestamp of the rightmost log entry from the timestamp of the log
-   entry in question and checking if the result is greater than or equal
-   to the defined duration.
+   timestamp of the log entry in question from the timestamp of the
+   rightmost log entry and checking if the result is greater than or
+   equal to the defined duration.
 
    A user executing a search may arrive at an expired log entry by
    either of two ways: The user may have inspected a log entry which is
@@ -1583,11 +1583,11 @@ Table of Contents
    struct {
      uint64 timestamp;
      opaque prefix_tree[Hash.Nh];
-   } LogLeaf;
+   } LogEntry;
 
    The timestamp field contains the timestamp that the leaf was created
    in milliseconds since the Unix epoch.  The prefix_tree field contains
-   the updated root hash of the prefix tree after making any desired
+   the updated root value of the prefix tree after making any desired
    modifications.
 
    The value of a parent node in the log tree is computed by hashing
@@ -1752,7 +1752,8 @@ Table of Contents
    PrefixProof structures that a user needs for their execution of these
    algorithms.  For the purposes of this protocol, the user always
    executes the algorithm to update their view of the tree as described
-   in Section 4, followed immediately by one of the other algorithms.
+   in Section 4, followed immediately by one or more of the other
+   algorithms.
 
    Proofs are encoded as follows:
 
@@ -2237,18 +2238,18 @@ Table of Contents
    the same as they would be in a SearchResponse for a greatest-version
    search, as described in Section 12.1.
 
-   If the credential is a standard type, the tree_size and distinguished
-   fields are present.  The tree_size field contains the minimum tree
-   size that the verifier should be aware of.  The distinguished field
-   contains lookups corresponding to a search binary ladder for the
-   target version of the label in a recently issued distinguished log
-   entry.  Applications define their own policy for what constitutes a
-   "recently issued" distinguished log entry.  Users learn of and retain
-   all of the recently issued distinguished log entries by monitoring
-   their own labels, or by monitoring a neutral label provided for this
-   purpose, using the algorithm in Section 8.3.  Once a distinguished
-   log entry is no longer considered "recent", users may delete their
-   knowledge of it as the associated credentials are considered expired.
+   If the credential is standard, the tree_size and distinguished fields
+   are present.  The tree_size field contains the minimum tree size that
+   the verifier should be aware of.  The distinguished field contains
+   lookups corresponding to a search binary ladder for the target
+   version of the label in a recently issued distinguished log entry.
+   Applications define their own policy for what constitutes a "recently
+   issued" distinguished log entry.  Users learn of and retain all of
+   the recently issued distinguished log entries by monitoring their own
+   labels, or by monitoring a neutral label provided for this purpose,
+   using the algorithm in Section 8.3.  Once a distinguished log entry
+   is no longer considered "recent", users may delete their knowledge of
+   it as the associated credentials are considered expired.
 
    Users follow these steps to verify a standard credential:
 
@@ -2257,26 +2258,35 @@ Table of Contents
        tree size was greater than or equal to tree_size.
 
    2.  Verify that the binary ladder lookups in distinguished terminate
-       in a way that is consistent with the target version of the label
-       being the greatest that exists.
+       in a way that is consistent with version being the greatest
+       version of the label that exists.
 
    3.  Verify that the prefix tree root value produced by evaluating
        distinguished matches the prefix tree root value of one of the
        recently issued distinguished log entries.
 
-   If the credential is a provisional type, the full_tree_head and
-   search fields are present.  These fields correspond to the same
-   values as they would in a SearchResponse for a greatest-version
-   search for the label where SearchRequest.last was not present.  Users
-   verify the Credential as they would a greatest-version search, and
-   additionally verify that the terminal node of the search is to the
-   right of the rightmost distinguished log entry.
-
-   TODO
+   If the credential is provisional, the full_tree_head and search
+   fields are present.  These fields correspond to the same values as
+   they would in a SearchResponse for a greatest-version search for the
+   label where SearchRequest.last was not present.  Users verify the
+   Credential as they would a greatest-version search, and additionally
+   verify that the terminal node of the search is to the right of the
+   rightmost distinguished log entry.
 
    Verifying a credential MUST NOT have any effect on the state used for
    the user's direct interactions with the Transparency Log, or on the
-   verification of other credentials (even for the same label).
+   verification of other credentials (even for the same label).  In
+   particular, the view of the tree presented in a provisional
+   credential MUST NOT cause a user to change its view of the tree for
+   any other purpose.
+
+   A provisional credential is considered expired once the timestamp of
+   the rightmost log entry exceeds the bound defined by max_behind.
+   Before a provisional credential expires, the user that provided it
+   MUST provide a CredentialUpdate structure.  This converts the
+   provisional credential into a standard credential:
+
+   TODO
 
 13.  Third Parties
 
