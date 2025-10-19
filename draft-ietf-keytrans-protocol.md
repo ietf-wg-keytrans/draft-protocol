@@ -1559,7 +1559,7 @@ contains the minimum set of timestamps and `PrefixProof` structures that a user
 needs for their execution of these algorithms. For the purposes of this
 protocol, the user always executes the algorithm to update their view of the
 tree as described in {{updating-views-of-the-tree}}, followed immediately by one
-of the other algorithms.
+or more of the other algorithms.
 
 Proofs are encoded as follows:
 
