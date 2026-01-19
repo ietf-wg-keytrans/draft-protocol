@@ -276,11 +276,11 @@ values that the verifier retained.
 
 Index:  0     1     2     3     4     5     6
 ~~~
-{: title="Illustration of a consistency proof between a log with 4 and with 6
-leaves respectively. The verifier is expected to
-already have the values (X), so the prover provides the verifier with the values
-of the nodes marked [X]. By combining these, the verifier is able to compute the
-new root value of the log."}
+{: title="Illustration of a consistency proof between a log with 5 and with 7
+leaves respectively. The verifier is expected to already have the values (X), so
+the prover provides the verifier with the values of the nodes marked [X]. By
+combining these, the verifier is able to compute the new root value of the
+log."}
 
 ## Prefix Tree
 
@@ -303,7 +303,7 @@ A prefix tree can be searched by starting at the root node and moving to the
 left child if the first bit of a search key is 0, or the right child if the first bit
 is 1. This is then repeated for the second bit, third bit, and so on until the
 search either terminates at a leaf node (which may or may not be for the desired
-value), or a parent node that lacks the desired child.
+search key), or a parent node that lacks the desired child.
 
 ~~~ aasvg
                      X
@@ -352,7 +352,7 @@ parent node is the hash of the combined values of its left and right children
 (or a stand-in value when one of the children doesn't exist).
 
 An inclusion proof is given by providing the leaf value, along with the value of
-each copath entry along the search path. A non-inclusion proof is given by
+each copath node along the search path. A non-inclusion proof is given by
 providing an abridged inclusion proof that follows the path for the intended
 search key, but ends either at a stand-in node or a leaf for a different search
 key. In either case, the proof is verified by hashing together the leaf with the
@@ -361,10 +361,10 @@ copath values and checking that the result equals the root value of the tree.
 ## Combined Tree
 
 Log trees are desirable because they can provide efficient consistency proofs to
-convince verifiers that nothing has been removed from a log that was present in a
+show verifiers that nothing has been removed from a log that was present in a
 previous version. However, log trees can't be efficiently searched without
 downloading the entire log. Prefix trees are efficient to search and can provide
-inclusion proofs to convince verifiers that the returned search results are
+inclusion proofs to show verifiers that the returned search results are
 correct. However, it's not possible to efficiently prove that a new version of a
 prefix tree contains the same data as a previous version with only new values
 added.
@@ -378,7 +378,7 @@ the timestamp of when it was published. With some caveats, this combined
 structure supports both efficient consistency proofs and can be efficiently
 searched.
 
-Note that, although the Transparency Log maintains a single logical prefix tree,
+Note that, while a Transparency Log implementation would likely maintain a single logical prefix tree,
 each modification of the prefix tree results in a new root value which is then
 stored in the log tree. As part of the protocol, the Transparency Log is often
 required to perform lookups in different versions of the prefix tree. Different
@@ -453,8 +453,8 @@ Index:  0  1  2  3  4  5  6  7  8  9 10 11 12 13
 The implicit binary search tree containing `n` entries can be defined
 inductively. The index of the root log entry in the implicit binary search tree
 is the greatest power of two, minus one, that is less than the size of the
-implicit binary search tree. That is `i_root = 2^floor(log2(n)) - 1`. The left
-subtree is the implicit binary search tree of size `i_root`, i.e., the implicit
+log. That is `i_root = 2^floor(log2(n)) - 1`. The left
+subtree is the implicit binary search tree of size `i_root`, i.e. the implicit
 binary search tree for all elements with a smaller index than the root. The
 right subtree is the implicit binary search tree of size `n-i_root-1`, but
 offset with `i_root+1`. Initially, these will be all indices larger than the
@@ -470,10 +470,9 @@ minimizing the number of log entries that need to be checked.
 
 As an example, consider a log with 50 entries. Instead of having the root be the
 typical "middle" entry of `50/2 = 25`, the root would be entry 31. As new log
-entries are added to the tree's right edge, all users that interact with the
-Transparency Log will require log entries to the right of entry 31 to have
-timestamps that are greater than or equal to that of entry 31, regardless of how
-much or how little the tree grows.
+entries are added, users that interact with the Transparency Log will
+consistently verify the timestamps of other log entries against that of entry 31
+despite small changes in the log's size.
 
 Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the **frontier** of the log. The frontier consists of the root log
@@ -523,7 +522,7 @@ The Transparency Log defines two durations: how far ahead and how far behind the
 current time the rightmost log entry's timestamp may be. Users verify this
 against their local clock at the time they receive the query response.
 
-For users which have never interacted with the Transparency Log before and don't
+For users that have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
 log entries along the frontier. The user verifies that the timestamp of each is
 greater than or equal to the one prior, and that the rightmost timestamp is
@@ -537,7 +536,7 @@ non-inclusion proofs, from a single log entry's prefix tree. The purpose of a
 binary ladder varies depending on the exact context in which it is provided, but
 it is generally to establish some bound on the greatest version of a label that
 existed as of a particular log entry. All binary ladders are variants of the
-following series of lookups that exactly determine the greatest version of a
+following series of lookups that exactly determines the greatest version of a
 label that exists:
 
 1. First, version `x` of the label is looked up, where `x` is a consecutively
@@ -618,7 +617,7 @@ context.
 ## Maximum Lifetime
 
 A Transparency Log operator MAY define a maximum lifetime for log entries. If
-defined, it MUST be greater than zero milliseconds. Whether a log entry is
+defined, it MUST be greater than zero. Whether a log entry is
 expired is determined by subtracting the timestamp of the log entry in question
 from the timestamp of the rightmost log entry and checking if the result is
 greater than or equal to the defined duration.
@@ -742,7 +741,7 @@ below, such that there is roughly one per every interval of the RMW:
    timestamp of a log entry to its right.
 2. If the right timestamp minus the left timestamp is less than the Reasonable
    Monitoring Window, terminate the algorithm. Otherwise, declare that the given
-   log entry is distinguished.
+   log entry is distinguished and then:
 3. If the given log entry has a left child in the implicit binary search tree,
    then recurse to its subtree by executing this algorithm with: the given log
    entry's left child, the given left timestamp, and the timestamp of the given
@@ -788,11 +787,11 @@ starting back at step 1:
 3. If this is not the rightmost log entry, recurse to the log entry's right
    child.
 
-If the Transparency Log is deployed in Contact Monitoring mode and the terminal
-log entry of the search is to the right of the rightmost distinguished log
-entry, the user MUST monitor the label as described in {{monitoring-the-tree}}.
 The terminal log entry of the search is defined as the leftmost log entry
-inspected that contains the greatest version of the label.
+inspected that contains the greatest version of the label. If the Transparency
+Log is deployed in Contact Monitoring mode and the terminal log entry of the
+search is to the right of the rightmost distinguished log entry, the user MUST
+monitor the label as described in {{monitoring-the-tree}}.
 
 
 # Monitoring the Tree
