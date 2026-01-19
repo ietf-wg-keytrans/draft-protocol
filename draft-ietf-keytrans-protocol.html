@@ -24,12 +24,12 @@ timely manner.
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
-    intervaltree 3.1.0
+    intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 5.3.1
-    platformdirs 4.5.0
+    lxml 6.0.2
+    platformdirs 4.5.1
     pycountry 24.6.1
-    PyYAML 6.0.2
+    PyYAML 6.0.3
     requests 2.32.5
     wcwidth 0.2.14
 -->
@@ -1050,11 +1050,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">October 2025</td>
+<td class="right">January 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 22 April 2026</td>
+<td class="center">Expires 23 July 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-10-19" class="published">19 October 2025</time>
+<time datetime="2026-01-19" class="published">19 January 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-04-22">22 April 2026</time></dd>
+<dd class="expires"><time datetime="2026-07-23">23 July 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1130,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 April 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1139,7 +1139,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 <a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
         </h2>
 <p id="section-boilerplate.2-1">
-            Copyright (c) 2025 IETF Trust and the persons identified as the
+            Copyright (c) 2026 IETF Trust and the persons identified as the
             document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.2-2">
             This document is subject to BCP 78 and the IETF Trust's Legal
@@ -1680,7 +1680,7 @@ values that the verifier retained.<a href="#section-3.2-11" class="pilcrow">¶</
 </div>
 </div>
 <figcaption><a href="#figure-4" class="selfRef">Figure 4</a>:
-<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof between a log with 4 and with 6 leaves respectively. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
+<a href="#name-illustration-of-a-consisten" class="selfRef">Illustration of a consistency proof between a log with 5 and with 7 leaves respectively. The verifier is expected to already have the values (X), so the prover provides the verifier with the values of the nodes marked [X]. By combining these, the verifier is able to compute the new root value of the log.</a>
           </figcaption></figure>
 </section>
 </div>
@@ -1705,7 +1705,7 @@ child contains all search keys that begin with a 1 bit.<a href="#section-3.3-3" 
 left child if the first bit of a search key is 0, or the right child if the first bit
 is 1. This is then repeated for the second bit, third bit, and so on until the
 search either terminates at a leaf node (which may or may not be for the desired
-value), or a parent node that lacks the desired child.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
+search key), or a parent node that lacks the desired child.<a href="#section-3.3-4" class="pilcrow">¶</a></p>
 <span id="name-a-prefix-tree-containing-fi"></span><figure id="figure-5">
           <div id="section-3.3-5.1">
             <div class="alignLeft art-svg artwork" id="section-3.3-5.1.1">
@@ -1809,7 +1809,7 @@ search key.<a href="#section-3.3-6" class="pilcrow">¶</a></p>
 parent node is the hash of the combined values of its left and right children
 (or a stand-in value when one of the children doesn't exist).<a href="#section-3.3-8" class="pilcrow">¶</a></p>
 <p id="section-3.3-9">An inclusion proof is given by providing the leaf value, along with the value of
-each copath entry along the search path. A non-inclusion proof is given by
+each copath node along the search path. A non-inclusion proof is given by
 providing an abridged inclusion proof that follows the path for the intended
 search key, but ends either at a stand-in node or a leaf for a different search
 key. In either case, the proof is verified by hashing together the leaf with the
@@ -1822,10 +1822,10 @@ copath values and checking that the result equals the root value of the tree.<a 
 <a href="#section-3.4" class="section-number selfRef">3.4. </a><a href="#name-combined-tree" class="section-name selfRef">Combined Tree</a>
         </h3>
 <p id="section-3.4-1">Log trees are desirable because they can provide efficient consistency proofs to
-convince verifiers that nothing has been removed from a log that was present in a
+show verifiers that nothing has been removed from a log that was present in a
 previous version. However, log trees can't be efficiently searched without
 downloading the entire log. Prefix trees are efficient to search and can provide
-inclusion proofs to convince verifiers that the returned search results are
+inclusion proofs to show verifiers that the returned search results are
 correct. However, it's not possible to efficiently prove that a new version of a
 prefix tree contains the same data as a previous version with only new values
 added.<a href="#section-3.4-1" class="pilcrow">¶</a></p>
@@ -1837,7 +1837,7 @@ tree, a log tree contains a record of each version of the prefix tree along with
 the timestamp of when it was published. With some caveats, this combined
 structure supports both efficient consistency proofs and can be efficiently
 searched.<a href="#section-3.4-2" class="pilcrow">¶</a></p>
-<p id="section-3.4-3">Note that, although the Transparency Log maintains a single logical prefix tree,
+<p id="section-3.4-3">Note that, while a Transparency Log implementation would likely maintain a single logical prefix tree,
 each modification of the prefix tree results in a new root value which is then
 stored in the log tree. As part of the protocol, the Transparency Log is often
 required to perform lookups in different versions of the prefix tree. Different
@@ -1993,8 +1993,8 @@ distinguished by the fact that not all parent nodes have two children.<a href="#
 <p id="section-4.1-3">The implicit binary search tree containing <code>n</code> entries can be defined
 inductively. The index of the root log entry in the implicit binary search tree
 is the greatest power of two, minus one, that is less than the size of the
-implicit binary search tree. That is <code>i_root = 2^floor(log2(n)) - 1</code>. The left
-subtree is the implicit binary search tree of size <code>i_root</code>, i.e., the implicit
+log. That is <code>i_root = 2^floor(log2(n)) - 1</code>. The left
+subtree is the implicit binary search tree of size <code>i_root</code>, i.e. the implicit
 binary search tree for all elements with a smaller index than the root. The
 right subtree is the implicit binary search tree of size <code>n-i_root-1</code>, but
 offset with <code>i_root+1</code>. Initially, these will be all indices larger than the
@@ -2008,10 +2008,9 @@ this tree structure ensures that users can detect misbehavior quickly while
 minimizing the number of log entries that need to be checked.<a href="#section-4.1-4" class="pilcrow">¶</a></p>
 <p id="section-4.1-5">As an example, consider a log with 50 entries. Instead of having the root be the
 typical "middle" entry of <code>50/2 = 25</code>, the root would be entry 31. As new log
-entries are added to the tree's right edge, all users that interact with the
-Transparency Log will require log entries to the right of entry 31 to have
-timestamps that are greater than or equal to that of entry 31, regardless of how
-much or how little the tree grows.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
+entries are added, users that interact with the Transparency Log will
+consistently verify the timestamps of other log entries against that of entry 31
+despite small changes in the log's size.<a href="#section-4.1-5" class="pilcrow">¶</a></p>
 <p id="section-4.1-6">Because we are often looking at the rightmost log entry, it is frequently useful
 to refer to the <strong>frontier</strong> of the log. The frontier consists of the root log
 entry, followed by the entries produced by repeatedly moving right until
@@ -2071,7 +2070,7 @@ data is retained to make later parts of the protocol more efficient.<a href="#se
 <p id="section-4.2-6">The Transparency Log defines two durations: how far ahead and how far behind the
 current time the rightmost log entry's timestamp may be. Users verify this
 against their local clock at the time they receive the query response.<a href="#section-4.2-6" class="pilcrow">¶</a></p>
-<p id="section-4.2-7">For users which have never interacted with the Transparency Log before and don't
+<p id="section-4.2-7">For users that have never interacted with the Transparency Log before and don't
 have a previous tree head to advertise, the Transparency Log simply provides the
 log entries along the frontier. The user verifies that the timestamp of each is
 greater than or equal to the one prior, and that the rightmost timestamp is
@@ -2090,7 +2089,7 @@ non-inclusion proofs, from a single log entry's prefix tree. The purpose of a
 binary ladder varies depending on the exact context in which it is provided, but
 it is generally to establish some bound on the greatest version of a label that
 existed as of a particular log entry. All binary ladders are variants of the
-following series of lookups that exactly determine the greatest version of a
+following series of lookups that exactly determines the greatest version of a
 label that exists:<a href="#section-5-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-5-2">
 <li id="section-5-2.1">
@@ -2178,7 +2177,7 @@ context.<a href="#section-6.1-4" class="pilcrow">¶</a></p>
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-maximum-lifetime" class="section-name selfRef">Maximum Lifetime</a>
         </h3>
 <p id="section-6.2-1">A Transparency Log operator <span class="bcp14">MAY</span> define a maximum lifetime for log entries. If
-defined, it <span class="bcp14">MUST</span> be greater than zero milliseconds. Whether a log entry is
+defined, it <span class="bcp14">MUST</span> be greater than zero. Whether a log entry is
 expired is determined by subtracting the timestamp of the log entry in question
 from the timestamp of the rightmost log entry and checking if the result is
 greater than or equal to the defined duration.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
@@ -2341,7 +2340,7 @@ timestamp of a log entry to its right.<a href="#section-7.1-3.1.1" class="pilcro
           <li id="section-7.1-3.2">
             <p id="section-7.1-3.2.1">If the right timestamp minus the left timestamp is less than the Reasonable
 Monitoring Window, terminate the algorithm. Otherwise, declare that the given
-log entry is distinguished.<a href="#section-7.1-3.2.1" class="pilcrow">¶</a></p>
+log entry is distinguished and then:<a href="#section-7.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-7.1-3.3">
             <p id="section-7.1-3.3.1">If the given log entry has a left child in the implicit binary search tree,
@@ -2400,11 +2399,11 @@ versions greater than the target.<a href="#section-7.2-2.2.1" class="pilcrow">¶
 child.<a href="#section-7.2-2.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-7.2-3">If the Transparency Log is deployed in Contact Monitoring mode and the terminal
-log entry of the search is to the right of the rightmost distinguished log
-entry, the user <span class="bcp14">MUST</span> monitor the label as described in <a href="#monitoring-the-tree" class="auto internal xref">Section 8</a>.
-The terminal log entry of the search is defined as the leftmost log entry
-inspected that contains the greatest version of the label.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
+<p id="section-7.2-3">The terminal log entry of the search is defined as the leftmost log entry
+inspected that contains the greatest version of the label. If the Transparency
+Log is deployed in Contact Monitoring mode and the terminal log entry of the
+search is to the right of the rightmost distinguished log entry, the user <span class="bcp14">MUST</span>
+monitor the label as described in <a href="#monitoring-the-tree" class="auto internal xref">Section 8</a>.<a href="#section-7.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -4312,7 +4311,7 @@ a particular KT DE, that KT DE <span class="bcp14">SHOULD</span> defer to the ju
 <dl class="references">
 <dt id="ARCH">[ARCH]</dt>
         <dd>
-<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-04</span>, <time datetime="2025-07-06" class="refDate">6 July 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-04">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-04</a>&gt;</span>. </dd>
+<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-05</span>, <time datetime="2025-10-19" class="refDate">19 October 2025</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-05">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-05</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2104">[RFC2104]</dt>
         <dd>
