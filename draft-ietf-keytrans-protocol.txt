@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 23 July 2026                                    19 January 2026
+Expires: 24 July 2026                                    20 January 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 23 July 2026.
+   This Internet-Draft will expire on 24 July 2026.
 
 Copyright Notice
 
@@ -733,13 +733,9 @@ Table of Contents
    entry's right child), the user continues as normal.
 
    When the root and potentially multiple frontier log entries are
-   expired, the user skips to the furthest-right expired frontier log
-   entry without receiving binary ladders from any of its parents.
-   Similar to the previous case, the user is provided with a binary
-   ladder from this log entry.  If the user determines that its search
-   would recurse to the left (further into the expired portion of the
-   tree), it aborts; to the right (into the unexpired portion of the
-   tree), it continues.
+   expired, the user skips to the first frontier log entry that is not
+   expired and the search starts from this log entry instead.  No binary
+   ladders are provided from any of the log entry's parents.
 
    This allows the Transparency Log to prune data which is sufficiently
    old, as only a small amount of the log tree and prefix tree outside
@@ -755,10 +751,10 @@ Table of Contents
    as defined by the implicit binary search tree, and then recurses to
    left or right children, each time starting back at step 1.
 
-   1.  If the log entry is expired, is on the frontier, and its right
-       child is also expired, recurse to the right child.  Note that a
-       right child always exists, as the rightmost log entry can not
-       exceed its maximum lifetime by definition.
+   1.  If the log entry is expired and is on the frontier, recurse to
+       the right child.  Note that a right child always exists, as the
+       rightmost log entry can not exceed its maximum lifetime by
+       definition.
 
    2.  Obtain a search binary ladder from the current log entry for the
        target version, omitting redundant lookups as described in
@@ -928,7 +924,7 @@ Table of Contents
    As new entries are added to the log tree, the search path that's
    traversed to find a specific version of a label may change.  New
    intermediate nodes may be established between the search root and the
-   log entry, or a new search root may be created.  The goal of
+   terminal log entry, or a new search root may be created.  The goal of
    monitoring a label is to efficiently ensure that, when these new
    parent nodes are created, they're created correctly such that
    searches for the same versions of a label continue converging to the
@@ -964,9 +960,9 @@ Table of Contents
    case, the only state that would be retained from the query would be
    the tree head, as discussed in Section 4.
 
-   "Regular" monitoring SHOULD be performed at least as frequently as
-   the RMW and MUST, if at all possible, happen more frequently than the
-   log entry maximum lifetime.
+   "Regular" monitoring SHOULD be performed roughly as frequently as the
+   RMW and MUST, if at all possible, happen more frequently than the log
+   entry maximum lifetime.
 
 8.1.  Binary Ladder
 
@@ -1001,12 +997,12 @@ Table of Contents
 
    To monitor a given label, users maintain a small amount of state: a
    map from a position in the log to a version counter.  The version
-   counter is the greatest version of the label that's been proved to
-   exist at that log position.  Users initially populate this map by
-   setting the position of the terminal log entry of their search to map
-   to the version of the label they searched for.  A map may track
-   several different versions of a label simultaneously if a user has
-   been shown different versions of the same label.
+   counter is the greatest version of the label proven to exist at that
+   log position.  Users initially populate this map by setting the
+   position of the terminal log entry of their search to map to the
+   version of the label they searched for.  A map may track several
+   different versions simultaneously if a user has been shown different
+   versions of the same label.
 
    To update this map, users receive the most recent tree head from the
    Transparency Log and follow these steps for each entry in the map,
@@ -1085,10 +1081,10 @@ Table of Contents
    MUST correspond to a distinguished log entry that is not expired.
    The user then executes the following algorithm:
 
-   1.  Compute the list of log entries to inspect.  This list starts
-       with the log entry at the requested starting position, followed
-       by the log entries that are on the starting position's direct
-       path and to its left, ending after the first expired log entry.
+   1.  Compute the list of log entries to inspect: this list starts with
+       the log entry at the requested starting position, followed by the
+       log entries that are on the starting position's direct path and
+       to its left, ending just before the first expired log entry.
 
    2.  Obtain the greatest version of the label that existed as of each
        of these log entries.  If the label did not exist, no value is
@@ -1109,6 +1105,10 @@ Table of Contents
        omitting redundant lookups.  Verify that each binary ladder
        terminates in a way that is consistent with the claimed greatest
        version of the label.
+
+   6.  If any new versions of the label were created after the requested
+       starting position, the label owner processes each of these
+       individually as described in Section 9.
 
    Once the label owner has initialized their state, they can begin
    regular monitoring.  The label owner advertises to the Transparency
@@ -1845,9 +1845,8 @@ Table of Contents
          child's timestamp.
 
       -  If it is not the case that the log entry is expired, is on the
-         frontier, and its right child is also expired, then a
-         PrefixProof corresponding to a search binary ladder in the log
-         entry's prefix tree is provided.
+         frontier, then a PrefixProof corresponding to a search binary
+         ladder in the log entry's prefix tree is provided.
 
    *  If step 6.2 is reached, provide a second PrefixProof from the
       identified log entry specifically looking up the target version.

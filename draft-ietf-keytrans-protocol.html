@@ -1054,7 +1054,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 23 July 2026</td>
+<td class="center">Expires 24 July 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1067,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-19" class="published">19 January 2026</time>
+<time datetime="2026-01-20" class="published">20 January 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-07-23">23 July 2026</time></dd>
+<dd class="expires"><time datetime="2026-07-24">24 July 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1130,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 23 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 24 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2193,12 +2193,9 @@ expired portion of the tree (to the log entry's left child), the search is
 aborted. If the user's search would recurse away from the expired portion of the
 tree (to the log entry's right child), the user continues as normal.<a href="#section-6.2-3" class="pilcrow">¶</a></p>
 <p id="section-6.2-4">When the root and potentially multiple frontier log entries are expired, the
-user skips to the furthest-right expired frontier log entry without receiving
-binary ladders from any of its parents. Similar to the previous case,
-the user is provided with a binary ladder from this log entry. If the user
-determines that its search would recurse to the left (further into the expired
-portion of the tree), it aborts; to the right (into the unexpired portion of the
-tree), it continues.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
+user skips to the first frontier log entry that is not expired and the search
+starts from this log entry instead. No binary ladders are provided from any of
+the log entry's parents.<a href="#section-6.2-4" class="pilcrow">¶</a></p>
 <p id="section-6.2-5">This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
 lifetime need to be retained. Users will need to inspect at most a logarithmic
@@ -2217,9 +2214,9 @@ implicit binary search tree, and then recurses to left or right children, each
 time starting back at step 1.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-6.3-2">
 <li id="section-6.3-2.1">
-            <p id="section-6.3-2.1.1">If the log entry is expired, is on the frontier, and its right child is also
-expired, recurse to the right child. Note that a right child always exists,
-as the rightmost log entry can not exceed its maximum lifetime by definition.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.1.1">If the log entry is expired and is on the frontier, recurse to the right
+child. Note that a right child always exists, as the rightmost log entry can
+not exceed its maximum lifetime by definition.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
             <p id="section-6.3-2.2.1">Obtain a search binary ladder from the current log entry for the target
@@ -2415,7 +2412,7 @@ monitor the label as described in <a href="#monitoring-the-tree" class="auto int
       </h2>
 <p id="section-8-1">As new entries are added to the log tree, the search path that's traversed to
 find a specific version of a label may change. New intermediate nodes may be
-established between the search root and the log entry, or a new search root may
+established between the search root and the terminal log entry, or a new search root may
 be created. The goal of monitoring a label is to efficiently ensure that, when
 these new parent nodes are created, they're created correctly such that searches
 for the same versions of a label continue converging to the same log entries.<a href="#section-8-1" class="pilcrow">¶</a></p>
@@ -2442,7 +2439,7 @@ a distinguished log entry or to the left of any distinguished log entry,
 monitoring is never necessary. In this case, the only state that would be
 retained from the query would be the tree head, as discussed in
 <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>.<a href="#section-8-5" class="pilcrow">¶</a></p>
-<p id="section-8-6">"Regular" monitoring <span class="bcp14">SHOULD</span> be performed at least as frequently as the RMW and
+<p id="section-8-6">"Regular" monitoring <span class="bcp14">SHOULD</span> be performed roughly as frequently as the RMW and
 <span class="bcp14">MUST</span>, if at all possible, happen more frequently than the log entry maximum
 lifetime.<a href="#section-8-6" class="pilcrow">¶</a></p>
 <div id="binary-ladder-1">
@@ -2479,10 +2476,10 @@ one of these log entries, then the lookup for this version is omitted.<a href="#
         </h3>
 <p id="section-8.2-1">To monitor a given label, users maintain a small amount of state: a map from a
 position in the log to a version counter. The version counter is the greatest
-version of the label that's been proved to exist at that log position. Users
+version of the label proven to exist at that log position. Users
 initially populate this map by setting the position of the terminal log entry of
 their search to map to the version of the label they searched for. A map may
-track several different versions of a label simultaneously if a user has been
+track several different versions simultaneously if a user has been
 shown different versions of the same label.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <p id="section-8.2-2">To update this map, users receive the most recent tree head from the
 Transparency Log and follow these steps for each entry in the map, from
@@ -2576,10 +2573,10 @@ distinguished log entry that is not expired. The user then executes the
 following algorithm:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.3-2">
 <li id="section-8.3-2.1">
-            <p id="section-8.3-2.1.1">Compute the list of log entries to inspect. This list starts with the log
+            <p id="section-8.3-2.1.1">Compute the list of log entries to inspect: this list starts with the log
 entry at the requested starting position, followed by the log entries that
-are on the starting position's direct path and to its left, ending after the
-first expired log entry.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+are on the starting position's direct path and to its left, ending just
+before the first expired log entry.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-2.2">
             <p id="section-8.3-2.2.1">Obtain the greatest version of the label that existed as of each of these log
@@ -2602,6 +2599,11 @@ step 1 where the target version is the corresponding version given in step 2,
 or zero if no version was given, without omitting redundant lookups. Verify
 that each binary ladder terminates in a way that is consistent with the
 claimed greatest version of the label.<a href="#section-8.3-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-8.3-2.6">
+            <p id="section-8.3-2.6.1">If any new versions of the label were created after the requested starting
+position, the label owner processes each of these individually as described
+in <a href="#updating-a-label" class="auto internal xref">Section 9</a>.<a href="#section-8.3-2.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-8.3-3">Once the label owner has initialized their state, they can begin regular
@@ -3454,9 +3456,9 @@ following is provided:<a href="#section-11.3.2-1" class="pilcrow">¶</a></p>
 timestamp.<a href="#section-11.3.2-2.1.2.2.1" class="pilcrow">¶</a></p>
 </li>
                 <li class="normal" id="section-11.3.2-2.1.2.3">
-                  <p id="section-11.3.2-2.1.2.3.1">If it is not the case that the log entry is expired, is on the frontier, and
-its right child is also expired, then a <code>PrefixProof</code> corresponding to a
-search binary ladder in the log entry's prefix tree is provided.<a href="#section-11.3.2-2.1.2.3.1" class="pilcrow">¶</a></p>
+                  <p id="section-11.3.2-2.1.2.3.1">If it is not the case that the log entry is expired, is on the frontier,
+then a <code>PrefixProof</code> corresponding to a search binary ladder in the log
+entry's prefix tree is provided.<a href="#section-11.3.2-2.1.2.3.1" class="pilcrow">¶</a></p>
 </li>
               </ul>
 </li>
