@@ -636,12 +636,9 @@ aborted. If the user's search would recurse away from the expired portion of the
 tree (to the log entry's right child), the user continues as normal.
 
 When the root and potentially multiple frontier log entries are expired, the
-user skips to the furthest-right expired frontier log entry without receiving
-binary ladders from any of its parents. Similar to the previous case,
-the user is provided with a binary ladder from this log entry. If the user
-determines that its search would recurse to the left (further into the expired
-portion of the tree), it aborts; to the right (into the unexpired portion of the
-tree), it continues.
+user skips to the first frontier log entry that is not expired and the search
+starts from this log entry instead. No binary ladders are provided from any of
+the log entry's parents.
 
 This allows the Transparency Log to prune data which is sufficiently old, as
 only a small amount of the log tree and prefix tree outside of the maximum
@@ -656,9 +653,9 @@ recursive algorithm. It starts with the root log entry, as defined by the
 implicit binary search tree, and then recurses to left or right children, each
 time starting back at step 1.
 
-1. If the log entry is expired, is on the frontier, and its right child is also
-   expired, recurse to the right child. Note that a right child always exists,
-   as the rightmost log entry can not exceed its maximum lifetime by definition.
+1. If the log entry is expired and is on the frontier, recurse to the right
+   child. Note that a right child always exists, as the rightmost log entry can
+   not exceed its maximum lifetime by definition.
 
 2. Obtain a search binary ladder from the current log entry for the target
    version, omitting redundant lookups as described in {{search-binary-ladder}}.
@@ -798,7 +795,7 @@ monitor the label as described in {{monitoring-the-tree}}.
 
 As new entries are added to the log tree, the search path that's traversed to
 find a specific version of a label may change. New intermediate nodes may be
-established between the search root and the log entry, or a new search root may
+established between the search root and the terminal log entry, or a new search root may
 be created. The goal of monitoring a label is to efficiently ensure that, when
 these new parent nodes are created, they're created correctly such that searches
 for the same versions of a label continue converging to the same log entries.
@@ -830,7 +827,7 @@ monitoring is never necessary. In this case, the only state that would be
 retained from the query would be the tree head, as discussed in
 {{updating-views-of-the-tree}}.
 
-"Regular" monitoring SHOULD be performed at least as frequently as the RMW and
+"Regular" monitoring SHOULD be performed roughly as frequently as the RMW and
 MUST, if at all possible, happen more frequently than the log entry maximum
 lifetime.
 
@@ -864,10 +861,10 @@ one of these log entries, then the lookup for this version is omitted.
 
 To monitor a given label, users maintain a small amount of state: a map from a
 position in the log to a version counter. The version counter is the greatest
-version of the label that's been proved to exist at that log position. Users
+version of the label proven to exist at that log position. Users
 initially populate this map by setting the position of the terminal log entry of
 their search to map to the version of the label they searched for. A map may
-track several different versions of a label simultaneously if a user has been
+track several different versions simultaneously if a user has been
 shown different versions of the same label.
 
 To update this map, users receive the most recent tree head from the
@@ -935,10 +932,10 @@ ownership of the label to begin. This starting position MUST correspond to a
 distinguished log entry that is not expired. The user then executes the
 following algorithm:
 
-1. Compute the list of log entries to inspect. This list starts with the log
+1. Compute the list of log entries to inspect: this list starts with the log
    entry at the requested starting position, followed by the log entries that
-   are on the starting position's direct path and to its left, ending after the
-   first expired log entry.
+   are on the starting position's direct path and to its left, ending just
+   before the first expired log entry.
 
 2. Obtain the greatest version of the label that existed as of each of these log
    entries. If the label did not exist, no value is provided. Verify that each
@@ -957,6 +954,10 @@ following algorithm:
    or zero if no version was given, without omitting redundant lookups. Verify
    that each binary ladder terminates in a way that is consistent with the
    claimed greatest version of the label.
+
+6. If any new versions of the label were created after the requested starting
+   position, the label owner processes each of these individually as described
+   in {{updating-a-label}}.
 
 Once the label owner has initialized their state, they can begin regular
 monitoring. The label owner advertises to the Transparency Log the greatest
@@ -1638,9 +1639,9 @@ following is provided:
   - The log entry's timestamp.
   - If the log entry is expired and is on the frontier, the right child's
     timestamp.
-  - If it is not the case that the log entry is expired, is on the frontier, and
-    its right child is also expired, then a `PrefixProof` corresponding to a
-    search binary ladder in the log entry's prefix tree is provided.
+  - If it is not the case that the log entry is expired, is on the frontier,
+    then a `PrefixProof` corresponding to a search binary ladder in the log
+    entry's prefix tree is provided.
 - If step 6.2 is reached, provide a second `PrefixProof` from the identified log
   entry specifically looking up the target version.
 
