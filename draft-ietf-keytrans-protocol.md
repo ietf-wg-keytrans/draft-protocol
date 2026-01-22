@@ -608,11 +608,11 @@ greater than the target version exist.
 Second, depending on the context in which the binary ladder is provided, the
 Transparency Log may omit inclusion proofs for any versions where another
 inclusion proof for the same version was already provided in the same query
-response for a log entry to the left. Similarly, the Transparency Log may omit
-non-inclusion proofs for any versions of the label where another non-inclusion
-proof for the same version was already provided in the same query response for a
-log entry to the right. Whether or not these lookups are omitted is specified in
-context.
+response from the same log entry or a log entry to its left. Similarly, the
+Transparency Log may omit non-inclusion proofs for any versions of the label
+where another non-inclusion proof for the same version was already provided in
+the same query response from the same log entry or a log entry to its right.
+Whether or not these lookups are omitted is specified in context.
 
 ## Maximum Lifetime
 
@@ -628,23 +628,11 @@ decided to recurse to the log entry's left child, which is expired.
 Alternatively, the root log entry may be expired, in which case the user
 would've started their search at an expired root log entry.
 
-When a user's search proceeds from a log entry which is not expired to a log
-entry which is expired, the user is provided with a binary ladder from the
-expired log entry as usual. If the user's search would recurse further into the
-expired portion of the tree (to the log entry's left child), the search is
-aborted. If the user's search would recurse away from the expired portion of the
-tree (to the log entry's right child), the user continues as normal.
-
-When the root and potentially multiple frontier log entries are expired, the
-user skips to the first frontier log entry that is not expired and the search
-starts from this log entry instead. No binary ladders are provided from any of
-the log entry's parents.
-
-This allows the Transparency Log to prune data which is sufficiently old, as
-only a small amount of the log tree and prefix tree outside of the maximum
-lifetime need to be retained. Users will need to inspect at most a logarithmic
-number of expired log entries, meaning the rest can be discarded. Pruning is
-explained in more detail in {{ARCH}}.
+Regardless of how the user arrived at the expired log entry, the user's next
+step is always to recurse to the log entry's right child (if one exists) without
+receiving a binary ladder. This allows the Transparency Log to prune sections of
+the log tree and any versions of the prefix tree that are older than the defined
+maximum lifetime. Pruning is explained in more detail in {{ARCH}}.
 
 ## Algorithm {#fv-algorithm}
 
@@ -653,39 +641,37 @@ recursive algorithm. It starts with the root log entry, as defined by the
 implicit binary search tree, and then recurses to left or right children, each
 time starting back at step 1.
 
-1. If the log entry is expired and is on the frontier, recurse to the right
-   child. Note that a right child always exists, as the rightmost log entry can
-   not exceed its maximum lifetime by definition.
+1. If the log entry is expired, recurse to the log entry's right child. If the
+   log entry does not have a right child, proceed to step 6.
 
 2. Obtain a search binary ladder from the current log entry for the target
    version, omitting redundant lookups as described in {{search-binary-ladder}}.
    Determine whether the binary ladder indicates a greatest version of the label
-   that is greater than, equal to, or less than the target version.
+   that is less than, greater than, or equal to the target version.
 
 3. If the binary ladder indicates a greatest version less than the target
    version (that is, if it contains a non-inclusion proof for a version less
-   than or equal to the target version), then:
+   than or equal to the target version), then recurse to the log entry's right
+   child. If the log entry does not have a right child, proceed to step 6.
 
-   1. If the log entry does not have a right child, proceed to step 6.
-   2. Otherwise, recurse to the log entry's right child.
+4. If the binary ladder indicates a greatest version greater than the target
+   version (that is, if it contains an inclusion proof for a version greater
+   than the target version), then recurse to the log entry's left child. If the
+   log entry does not have a left child, proceed to step 6.
 
-4. If the binary ladder indicates a greatest version equal to the target version
+5. If the binary ladder indicates a greatest version equal to the target version
    (that is, it contains inclusion proofs for all expected versions less than or
    equal to the target and non-inclusion proofs for all expected versions
    greater than the target), then:
 
-   1. If the log entry is not expired, terminate the search successfully.
-   2. If the log entry does not have a right child, proceed to step 6.
-   3. Otherwise, recurse to the log entry's right child.
+   1. If there are no expired log entries in the current log entry's direct
+      path, then terminate the search successfully.
 
-5. If the binary ladder indicates a greatest version greater than the target
-   version (that is, if it contains an inclusion proof for a version greater
-   than the target version), then:
-
-   1. If the log entry does not have a left child, proceed to step 6.
-   2. If the log entry is expired, terminate the search with an error indicating
-      that the requested version of the label has expired.
-   3. Otherwise, recurse to the log entry's left child.
+   2. Otherwise, identify whether the log entry itself is distinguished, or
+      whether there are any unexpired distinguished log entries in its direct
+      path and to its left. If yes, terminate the search successfully. If no,
+      terminate the search with an error indicating that the target version of
+      the label is expired.
 
 6. If this step is reached, the search has terminated without finding an
    unexpired log entry where the target version is the greatest that exists. In
@@ -693,21 +679,25 @@ time starting back at step 1.
    where the binary ladder indicated a greatest version greater than or equal to
    the target version.
 
-   1. If there is no such log entry or this log entry is expired, terminate the
-      search with an error indicating that the requested version of the label is
-      unavailable.
-   2. Otherwise, look up the target version of the label in the log entry's
+   1. If there is no such log entry, terminate the search with an error
+      indicating that the target version of the label does not exist.
+
+   2. If the log entry is to the left of the leftmost distinguished log entry,
+      terminate the search with an error indicating that the target version of
+      the label is expired.
+
+   3. Otherwise, look up the target version of the label in the log entry's
       prefix tree. If the result is a non-inclusion proof, terminate the search
-      with an error indicating that the requested version of the label is
-      unavailable. If the result is an inclusion proof, terminate the search
+      with an error indicating that the requested version of the label does not
+      exist. If the result is an inclusion proof, terminate the search
       successfully.
 
-If the Transparency Log is deployed in Contact Monitoring mode and the terminal
-log entry of the search is to the right of the rightmost distinguished log entry
-(defined in {{reasonable-monitoring-window}}), the user MUST monitor the label
-as described in {{monitoring-the-tree}}. The terminal log entry of the search is
-defined as the log entry that triggered step 4.1, or the log entry identified in
-step 6.
+The terminal log entry of the search is defined as the log entry that triggered
+step 5.1, or the log entry identified in step 6. If the Transparency Log is
+deployed in Contact Monitoring mode and the terminal log entry of the search is
+to the right of the rightmost distinguished log entry (defined in
+{{reasonable-monitoring-window}}), the user MUST monitor the label as described
+in {{monitoring-the-tree}}.
 
 
 # Greatest-Version Search
