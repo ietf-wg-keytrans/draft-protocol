@@ -567,33 +567,74 @@ Example code for computing the versions of a label that go in a binary ladder is
 provided in {{appendix-binary-ladder}}.
 
 
-# Fixed-Version Search
+# Greatest-Version Search
 
-When searching the combined tree structure described in {{combined-tree}}, users
-essentially perform a binary search for the first log entry where the prefix
-tree contained the target version of the label. This search may terminate early
-if the user discovers a log entry where the target version of the label is the
-greatest that exists, as this is assumed to have been verified by the label
-owner (discussed in {{monitoring-the-tree}}).
+Users often wish to search for the "most recent" version, or the greatest
+version, of a label. Since label owners regularly verify that the greatest
+version is correctly represented in the log, this enables a relatively simple
+approach to searching.
 
 Users reuse the implicit binary search tree from {{implicit-binary-search-tree}}
 to execute their search. This ensures that all users will check the same or
 similar log entries when searching for a label, allowing the Transparency Log to
-be monitored efficiently.
+be monitored efficiently. This section additionally defines the concept of a
+distinguished log entry, which is any log entry that label owners are required
+to check for correctness. Given this, users can start their search at the
+rightmost distinguished log entry and only consider new versions which have been
+created since then.
+
+## Reasonable Monitoring Window
+
+Transparency Logs define a duration, referred to as the **Reasonable Monitoring
+Window** (RMW), which is the frequency with which the Transparency Log generally
+expects label owners to perform monitoring.
+
+**Distinguished** log entries are chosen according to the recursive algorithm
+below, such that there is roughly one per every interval of the RMW:
+
+1. Take as input: a log entry, the timestamp of a log entry to its left, and the
+   timestamp of a log entry to its right.
+2. If the right timestamp minus the left timestamp is less than the Reasonable
+   Monitoring Window, terminate the algorithm. Otherwise, declare that the given
+   log entry is distinguished and then:
+3. If the given log entry has a left child in the implicit binary search tree,
+   recurse to its subtree by executing this algorithm with: the given log
+   entry's left child, the given left timestamp, and the timestamp of the given
+   log entry.
+4. If the given log entry has a right child, recurse to its subtree by executing
+   this algorithm with: the given log entry's right child, the timestamp of the
+   given log entry, and the given right timestamp.
+
+The algorithm is initialized with these parameters: the root node in the
+implicit binary search tree, the timestamp 0, and the timestamp of the rightmost
+log entry. Note that step 2 is specifically "less than" and not "less than or
+equal to"; this ensures correct behavior when the RMW is zero.
+
+This process for choosing distinguished log entries ensures that they are
+**regularly spaced**. Having irregularly spaced distinguished log entries risks
+either overwhelming label owners with a large number of them, or delaying
+consensus between users by having arbitrarily few. Distinguished log entries
+must reliably occur at roughly the same interval as the Reasonable Monitoring
+Window regardless of variations in how quickly new log entries are added.
+
+This process also ensures that distinguished log entries are **stable**. Once a
+log entry is chosen to be distinguished, it will never stop being distinguished.
+This ensures that, if a user looks up a label and checks consistency with some
+distinguished log entry, this log entry can't later avoid inspection by the
+label owner by losing its distinguished status.
 
 ## Binary Ladder {#search-binary-ladder}
 
-To perform a binary search, users need to be able to inspect individual log
-entries and determine whether their search should continue to the left of the
-current log entry or the right. Specifically, they need to be able to determine
-if the greatest version of the label that's present in a given version of the
-prefix tree is greater than, equal to, or less than their **target version**.
+To perform a search, users need to be able to inspect individual log entries and
+determine the greatest version of the label that was present in the prefix tree
+at that time. Specifically, they need to be able to determine if the greatest
+version of the label was greater than, equal to, or less than their **target
+version**.
 
 This is accomplished by having the Transparency Log provide a binary ladder from
-each log entry in the user's search path. Binary ladders provided for the
-purpose of searching the tree are called **search binary ladders** and follow
-the series of lookups described in {{binary-ladder}}, but with two
-optimizations:
+the log entry. Binary ladders provided for the purpose of searching the tree are
+called **search binary ladders** and follow the series of lookups described in
+{{binary-ladder}}, but with two optimizations:
 
 First, the series of lookups ends after the first inclusion proof for a version
 greater than the target version, or the first non-inclusion proof for a version
@@ -608,31 +649,67 @@ greater than the target version exist.
 Second, depending on the context in which the binary ladder is provided, the
 Transparency Log may omit inclusion proofs for any versions where another
 inclusion proof for the same version was already provided in the same query
-response from the same log entry or a log entry to its left. Similarly, the
-Transparency Log may omit non-inclusion proofs for any versions of the label
-where another non-inclusion proof for the same version was already provided in
-the same query response from the same log entry or a log entry to its right.
-Whether or not these lookups are omitted is specified in context.
+response for a log entry to the left. Similarly, the Transparency Log may omit
+non-inclusion proofs for any versions of the label where another non-inclusion
+proof for the same version was already provided in the same query response for a
+log entry to the right. Whether or not these lookups are omitted is specified in
+context.
+
+## Algorithm {#gv-algorithm}
+
+The algorithm for performing a greatest-version search is described below as a
+recursive algorithm. It starts at the rightmost distinguished log entry, or the
+root of the implicit binary search tree if there are no distinguished log
+entries, and then recurses down the remainder of the frontier, each time
+starting back at step 1:
+
+1. Obtain a search binary ladder from the current log entry where the target
+   version is the claimed greatest version of the label, omitting redundant
+   lookups.
+2. If this is the rightmost log entry, verify that the binary ladder terminates
+   in a way that is consistent with the claimed greatest version of the label.
+   That is, verify that it contains inclusion proofs for all expected versions
+   less than or equal to the target and non-inclusion proofs for all expected
+   versions greater than the target.
+3. If this is not the rightmost log entry, recurse to the log entry's right
+   child.
+
+The terminal log entry of the search is defined as the leftmost log entry
+inspected that contains the greatest version of the label. If the Transparency
+Log is deployed in Contact Monitoring mode and the terminal log entry of the
+search is to the right of the rightmost distinguished log entry, the user MUST
+monitor the label as described in {{monitoring-the-tree}}.
+
+
+# Fixed-Version Search
+
+When searching the combined tree structure described in {{combined-tree}} for a
+specific version of a label, users essentially perform a binary search for the
+first log entry where the prefix tree contained the target version of the label.
+This search may terminate early if the user discovers a log entry where the
+target version of the label is the greatest that exists, as this is assumed to
+have been verified by the label owner (discussed in {{monitoring-the-tree}}).
 
 ## Maximum Lifetime
 
 A Transparency Log operator MAY define a maximum lifetime for log entries. If
-defined, it MUST be greater than zero. Whether a log entry is
-expired is determined by subtracting the timestamp of the log entry in question
-from the timestamp of the rightmost log entry and checking if the result is
-greater than or equal to the defined duration.
+defined, it MUST be greater than zero and greater than the RMW. Whether a log
+entry is expired is determined by subtracting the timestamp of the log entry in
+question from the timestamp of the rightmost log entry and checking if the
+result is greater than or equal to the defined duration.
 
 A user executing a search may arrive at an expired log entry by either of two
 ways: The user may have inspected a log entry which is **not** expired and
 decided to recurse to the log entry's left child, which is expired.
-Alternatively, the root log entry may be expired, in which case the user
+Alternatively, the root log entry might be expired, in which case the user
 would've started their search at an expired root log entry.
 
 Regardless of how the user arrived at the expired log entry, the user's next
 step is always to recurse to the log entry's right child (if one exists) without
-receiving a binary ladder. This allows the Transparency Log to prune sections of
-the log tree and any versions of the prefix tree that are older than the defined
-maximum lifetime. Pruning is explained in more detail in {{ARCH}}.
+receiving a binary ladder. This allows the Transparency Log to prune large
+sections of the log tree, and any versions of the prefix tree that are older
+than the defined maximum lifetime. Pruning is explained in more detail in
+{{ARCH}}.
 
 ## Algorithm {#fv-algorithm}
 
@@ -647,7 +724,7 @@ time starting back at step 1.
 2. Obtain a search binary ladder from the current log entry for the target
    version, omitting redundant lookups as described in {{search-binary-ladder}}.
    Determine whether the binary ladder indicates a greatest version of the label
-   that is less than, greater than, or equal to the target version.
+   that is greater than, equal to, or less than the target version.
 
 3. If the binary ladder indicates a greatest version less than the target
    version (that is, if it contains a non-inclusion proof for a version less
@@ -676,15 +753,16 @@ time starting back at step 1.
 6. If this step is reached, the search has terminated without finding an
    unexpired log entry where the target version is the greatest that exists. In
    this case, out of all the log entries inspected, identify the leftmost one
-   where the binary ladder indicated a greatest version greater than or equal to
-   the target version.
+   where the binary ladder indicated a greatest version greater than the target
+   version.
 
    1. If there is no such log entry, terminate the search with an error
       indicating that the target version of the label does not exist.
 
-   2. If the log entry is to the left of the leftmost distinguished log entry,
-      terminate the search with an error indicating that the target version of
-      the label is expired.
+   2. If any expired log entries were encountered in the search, and the
+      identified log entry is either the leftmost distinguished log entry or to
+      the left of the leftmost distinguished log entry, terminate the search
+      with an error indicating that the target version of the label is expired.
 
    3. Otherwise, look up the target version of the label in the log entry's
       prefix tree. If the result is a non-inclusion proof, terminate the search
@@ -700,95 +778,15 @@ to the right of the rightmost distinguished log entry (defined in
 in {{monitoring-the-tree}}.
 
 
-# Greatest-Version Search
-
-Users often wish to search for the "most recent" version, or the greatest
-version, of a label. Unlike searches for a specific version, label owners
-regularly verify that the greatest version is correctly represented in the log.
-This enables a simpler, more efficient approach to searching.
-
-This section defines the concept of a distinguished log entry, which is any log
-entry that label owners are required to check for correctness. Given this, users
-can start their search at the rightmost distinguished log entry and only
-consider new versions which have been created since then. The rightmost
-distinguished log entry will always be on the frontier of the log and will never
-be past its maximum lifetime.
-
-## Reasonable Monitoring Window
-
-Transparency Logs define a duration, referred to as the **Reasonable Monitoring
-Window** (RMW), which is the frequency with which the Transparency Log generally
-expects label owners to perform monitoring. The log entry maximum lifetime, if
-defined, MUST be greater than the RMW.
-
-**Distinguished** log entries are chosen according to the recursive algorithm
-below, such that there is roughly one per every interval of the RMW:
-
-1. Take as input: a log entry, the timestamp of a log entry to its left, and the
-   timestamp of a log entry to its right.
-2. If the right timestamp minus the left timestamp is less than the Reasonable
-   Monitoring Window, terminate the algorithm. Otherwise, declare that the given
-   log entry is distinguished and then:
-3. If the given log entry has a left child in the implicit binary search tree,
-   then recurse to its subtree by executing this algorithm with: the given log
-   entry's left child, the given left timestamp, and the timestamp of the given
-   log entry.
-4. If the given log entry has a right child, then recurse to its subtree by
-   executing this algorithm with: the given log entry's right child, the
-   timestamp of the given log entry, and the given right timestamp.
-
-The algorithm is initialized with these parameters: the root node in the
-implicit binary search tree, the timestamp 0, and the timestamp of the rightmost
-log entry. Note that step 2 is specifically "less than" and not "less than or
-equal to"; this ensures correct behavior when the RMW is zero.
-
-This process for choosing distinguished log entries ensures that they are
-**regularly spaced**. Having irregularly spaced distinguished log entries risks
-either overwhelming label owners with a large number of them, or delaying
-consensus between users by having arbitrarily few. Distinguished log entries
-must reliably occur at roughly the same interval as the Reasonable Monitoring
-Window regardless of variations in how quickly new log entries are added.
-
-This process also ensures that distinguished log entries are **stable**. Once a
-log entry is chosen to be distinguished, it will never stop being distinguished.
-This ensures that, if a user looks up a label and checks consistency with some
-distinguished log entry, this log entry can't later avoid inspection by the
-label owner by losing its distinguished status.
-
-## Algorithm {#gv-algorithm}
-
-The algorithm for performing a greatest-version search is described below as a
-recursive algorithm. It starts at the rightmost distinguished log entry, or the
-root of the implicit binary search tree if there are no distinguished log
-entries, and then recurses down the remainder of the frontier, each time
-starting back at step 1:
-
-1. Obtain a search binary ladder from the current log entry where the target
-   version is the claimed greatest version of the label, omitting redundant
-   lookups.
-2. If this is the rightmost log entry, verify that the binary ladder terminates
-   in a way that is consistent with the claimed greatest version of the label.
-   That is, verify that it contains inclusion proofs for all expected versions
-   less than or equal to the target and non-inclusion proofs for all expected
-   versions greater than the target.
-3. If this is not the rightmost log entry, recurse to the log entry's right
-   child.
-
-The terminal log entry of the search is defined as the leftmost log entry
-inspected that contains the greatest version of the label. If the Transparency
-Log is deployed in Contact Monitoring mode and the terminal log entry of the
-search is to the right of the rightmost distinguished log entry, the user MUST
-monitor the label as described in {{monitoring-the-tree}}.
-
-
 # Monitoring the Tree
 
 As new entries are added to the log tree, the search path that's traversed to
 find a specific version of a label may change. New intermediate nodes may be
-established between the search root and the terminal log entry, or a new search root may
-be created. The goal of monitoring a label is to efficiently ensure that, when
-these new parent nodes are created, they're created correctly such that searches
-for the same versions of a label continue converging to the same log entries.
+established between the search root and the terminal log entry, or a new search
+root may be created. The goal of monitoring a label is to efficiently ensure
+that, when these new parent nodes are created, they're created correctly such
+that searches for the same versions of a label continue producing the same
+results.
 
 Label owners MUST monitor their labels regularly, ensuring that past versions of
 the label are still correctly represented in the log and that any new versions
@@ -828,7 +826,7 @@ the tree require a way to prove that the greatest version of a label stored in
 a particular log entry's prefix tree is greater than or equal to a **target
 version**. The target version in this case is the version of the label that the
 user is monitoring. Unlike in a search though, users already know that the
-target version of the label exists and only need proof that there has not been
+target version of the label exists and only need proof that there hasn't been
 an unexpected downgrade.
 
 Binary ladders provided for the purpose of monitoring are called **monitoring
@@ -851,11 +849,11 @@ one of these log entries, then the lookup for this version is omitted.
 
 To monitor a given label, users maintain a small amount of state: a map from a
 position in the log to a version counter. The version counter is the greatest
-version of the label proven to exist at that log position. Users
-initially populate this map by setting the position of the terminal log entry of
-their search to map to the version of the label they searched for. A map may
-track several different versions simultaneously if a user has been
-shown different versions of the same label.
+version of the label proven to exist at that log position. Users initially
+populate this map by setting the position of the terminal log entry of their
+search to map to the version of the label they searched for. A map may track
+several different versions simultaneously if a user has been shown different
+versions of the same label.
 
 To update this map, users receive the most recent tree head from the
 Transparency Log and follow these steps for each entry in the map, from
@@ -871,20 +869,17 @@ rightmost to leftmost log entry:
    3. If any of the remaining log entries are distinguished, terminate the list
       just after the first distinguished log entry.
 
-3. If the computed list is empty, leave the position-version pair in the map
-   and move on to the next map entry.
+3. For each log entry in the computed list, from left to right:
 
-4. For each log entry in the computed list, from left to right:
-
-   1. Check if a binary ladder for this log entry was already provided in the
+   1. Check if a binary ladder from this log entry was already provided in the
       same query response. If so:
       1. If the previously provided binary ladder had a greater target version
          than the current map entry, then this version of the label no longer
          needs to be monitored. Remove the position-version pair with the
          the lesser version from the map and move on to the next map
          entry.
-      2. If it had a version less than or equal to that of the current map
-         entry, terminate and return an error to the user.
+      2. If it had a target version less than or equal to that of the current
+         map entry, terminate and return an error to the user.
 
    2. Obtain a monitoring binary ladder from this log entry where the target
       version is the version currently in the map. Verify that all expected
@@ -900,10 +895,11 @@ monitoring is to remove all mappings where the position corresponds to a
 distinguished log entry. All remaining entries will be non-distinguished log
 entries lying on the log's frontier.
 
-This algorithm works by progressively moving up the tree as new intermediate or
-root nodes are established and verifying that they're constructed correctly.
-Once a distinguished log entry is reached and successfully verified, monitoring
-is no longer necessary and the relevant entry is removed from the map.
+This algorithm works by progressively moving up the implicit binary search tree
+as new intermediate or root nodes are established, and verifying that they're
+constructed correctly. Once a distinguished log entry is reached and
+successfully verified, monitoring is no longer necessary and the corresponding
+entry is removed from the map.
 
 Users will often be able to execute the monitoring process, at least partially,
 with the output of a fixed-version or greatest-version search for the label.
@@ -918,9 +914,9 @@ on.
 
 Label owners initialize their state by providing the Transparency Log with a
 **starting position** coresponding to the log entry where they wish their
-ownership of the label to begin. This starting position MUST correspond to a
-distinguished log entry that is not expired. The user then executes the
-following algorithm:
+ownership of the label to begin. This starting position MUST correspond to an
+unexpired distinguished log entry. The user then executes the following
+algorithm:
 
 1. Compute the list of log entries to inspect: this list starts with the log
    entry at the requested starting position, followed by the log entries that
@@ -945,11 +941,12 @@ following algorithm:
    that each binary ladder terminates in a way that is consistent with the
    claimed greatest version of the label.
 
-6. If any new versions of the label were created after the requested starting
-   position, the label owner processes each of these individually as described
-   in {{updating-a-label}}.
+If any new versions of the label were created after the requested starting
+position, the label owner will need to process each of these individually as
+described in {{updating-a-label}}.
 
-Once the label owner has initialized their state, they can begin regular
+Once the label owner has fully initialized their state, through the algorithm
+above and by processing any remaining new versions, they can begin regular
 monitoring. The label owner advertises to the Transparency Log the greatest
 version of the label that they're aware of and the rightmost distinguished log
 entry that they've verified is correct. For a number of subsequent distinguished
@@ -967,25 +964,24 @@ algorithm, starting with the root log entry:
 3. If the current log entry has a left child, recurse to the left child.
    Afterwards, proceed to step 4.
 
-4. If a stop condition has been reached, stop. For a user executing this
-   algorithm, the only stop condition is having consumed all of the Transparency
-   Log's response. The Transparency Log executing this algorithm may stop at
-   this point if the greatest version of the label present at this log entry is
-   greater than the version advertised by the user, or if a maximum output size
-   has been reached.
+4. If a stop condition has been reached, stop. From a user's perspective, the
+   only stop condition is having consumed all of the Transparency Log's
+   response. The Transparency Log may stop at this point if the greatest version
+   of the label present at this log entry is greater than the version advertised
+   by the user, or if a maximum output size has been reached.
 
 5. Obtain a search binary ladder from the current log entry where the target
-   version is the greatest version of the label that is expected to exist at
-   this point based on the label owner's local state, without omitting redundant
+   version is the greatest version of the label expected to exist at this point
+   according to the label owner's local state, without omitting redundant
    lookups. Verify that the binary ladder terminates in a way that is consistent
    with the expected version being the greatest that exists.
 
 6. If the current log entry has a right child, recurse to the right child.
 
 To avoid excessive load, the Transparency Log SHOULD limit the number of
-distinguished log entries it provides binary ladders for in a single response.
-Users repeatedly query the Transparency Log until they detect that the above
-algorithm has either hit an unresolvable error or successfully reached the
+distinguished log entries that it provides binary ladders for in a single
+response. Users repeatedly query the Transparency Log until they detect that the
+above algorithm has either hit an unresolvable error or successfully reached the
 rightmost distinguished log entry.
 
 Users are expected to already know the correct greatest version of the label
@@ -1015,6 +1011,7 @@ following:
 
 - The new greatest version of the label.
 - The index of the log entry where the new versions were inserted.
+- The value of each new version of the label.
 - The commitment openings that were chosen for each new version of the label.
 - If the Transparency Log is deployed with a Third-Party Manager, the signatures
   produced by the Service Operator over each new value.
@@ -1036,11 +1033,12 @@ The user verifies this information as follows:
    right of where the previous greatest version of the label was inserted, or
    the starting position chosen in {{owner-algorithm}} if this is the first
    version inserted since the user became the label owner.
-3. Verify that the number of commitment openings provided is equal to the new
-   greatest version minus the previous greatest version, or is equal to the new
-   greatest version plus one if there were no previous versions.
+3. Verify that the number of label values and commitment openings provided is
+   equal to the number of new versions (the greatest version minus the previous
+   greatest version, or the new greatest version plus one if there were no
+   previous versions).
 4. If the Transparency Log is deployed with a Third-Party Manager, verify that
-   the number of signatures provided matches the number of commitments and that
+   the number of signatures provided matches the number of new versions and that
    the signatures are valid.
 5. Verify that the expected number of VRF proofs was provided, and that the
    proofs properly evaluate into a VRF output.
@@ -1084,9 +1082,9 @@ its right. Given this, the user executes the following algorithm:
    If the log entry is not distinguished in the current tree, obtain a
    `PrefixProof` from it with lookups corresponding to a search binary ladder
    where the target version is the new greatest version of the label, omitting
-   redundant lookups, additionally including all newly added versions of the
+   redundant lookups, additionally including all other new versions of the
    label. Verify that the binary ladder lookups are consistent with the new
-   greatest version of the label being the greatest that exists, and that all
+   greatest version of the label being the greatest that exists, and that the
    lookups for new but lesser versions result in an inclusion proof.
 
 # Cryptographic Computations
