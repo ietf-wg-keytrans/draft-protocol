@@ -172,7 +172,7 @@ timely manner.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
-  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 @font-face {
   font-family: 'Oxygen Mono';
@@ -180,7 +180,8 @@ timely manner.
   font-weight: 400;
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 }
 
 @font-face {
@@ -572,6 +573,7 @@ aside, blockquote {
 }
 blockquote {
   margin: 1em 0;
+  border-left: 2px var(--pilcrow-strong) solid;
 }
 cite {
   display: block;
@@ -642,7 +644,7 @@ a.pilcrow {
   }
 }
 @media not print {
-  :hover > a.pilcrow {
+  :hover > a.pilcrow, a.pilcrow:focus {
     opacity: 1;
   }
   a.pilcrow[href]:hover {
@@ -1050,11 +1052,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">January 2026</td>
+<td class="right">February 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 27 July 2026</td>
+<td class="center">Expires 25 August 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1067,12 +1069,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-01-23" class="published">23 January 2026</time>
+<time datetime="2026-02-21" class="published">21 February 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-07-27">27 July 2026</time></dd>
+<dd class="expires"><time datetime="2026-08-25">25 August 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1132,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 27 July 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 25 August 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1291,10 +1293,10 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
                     <p id="section-toc.1-1.11.2.3.2.1.1"><a href="#section-11.3.1" class="auto internal xref">11.3.1</a>.  <a href="#name-updating-view" class="internal xref">Updating View</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.2">
-                    <p id="section-toc.1-1.11.2.3.2.2.1"><a href="#section-11.3.2" class="auto internal xref">11.3.2</a>.  <a href="#name-fixed-version-search-2" class="internal xref">Fixed-Version Search</a></p>
+                    <p id="section-toc.1-1.11.2.3.2.2.1"><a href="#section-11.3.2" class="auto internal xref">11.3.2</a>.  <a href="#name-greatest-version-search-2" class="internal xref">Greatest-Version Search</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.3">
-                    <p id="section-toc.1-1.11.2.3.2.3.1"><a href="#section-11.3.3" class="auto internal xref">11.3.3</a>.  <a href="#name-greatest-version-search-2" class="internal xref">Greatest-Version Search</a></p>
+                    <p id="section-toc.1-1.11.2.3.2.3.1"><a href="#section-11.3.3" class="auto internal xref">11.3.3</a>.  <a href="#name-fixed-version-search-2" class="internal xref">Fixed-Version Search</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.3.2.4">
                     <p id="section-toc.1-1.11.2.3.2.4.1"><a href="#section-11.3.4" class="auto internal xref">11.3.4</a>.  <a href="#name-contact-monitoring" class="internal xref">Contact Monitoring</a></p>
@@ -2238,11 +2240,12 @@ version is the claimed greatest version of the label, omitting redundant
 lookups.<a href="#section-6.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.2">
-            <p id="section-6.3-2.2.1">If this is the rightmost log entry, verify that the binary ladder terminates
-in a way that is consistent with the claimed greatest version of the label.
-That is, verify that it contains inclusion proofs for all expected versions
-less than or equal to the target and non-inclusion proofs for all expected
-versions greater than the target.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-6.3-2.2.1">Verify that the binary ladder terminates in a way that is consistent with the
+claimed greatest version of the label. That is, verify that every lookup for
+a version greater than the target version results in a non-inclusion proof.
+If this is the rightmost log entry, additionally verify that every lookup for
+a version less than or equal to the target version results in an inclusion
+proof.<a href="#section-6.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-6.3-2.3">
             <p id="section-6.3-2.3.1">If this is not the rightmost log entry, recurse to the log entry's right
@@ -2355,10 +2358,10 @@ version.<a href="#section-7.2-2.6.1" class="pilcrow">¶</a></p>
 indicating that the target version of the label does not exist.<a href="#section-7.2-2.6.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.2-2.6.2.2">
-                <p id="section-7.2-2.6.2.2.1">If any expired log entries were encountered in the search, and the
-identified log entry is either the leftmost distinguished log entry or to
-the left of the leftmost distinguished log entry, terminate the search
-with an error indicating that the target version of the label is expired.<a href="#section-7.2-2.6.2.2.1" class="pilcrow">¶</a></p>
+                <p id="section-7.2-2.6.2.2.1">If any expired log entries were encountered in the search, and there are
+no unexpired distinguished log entries to the left of the identified log
+entry, terminate the search with an error indicating that the target
+version of the label is expired.<a href="#section-7.2-2.6.2.2.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-7.2-2.6.2.3">
                 <p id="section-7.2-2.6.2.3.1">Otherwise, look up the target version of the label in the log entry's
@@ -3049,21 +3052,22 @@ struct {
     case thirdPartyManagement:
       opaque signature&lt;0..2^16-1&gt;;
   };
-} UpdatePrefix;
+} UpdateSuffix;
 
 struct {
-  UpdatePrefix prefix;
   opaque value&lt;0..2^32-1&gt;;
+  UpdateSuffix suffix;
 } UpdateValue;
 </pre><a href="#section-10.5-2" class="pilcrow">¶</a>
 </div>
 <p id="section-10.5-3">The <code>value</code> field contains the value associated with the label-version pair.<a href="#section-10.5-3" class="pilcrow">¶</a></p>
-<p id="section-10.5-4">In the event that Third-Party Management is used, the <code>prefix</code> field contains a
+<p id="section-10.5-4">In the event that Third-Party Management is used, the <code>suffix</code> field contains a
 signature from the Service Operator, using the public key from
 <code>Configuration.leaf_public_key</code>, over the following structure:<a href="#section-10.5-4" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-10.5-5">
 <pre>
 struct {
+  Configuration config;
   opaque label&lt;0..2^8-1&gt;;
   uint32 version;
   opaque value&lt;0..2^32-1&gt;;
@@ -3094,6 +3098,7 @@ is specified as:<a href="#section-10.6-3" class="pilcrow">¶</a></p>
 struct {
   opaque opening[Nc];
   opaque label&lt;0..2^8-1&gt;;
+  uint32 version;
   UpdateValue update;
 } CommitmentValue;
 </pre><a href="#section-10.6-4" class="pilcrow">¶</a>
@@ -3286,15 +3291,15 @@ struct {
 provided in the order requested. For <code>PrefixProof</code> structures that correspond to
 a binary ladder, this means the entries of <code>results</code> correspond directly with
 the lookups of the binary ladder. The <code>result_type</code> field of each
-<code>PrefixSearchResult</code> struct indicates what the terminal node of the search for
-that value was:<a href="#section-11.2-3" class="pilcrow">¶</a></p>
+<code>PrefixSearchResult</code> indicates what the terminal node of the search for that
+value was:<a href="#section-11.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.2-4.1">
-            <p id="section-11.2-4.1.1"><code>inclusion</code> for a leaf node matching the requested value.<a href="#section-11.2-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-11.2-4.1.1"><code>inclusion</code> for a leaf node matching the requested search key.<a href="#section-11.2-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-11.2-4.2">
-            <p id="section-11.2-4.2.1"><code>nonInclusionLeaf</code> for a leaf node not matching the requested value. In this
-case, the terminal node's value is provided since it can not be inferred.<a href="#section-11.2-4.2.1" class="pilcrow">¶</a></p>
+            <p id="section-11.2-4.2.1"><code>nonInclusionLeaf</code> for a leaf node not matching the requested search key. In
+this case, the terminal node is provided since it can not be inferred.<a href="#section-11.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-11.2-4.3">
             <p id="section-11.2-4.3.1"><code>nonInclusionParent</code> for a parent node that lacks the desired child.<a href="#section-11.2-4.3.1" class="pilcrow">¶</a></p>
@@ -3310,7 +3315,7 @@ together with the provided leaves to produce the root. The contents of the
 root's left subtree, its value is listed before any values from nodes that are
 in the root's right subtree, and so on recursively. In the event that a node
 does not exist, an all-zero byte string of length <code>Hash.Nh</code> is listed instead.<a href="#section-11.2-6" class="pilcrow">¶</a></p>
-<p id="section-11.2-7">The proof is verified by hashing together the provided elements, in the
+<p id="section-11.2-7">The proof is verified by hashing together the provided values, in the
 left/right arrangement dictated by the bits of the search keys, and checking
 that the result equals the root value of the prefix tree.<a href="#section-11.2-7" class="pilcrow">¶</a></p>
 </section>
@@ -3321,7 +3326,7 @@ that the result equals the root value of the prefix tree.<a href="#section-11.2-
 <a href="#section-11.3" class="section-number selfRef">11.3. </a><a href="#name-combined-tree-2" class="section-name selfRef">Combined Tree</a>
         </h3>
 <p id="section-11.3-1">As users execute the algorithms defined in <a href="#updating-views-of-the-tree" class="auto internal xref">Section 4</a>,
-<a href="#fixed-version-search" class="auto internal xref">Section 7</a>, <a href="#greatest-version-search" class="auto internal xref">Section 6</a>, <a href="#monitoring-the-tree" class="auto internal xref">Section 8</a>,
+<a href="#greatest-version-search" class="auto internal xref">Section 6</a>, <a href="#fixed-version-search" class="auto internal xref">Section 7</a>, <a href="#monitoring-the-tree" class="auto internal xref">Section 8</a>,
 and <a href="#updating-a-label" class="auto internal xref">Section 9</a>, they inspect a series of log entries. For some of
 these, only the timestamp of the log entry is needed. For others, both the
 timestamp and a <code>PrefixProof</code> from the log entry's prefix tree are needed.<a href="#section-11.3-1" class="pilcrow">¶</a></p>
@@ -3371,7 +3376,7 @@ of entries -- no more and no less. Additionally, users <span class="bcp14">MUST<
 timestamps explicitly included in <code>timestamps</code>, along with any retained
 timestamps, represent a monotonic series. That is, users verify that any given
 timestamp is greater than or equal to all observed timestamps to its left.<a href="#section-11.3-8" class="pilcrow">¶</a></p>
-<p id="section-11.3-9">Finally, the <code>inclusion</code> field contains the minimum set of intermediate node
+<p id="section-11.3-9">Finally, the <code>inclusion</code> field contains the minimum set of node
 values from the log tree that would allow a user to compute:<a href="#section-11.3-9" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3-10.1">
@@ -3404,7 +3409,7 @@ intermediate node values the user is expected to have retained.<a href="#section
 entry along the frontier.<a href="#section-11.3.1-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-11.3.1-2.2">
-              <p id="section-11.3.1-2.2.1">If the user has previously observed a tree head, the timestamps of each log
+              <p id="section-11.3.1-2.2.1">If the user has previously observed a tree head, the timestamp of each log
 entry from the list computed in <a href="#update-view-algorithm" class="auto internal xref">Section 4.2</a>.<a href="#section-11.3.1-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
@@ -3412,56 +3417,51 @@ entry from the list computed in <a href="#update-view-algorithm" class="auto int
 <code>max_ahead</code> and <code>max_behind</code>.<a href="#section-11.3.1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="fixed-version-search-1">
+<div id="greatest-version-search-1">
 <section id="section-11.3.2">
-          <h4 id="name-fixed-version-search-2">
-<a href="#section-11.3.2" class="section-number selfRef">11.3.2. </a><a href="#name-fixed-version-search-2" class="section-name selfRef">Fixed-Version Search</a>
+          <h4 id="name-greatest-version-search-2">
+<a href="#section-11.3.2" class="section-number selfRef">11.3.2. </a><a href="#name-greatest-version-search-2" class="section-name selfRef">Greatest-Version Search</a>
           </h4>
-<p id="section-11.3.2-1">For a user to search the combined tree for a specific version of a label, the
+<p id="section-11.3.2-1">For a user to search the combined tree for the greatest version of a label, the
 following is provided:<a href="#section-11.3.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.2-2.1">
-              <p id="section-11.3.2-2.1.1">For each log entry touched by the algorithm in <a href="#fv-algorithm" class="auto internal xref">Section 7.2</a>:<a href="#section-11.3.2-2.1.1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-11.3.2-2.1.2.1">
-                  <p id="section-11.3.2-2.1.2.1.1">The log entry's timestamp.<a href="#section-11.3.2-2.1.2.1.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-11.3.2-2.1.2.2">
-                  <p id="section-11.3.2-2.1.2.2.1">If the log entry is expired and is on the frontier, the right child's
-timestamp.<a href="#section-11.3.2-2.1.2.2.1" class="pilcrow">¶</a></p>
-</li>
-                <li class="normal" id="section-11.3.2-2.1.2.3">
-                  <p id="section-11.3.2-2.1.2.3.1">If it is not the case that the log entry is expired, is on the frontier,
-then a <code>PrefixProof</code> corresponding to a search binary ladder in the log
-entry's prefix tree is provided.<a href="#section-11.3.2-2.1.2.3.1" class="pilcrow">¶</a></p>
-</li>
-              </ul>
-</li>
-            <li class="normal" id="section-11.3.2-2.2">
-              <p id="section-11.3.2-2.2.1">If step 6.2 is reached, provide a second <code>PrefixProof</code> from the identified log
-entry specifically looking up the target version.<a href="#section-11.3.2-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.2-2.1.1">From each log entry along the frontier, starting from the log entry identified
+in <a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>, a <code>PrefixProof</code> corresponding to a search binary ladder.<a href="#section-11.3.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-11.3.2-3">Users verify the output as specified in <a href="#fv-algorithm" class="auto internal xref">Section 7.2</a>.<a href="#section-11.3.2-3" class="pilcrow">¶</a></p>
+<p id="section-11.3.2-3">Note that the frontier log entry timestamps are either already provided as part
+of updating the user's view of the tree, or are expected to have been retained
+by the user, and no additional timestamps are necessary to identify the starting
+log entry. Users verify the proof as described in <a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>.<a href="#section-11.3.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="greatest-version-search-1">
+<div id="fixed-version-search-1">
 <section id="section-11.3.3">
-          <h4 id="name-greatest-version-search-2">
-<a href="#section-11.3.3" class="section-number selfRef">11.3.3. </a><a href="#name-greatest-version-search-2" class="section-name selfRef">Greatest-Version Search</a>
+          <h4 id="name-fixed-version-search-2">
+<a href="#section-11.3.3" class="section-number selfRef">11.3.3. </a><a href="#name-fixed-version-search-2" class="section-name selfRef">Fixed-Version Search</a>
           </h4>
-<p id="section-11.3.3-1">For a user to search the combined tree for the greatest version of a label, the
+<p id="section-11.3.3-1">For a user to search the combined tree for a specific version of a label, the
 following is provided:<a href="#section-11.3.3-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.3-2.1">
-              <p id="section-11.3.3-2.1.1">From each log entry along the frontier, starting from the log entry identified
-in <a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>, a <code>PrefixProof</code> corresponding to a search binary ladder.<a href="#section-11.3.3-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.3-2.1.1">For each log entry touched by the algorithm in <a href="#fv-algorithm" class="auto internal xref">Section 7.2</a>:<a href="#section-11.3.3-2.1.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11.3.3-2.1.2.1">
+                  <p id="section-11.3.3-2.1.2.1.1">The log entry's timestamp.<a href="#section-11.3.3-2.1.2.1.1" class="pilcrow">¶</a></p>
+</li>
+                <li class="normal" id="section-11.3.3-2.1.2.2">
+                  <p id="section-11.3.3-2.1.2.2.1">If the log entry is not expired, then a <code>PrefixProof</code> corresponding to a
+search binary ladder in the log entry's prefix tree is provided.<a href="#section-11.3.3-2.1.2.2.1" class="pilcrow">¶</a></p>
+</li>
+              </ul>
+</li>
+            <li class="normal" id="section-11.3.3-2.2">
+              <p id="section-11.3.3-2.2.1">If step 6.3 is reached, a second <code>PrefixProof</code> from the identified log entry
+specifically looking up the target version is provided.<a href="#section-11.3.3-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-11.3.3-3">Note that the frontier log entry timestamps are either already provided as part
-of updating the user's view of the tree, or are expected to have been retained
-by the user, and no additional timestamps are necessary to identify the starting
-log entry. Users verify the proof as described in <a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>.<a href="#section-11.3.3-3" class="pilcrow">¶</a></p>
+<p id="section-11.3.3-3">Users verify the output as specified in <a href="#fv-algorithm" class="auto internal xref">Section 7.2</a>.<a href="#section-11.3.3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="contact-monitoring">
@@ -3696,7 +3696,7 @@ then returns an UpdateResponse structure:<a href="#section-12.2-3" class="pilcro
 <pre>
 struct {
   opaque opening[Nc];
-  UpdatePrefix prefix;
+  UpdateSuffix suffix;
 } UpdateInfo;
 
 struct {
@@ -3713,7 +3713,7 @@ struct {
 </div>
 <p id="section-12.2-5">The <code>opening</code> field of an <code>UpdateInfo</code> structure contains the commitment opening
 that was chosen for a specific new version of the label and, if in Third-Party
-Management mode, the <code>prefix</code> field contains the Service Operator's signature
+Management mode, the <code>suffix</code> field contains the Service Operator's signature
 over the new value.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
 <p id="section-12.2-6">The <code>version</code> field of <code>UpdateResponse</code> contains the new greatest version of the
 label. The <code>position</code> field contains the index of the log entry that where the
@@ -3724,7 +3724,7 @@ given in <code>UpdateRequest.values</code>.<a href="#section-12.2-6" class="pilc
 <p id="section-12.2-8">Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-12.2-8" class="pilcrow">¶</a></p>
 <p id="section-12.2-9">Users verify the UpdateResponse as if it were a SearchResponse for the greatest
 version of <code>label</code>. To aid verification, the update response provides the
-<code>UpdatePrefix</code> structure necessary to reconstruct the <code>UpdateValue</code>.<a href="#section-12.2-9" class="pilcrow">¶</a></p>
+<code>UpdateSuffix</code> structure necessary to reconstruct the <code>UpdateValue</code>.<a href="#section-12.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="monitor">
@@ -4288,7 +4288,7 @@ a particular KT DE, that KT DE <span class="bcp14">SHOULD</span> defer to the ju
 <dl class="references">
 <dt id="ARCH">[ARCH]</dt>
         <dd>
-<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-06</span>, <time datetime="2026-01-21" class="refDate">21 January 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-06">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-06</a>&gt;</span>. </dd>
+<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-07</span>, <time datetime="2026-02-18" class="refDate">18 February 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-07">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-07</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2104">[RFC2104]</dt>
         <dd>

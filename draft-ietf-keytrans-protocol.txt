@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 27 July 2026                                    23 January 2026
+Expires: 25 August 2026                                 21 February 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 27 July 2026.
+   This Internet-Draft will expire on 25 August 2026.
 
 Copyright Notice
 
@@ -111,8 +111,8 @@ Table of Contents
      11.2.  Prefix Tree
      11.3.  Combined Tree
        11.3.1.  Updating View
-       11.3.2.  Fixed-Version Search
-       11.3.3.  Greatest-Version Search
+       11.3.2.  Greatest-Version Search
+       11.3.3.  Fixed-Version Search
        11.3.4.  Contact Monitoring
        11.3.5.  Owner Initialization
        11.3.6.  Owner Monitoring
@@ -772,12 +772,13 @@ Table of Contents
        the target version is the claimed greatest version of the label,
        omitting redundant lookups.
 
-   2.  If this is the rightmost log entry, verify that the binary ladder
-       terminates in a way that is consistent with the claimed greatest
-       version of the label.  That is, verify that it contains inclusion
-       proofs for all expected versions less than or equal to the target
-       and non-inclusion proofs for all expected versions greater than
-       the target.
+   2.  Verify that the binary ladder terminates in a way that is
+       consistent with the claimed greatest version of the label.  That
+       is, verify that every lookup for a version greater than the
+       target version results in a non-inclusion proof.  If this is the
+       rightmost log entry, additionally verify that every lookup for a
+       version less than or equal to the target version results in an
+       inclusion proof.
 
    3.  If this is not the rightmost log entry, recurse to the log
        entry's right child.
@@ -878,10 +879,10 @@ Table of Contents
            not exist.
 
        2.  If any expired log entries were encountered in the search,
-           and the identified log entry is either the leftmost
-           distinguished log entry or to the left of the leftmost
-           distinguished log entry, terminate the search with an error
-           indicating that the target version of the label is expired.
+           and there are no unexpired distinguished log entries to the
+           left of the identified log entry, terminate the search with
+           an error indicating that the target version of the label is
+           expired.
 
        3.  Otherwise, look up the target version of the label in the log
            entry's prefix tree.  If the result is a non-inclusion proof,
@@ -1483,21 +1484,22 @@ Table of Contents
        case thirdPartyManagement:
          opaque signature<0..2^16-1>;
      };
-   } UpdatePrefix;
+   } UpdateSuffix;
 
    struct {
-     UpdatePrefix prefix;
      opaque value<0..2^32-1>;
+     UpdateSuffix suffix;
    } UpdateValue;
 
    The value field contains the value associated with the label-version
    pair.
 
-   In the event that Third-Party Management is used, the prefix field
+   In the event that Third-Party Management is used, the suffix field
    contains a signature from the Service Operator, using the public key
    from Configuration.leaf_public_key, over the following structure:
 
    struct {
+     Configuration config;
      opaque label<0..2^8-1>;
      uint32 version;
      opaque value<0..2^32-1>;
@@ -1522,6 +1524,7 @@ Table of Contents
    struct {
      opaque opening[Nc];
      opaque label<0..2^8-1>;
+     uint32 version;
      UpdateValue update;
    } CommitmentValue;
 
@@ -1685,14 +1688,14 @@ Table of Contents
    value, provided in the order requested.  For PrefixProof structures
    that correspond to a binary ladder, this means the entries of results
    correspond directly with the lookups of the binary ladder.  The
-   result_type field of each PrefixSearchResult struct indicates what
-   the terminal node of the search for that value was:
+   result_type field of each PrefixSearchResult indicates what the
+   terminal node of the search for that value was:
 
-   *  inclusion for a leaf node matching the requested value.
+   *  inclusion for a leaf node matching the requested search key.
 
-   *  nonInclusionLeaf for a leaf node not matching the requested value.
-      In this case, the terminal node's value is provided since it can
-      not be inferred.
+   *  nonInclusionLeaf for a leaf node not matching the requested search
+      key.  In this case, the terminal node is provided since it can not
+      be inferred.
 
    *  nonInclusionParent for a parent node that lacks the desired child.
 
@@ -1709,15 +1712,14 @@ Table of Contents
    and so on recursively.  In the event that a node does not exist, an
    all-zero byte string of length Hash.Nh is listed instead.
 
-   The proof is verified by hashing together the provided elements, in
-   the left/right arrangement dictated by the bits of the search keys,
-   and checking that the result equals the root value of the prefix
-   tree.
+   The proof is verified by hashing together the provided values, in the
+   left/right arrangement dictated by the bits of the search keys, and
+   checking that the result equals the root value of the prefix tree.
 
 11.3.  Combined Tree
 
-   As users execute the algorithms defined in Section 4, Section 7,
-   Section 6, Section 8, and Section 9, they inspect a series of log
+   As users execute the algorithms defined in Section 4, Section 6,
+   Section 7, Section 8, and Section 9, they inspect a series of log
    entries.  For some of these, only the timestamp of the log entry is
    needed.  For others, both the timestamp and a PrefixProof from the
    log entry's prefix tree are needed.
@@ -1776,8 +1778,8 @@ Table of Contents
    users verify that any given timestamp is greater than or equal to all
    observed timestamps to its left.
 
-   Finally, the inclusion field contains the minimum set of intermediate
-   node values from the log tree that would allow a user to compute:
+   Finally, the inclusion field contains the minimum set of node values
+   from the log tree that would allow a user to compute:
 
    *  The root value of the log tree, and
 
@@ -1802,34 +1804,13 @@ Table of Contents
    *  If the user has not previously observed a tree head, the timestamp
       of each log entry along the frontier.
 
-   *  If the user has previously observed a tree head, the timestamps of
+   *  If the user has previously observed a tree head, the timestamp of
       each log entry from the list computed in Section 4.2.
 
    Users verify that the rightmost timestamp is within the bounds
    defined by max_ahead and max_behind.
 
-11.3.2.  Fixed-Version Search
-
-   For a user to search the combined tree for a specific version of a
-   label, the following is provided:
-
-   *  For each log entry touched by the algorithm in Section 7.2:
-
-      -  The log entry's timestamp.
-
-      -  If the log entry is expired and is on the frontier, the right
-         child's timestamp.
-
-      -  If it is not the case that the log entry is expired, is on the
-         frontier, then a PrefixProof corresponding to a search binary
-         ladder in the log entry's prefix tree is provided.
-
-   *  If step 6.2 is reached, provide a second PrefixProof from the
-      identified log entry specifically looking up the target version.
-
-   Users verify the output as specified in Section 7.2.
-
-11.3.3.  Greatest-Version Search
+11.3.2.  Greatest-Version Search
 
    For a user to search the combined tree for the greatest version of a
    label, the following is provided:
@@ -1843,6 +1824,24 @@ Table of Contents
    expected to have been retained by the user, and no additional
    timestamps are necessary to identify the starting log entry.  Users
    verify the proof as described in Section 6.3.
+
+11.3.3.  Fixed-Version Search
+
+   For a user to search the combined tree for a specific version of a
+   label, the following is provided:
+
+   *  For each log entry touched by the algorithm in Section 7.2:
+
+      -  The log entry's timestamp.
+
+      -  If the log entry is not expired, then a PrefixProof
+         corresponding to a search binary ladder in the log entry's
+         prefix tree is provided.
+
+   *  If step 6.3 is reached, a second PrefixProof from the identified
+      log entry specifically looking up the target version is provided.
+
+   Users verify the output as specified in Section 7.2.
 
 11.3.4.  Contact Monitoring
 
@@ -2033,7 +2032,7 @@ Table of Contents
 
    struct {
      opaque opening[Nc];
-     UpdatePrefix prefix;
+     UpdateSuffix suffix;
    } UpdateInfo;
 
    struct {
@@ -2049,7 +2048,7 @@ Table of Contents
 
    The opening field of an UpdateInfo structure contains the commitment
    opening that was chosen for a specific new version of the label and,
-   if in Third-Party Management mode, the prefix field contains the
+   if in Third-Party Management mode, the suffix field contains the
    Service Operator's signature over the new value.
 
    The version field of UpdateResponse contains the new greatest version
@@ -2065,7 +2064,7 @@ Table of Contents
 
    Users verify the UpdateResponse as if it were a SearchResponse for
    the greatest version of label.  To aid verification, the update
-   response provides the UpdatePrefix structure necessary to reconstruct
+   response provides the UpdateSuffix structure necessary to reconstruct
    the UpdateValue.
 
 12.3.  Monitor
@@ -2561,9 +2560,9 @@ Table of Contents
 
    [ARCH]     McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
-              architecture-06, 21 January 2026,
+              architecture-07, 18 February 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-
-              keytrans-architecture-06>.
+              keytrans-architecture-07>.
 
    [RFC2104]  Krawczyk, H., Bellare, M., and R. Canetti, "HMAC: Keyed-
               Hashing for Message Authentication", RFC 2104,
