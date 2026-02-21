@@ -666,11 +666,12 @@ starting back at step 1:
 1. Obtain a search binary ladder from the current log entry where the target
    version is the claimed greatest version of the label, omitting redundant
    lookups.
-2. If this is the rightmost log entry, verify that the binary ladder terminates
-   in a way that is consistent with the claimed greatest version of the label.
-   That is, verify that it contains inclusion proofs for all expected versions
-   less than or equal to the target and non-inclusion proofs for all expected
-   versions greater than the target.
+2. Verify that the binary ladder terminates in a way that is consistent with the
+   claimed greatest version of the label. That is, verify that every lookup for
+   a version greater than the target version results in a non-inclusion proof.
+   If this is the rightmost log entry, additionally verify that every lookup for
+   a version less than or equal to the target version results in an inclusion
+   proof.
 3. If this is not the rightmost log entry, recurse to the log entry's right
    child.
 
@@ -759,10 +760,10 @@ time starting back at step 1.
    1. If there is no such log entry, terminate the search with an error
       indicating that the target version of the label does not exist.
 
-   2. If any expired log entries were encountered in the search, and the
-      identified log entry is either the leftmost distinguished log entry or to
-      the left of the leftmost distinguished log entry, terminate the search
-      with an error indicating that the target version of the label is expired.
+   2. If any expired log entries were encountered in the search, and there are
+      no unexpired distinguished log entries to the left of the identified log
+      entry, terminate the search with an error indicating that the target
+      version of the label is expired.
 
    3. Otherwise, look up the target version of the label in the log entry's
       prefix tree. If the result is a non-inclusion proof, terminate the search
@@ -1302,22 +1303,23 @@ struct {
     case thirdPartyManagement:
       opaque signature<0..2^16-1>;
   };
-} UpdatePrefix;
+} UpdateSuffix;
 
 struct {
-  UpdatePrefix prefix;
   opaque value<0..2^32-1>;
+  UpdateSuffix suffix;
 } UpdateValue;
 ~~~
 
 The `value` field contains the value associated with the label-version pair.
 
-In the event that Third-Party Management is used, the `prefix` field contains a
+In the event that Third-Party Management is used, the `suffix` field contains a
 signature from the Service Operator, using the public key from
 `Configuration.leaf_public_key`, over the following structure:
 
 ~~~ tls-presentation
 struct {
+  Configuration config;
   opaque label<0..2^8-1>;
   uint32 version;
   opaque value<0..2^32-1>;
@@ -1344,6 +1346,7 @@ is specified as:
 struct {
   opaque opening[Nc];
   opaque label<0..2^8-1>;
+  uint32 version;
   UpdateValue update;
 } CommitmentValue;
 ~~~
@@ -1510,12 +1513,12 @@ The `results` field contains the search result for each individual value,
 provided in the order requested. For `PrefixProof` structures that correspond to
 a binary ladder, this means the entries of `results` correspond directly with
 the lookups of the binary ladder. The `result_type` field of each
-`PrefixSearchResult` struct indicates what the terminal node of the search for
-that value was:
+`PrefixSearchResult` indicates what the terminal node of the search for that
+value was:
 
-- `inclusion` for a leaf node matching the requested value.
-- `nonInclusionLeaf` for a leaf node not matching the requested value. In this
-  case, the terminal node's value is provided since it can not be inferred.
+- `inclusion` for a leaf node matching the requested search key.
+- `nonInclusionLeaf` for a leaf node not matching the requested search key. In
+  this case, the terminal node is provided since it can not be inferred.
 - `nonInclusionParent` for a parent node that lacks the desired child.
 
 The `depth` field indicates the depth of the terminal node of the search and is
@@ -1530,14 +1533,14 @@ root's left subtree, its value is listed before any values from nodes that are
 in the root's right subtree, and so on recursively. In the event that a node
 does not exist, an all-zero byte string of length `Hash.Nh` is listed instead.
 
-The proof is verified by hashing together the provided elements, in the
+The proof is verified by hashing together the provided values, in the
 left/right arrangement dictated by the bits of the search keys, and checking
 that the result equals the root value of the prefix tree.
 
 ## Combined Tree {#proof-combined-tree}
 
 As users execute the algorithms defined in {{updating-views-of-the-tree}},
-{{fixed-version-search}}, {{greatest-version-search}}, {{monitoring-the-tree}},
+{{greatest-version-search}}, {{fixed-version-search}}, {{monitoring-the-tree}},
 and {{updating-a-label}}, they inspect a series of log entries. For some of
 these, only the timestamp of the log entry is needed. For others, both the
 timestamp and a `PrefixProof` from the log entry's prefix tree are needed.
@@ -1593,7 +1596,7 @@ timestamps explicitly included in `timestamps`, along with any retained
 timestamps, represent a monotonic series. That is, users verify that any given
 timestamp is greater than or equal to all observed timestamps to its left.
 
-Finally, the `inclusion` field contains the minimum set of intermediate node
+Finally, the `inclusion` field contains the minimum set of node
 values from the log tree that would allow a user to compute:
 
 - The root value of the log tree, and
@@ -1612,28 +1615,11 @@ For a user to update their view of the tree, the following is provided:
 
 - If the user has not previously observed a tree head, the timestamp of each log
   entry along the frontier.
-- If the user has previously observed a tree head, the timestamps of each log
+- If the user has previously observed a tree head, the timestamp of each log
   entry from the list computed in {{update-view-algorithm}}.
 
 Users verify that the rightmost timestamp is within the bounds defined by
 `max_ahead` and `max_behind`.
-
-### Fixed-Version Search
-
-For a user to search the combined tree for a specific version of a label, the
-following is provided:
-
-- For each log entry touched by the algorithm in {{fv-algorithm}}:
-  - The log entry's timestamp.
-  - If the log entry is expired and is on the frontier, the right child's
-    timestamp.
-  - If it is not the case that the log entry is expired, is on the frontier,
-    then a `PrefixProof` corresponding to a search binary ladder in the log
-    entry's prefix tree is provided.
-- If step 6.2 is reached, provide a second `PrefixProof` from the identified log
-  entry specifically looking up the target version.
-
-Users verify the output as specified in {{fv-algorithm}}.
 
 ### Greatest-Version Search
 
@@ -1647,6 +1633,20 @@ Note that the frontier log entry timestamps are either already provided as part
 of updating the user's view of the tree, or are expected to have been retained
 by the user, and no additional timestamps are necessary to identify the starting
 log entry. Users verify the proof as described in {{gv-algorithm}}.
+
+### Fixed-Version Search
+
+For a user to search the combined tree for a specific version of a label, the
+following is provided:
+
+- For each log entry touched by the algorithm in {{fv-algorithm}}:
+  - The log entry's timestamp.
+  - If the log entry is not expired, then a `PrefixProof` corresponding to a
+    search binary ladder in the log entry's prefix tree is provided.
+- If step 6.3 is reached, a second `PrefixProof` from the identified log entry
+  specifically looking up the target version is provided.
+
+Users verify the output as specified in {{fv-algorithm}}.
 
 ### Contact Monitoring
 
@@ -1821,7 +1821,7 @@ then returns an UpdateResponse structure:
 ~~~ tls-presentation
 struct {
   opaque opening[Nc];
-  UpdatePrefix prefix;
+  UpdateSuffix suffix;
 } UpdateInfo;
 
 struct {
@@ -1838,7 +1838,7 @@ struct {
 
 The `opening` field of an `UpdateInfo` structure contains the commitment opening
 that was chosen for a specific new version of the label and, if in Third-Party
-Management mode, the `prefix` field contains the Service Operator's signature
+Management mode, the `suffix` field contains the Service Operator's signature
 over the new value.
 
 The `version` field of `UpdateResponse` contains the new greatest version of the
@@ -1855,7 +1855,7 @@ Users verify an `UpdateResponse` by following these steps:
 
 Users verify the UpdateResponse as if it were a SearchResponse for the greatest
 version of `label`. To aid verification, the update response provides the
-`UpdatePrefix` structure necessary to reconstruct the `UpdateValue`.
+`UpdateSuffix` structure necessary to reconstruct the `UpdateValue`.
 
 <!-- TODO: This could probably be a lot more efficient -->
 
