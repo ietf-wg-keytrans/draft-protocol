@@ -1413,7 +1413,7 @@ The value of a leaf node in the prefix tree is computed as the hash, with the
 cipher suite hash function, of the following structure:
 
 ~~~ tls
-leaf.value = Hash(0x01 || vrf_output || commitment)
+leaf.value = Hash(0x02 || vrf_output || commitment)
 ~~~
 
 `vrf_output` contains the VRF output for the label-version pair and `commitment`
@@ -1423,7 +1423,7 @@ The value of a parent node in the prefix tree is computed by hashing together
 the values of its left and right children:
 
 ~~~ pseudocode
-parent.value = Hash(0x02 || parent.leftChild.value || parent.rightChild.value)
+parent.value = Hash(0x03 || parent.leftChild.value || parent.rightChild.value)
 ~~~
 
 If one of the children does not exist, an all-zero byte string of length
@@ -2117,21 +2117,26 @@ An auditor processes a single `AuditorUpdate` by following these steps:
 
 1. Verify that `timestamp` is greater than or equal to the timestamp of the
    previous log entry.
-2. Verify that the `PrefixSearchResult` provided in `proof` for each element of
-   `added` has a `result_type` of `nonInclusionParent` or `nonInclusionLeaf`.
-3. Verify that the `PrefixSearchResult` provided in `proof` for each element of
+2. Verify that the elements of `added` are sorted in ascending order by
+   `vrf_output` and that the same `vrf_output` is not present twice. Verify the
+   same in `removed`. Note that a VRF output in `added` is also allowed to be in
+   `removed`.
+3. For each element of `added` where the same VRF output is not in `removed`,
+   verify that the `PrefixSearchResult` provided in `proof` has a `result_type`
+   of `nonInclusionParent` or `nonInclusionLeaf`
+4. Verify that the `PrefixSearchResult` provided in `proof` for each element of
    `removed` has a `result_type` of `inclusion`.
-4. For each element of `removed`, verify that, with the addition of the new log
+5. For each element of `removed`, verify that, with the addition of the new log
    entry, the prefix tree leaf was published in at least one
    distinguished log entry before removal.
-5. With `proof` and the `PrefixLeaf` structures in `removed`, compute the root
+6. With `proof` and the `PrefixLeaf` structures in `removed`, compute the root
    value of the previous log entry's prefix tree. Verify that this matches the
    auditor's state.
-6. With `proof` and the `PrefixLeaf` structures in `added` and `removed`,
+7. With `proof` and the `PrefixLeaf` structures in `added` and `removed`,
    compute the new root value of the prefix tree. Compute the new root value of
    the log tree after adding a leaf with the specified `timestamp` and prefix
    tree root value.
-7. Optionally, provide an `AuditorTreeHead` to the Service Operator where
+8. Optionally, provide an `AuditorTreeHead` to the Service Operator where
    `AuditorTreeHead.timestamp` is set to `timestamp` and
    `AuditorTreeHead.tree_size` is set to the new size of the log tree after the
    addition of the new leaf. The signature is computed with the log tree root
