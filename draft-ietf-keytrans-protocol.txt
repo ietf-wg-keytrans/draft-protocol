@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 29 October 2026                                   27 April 2026
+Expires: 1 November 2026                                   30 April 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 October 2026.
+   This Internet-Draft will expire on 1 November 2026.
 
 Copyright Notice
 
@@ -119,9 +119,10 @@ Table of Contents
        11.3.7.  Updating a Label
    12. User Operations
      12.1.  Search
-     12.2.  Update
-     12.3.  Monitor
-     12.4.  Credentials
+     12.2.  Contact Monitor
+     12.3.  Owner Initialization
+     12.4.  Owner Monitoring
+     12.5.  Credentials
    13. Third Parties
      13.1.  Management
      13.2.  Auditing
@@ -1836,10 +1837,10 @@ Table of Contents
 
       -  If the log entry is not expired, then a PrefixProof
          corresponding to a search binary ladder in the log entry's
-         prefix tree is provided.
+         prefix tree.
 
    *  If step 6.3 is reached, a second PrefixProof from the identified
-      log entry specifically looking up the target version is provided.
+      log entry specifically looking up the target version.
 
    Users verify the output as specified in Section 7.2.
 
@@ -1867,9 +1868,8 @@ Table of Contents
    label, the following is provided:
 
    *  In reverse order (from top to bottom), the timestamp of each log
-      entry that is on the direct path of the user's requested starting
-      position and to its left, stopping just after the first unexpired
-      log entry (if any).
+      entry on the direct path of the user's requested starting
+      position.
 
    *  For each log entry in the list computed in step 1 of the first
       algorithm in Section 8.3, a PrefixProof corresponding to a search
@@ -1882,10 +1882,6 @@ Table of Contents
 
    For a label owner to perform regular monitoring, the following is
    provided:
-
-   *  The timestamp for each log entry that is on the direct path of the
-      root of the previous tree, for the purpose of determining if the
-      root log entry is distinguished.
 
    *  The timestamp for each log entry that causes the second algorithm
       in Section 8.3 to recurse either left or right.
@@ -1995,7 +1991,8 @@ Table of Contents
    1.  Verify value as described in Section 10.5.
 
    2.  Verify that the expected number of entries is present in
-       binary_ladder and compute the VRF output for each version of the
+       binary_ladder and that no commitment value is provided for the
+       target version.  Compute the VRF output for each version of the
        label from the provided proofs.
 
    3.  Verify the proof in search as described in Section 11.3.
@@ -2007,71 +2004,12 @@ Table of Contents
    5.  With the candidate root value for the tree, verify FullTreeHead
        as described in Section 10.4.
 
-12.2.  Update
+12.2.  Contact Monitor
 
-   Users initiate an Update operation by submitting an UpdateRequest to
-   the Transparency Log containing the label and the new values to
-   store.
-
-   struct {
-     opaque value<0..2^32-1>;
-   } LabelValue;
-
-   struct {
-     optional<uint64> last;
-
-     opaque label<0..2^8-1>;
-     LabelValue values<0..2^8-1>;
-   } UpdateRequest;
-
-   If the request passes application-layer policy checks, the
-   Transparency Log adds the new values for the label to the next log
-   entry, assigning version counters in the same order that the values
-   are given in values.  The Transparency Log then returns an
-   UpdateResponse structure:
-
-   struct {
-     opaque opening[Nc];
-     UpdateSuffix suffix;
-   } UpdateInfo;
-
-   struct {
-     FullTreeHead full_tree_head;
-
-     uint32 version;
-     uint64 position;
-     UpdateInfo info<0..2^8-1>;
-
-     BinaryLadderStep binary_ladder<0..2^8-1>;
-     CombinedTreeProof search;
-   } UpdateResponse;
-
-   The opening field of an UpdateInfo structure contains the commitment
-   opening that was chosen for a specific new version of the label and,
-   if in Third-Party Management mode, the suffix field contains the
-   Service Operator's signature over the new value.
-
-   The version field of UpdateResponse contains the new greatest version
-   of the label.  The position field contains the index of the log entry
-   that where the new versions of the label were inserted.  The info
-   field contains an UpdateInfo for each new version of the label, in
-   the same order as they were given in UpdateRequest.values.
-
-   The binary_ladder field contains VRF proofs and commitments as
-   described
-
-   Users verify an UpdateResponse by following these steps:
-
-   Users verify the UpdateResponse as if it were a SearchResponse for
-   the greatest version of label.  To aid verification, the update
-   response provides the UpdateSuffix structure necessary to reconstruct
-   the UpdateValue.
-
-12.3.  Monitor
-
-   Users initiate a Monitor operation by submitting a MonitorRequest to
-   the Transparency Log containing information about the labels they
-   wish to monitor.
+   If a Transparency Log is deployed in Contact Monitoring mode, users
+   that looked up a label initiate a Contact Monitoring operation by
+   submitting a ContactMonitorRequest to the Transparency Log containing
+   information about the label they wish to monitor.
 
    struct {
      uint64 position;
@@ -2079,96 +2017,167 @@ Table of Contents
    } MonitorMapEntry;
 
    struct {
+     optional<uint64> last;
+
      opaque label<0..2^8-1>;
      MonitorMapEntry entries<0..2^8-1>;
-     optional<uint64> rightmost;
-   } MonitorLabel;
+   } ContactMonitorRequest;
 
-   struct {
-     optional<uint64> last;
-     MonitorLabel labels<0..2^8-1>;
-   } MonitorRequest;
-
-   Each MonitorLabel structure in labels contains the label to monitor
-   in label, and a list in the entries field corresponding to the map
-   described in Section 8.2.  If the user owns the label, they
-   additionally indicate in rightmost the position of the rightmost
-   distinguished log entry where they have verified that the greatest
-   version of the label is correctly represented.
-
-   The Transparency Log verifies the MonitorRequest by following these
-   steps, for each MonitorLabel structure:
-
-   1.  Verify that the label field of every MonitorLabel is unique.  For
-       all MonitorLabel structures with rightmost provided, verify that
-       the user owns the label (according to application-layer policy).
-       For all other MonitorLabel structures, verify that the user is
-       currently, or was previously, allowed to lookup all versions of
-       the label contained in a MonitorMapEntry.
-
-   2.  Verify that each MonitorMapEntry in the same MonitorLabel
-       structure is sorted in ascending order by position.
-       Additionally, verify that each version field is unique and that
-       position lies on the direct path of the first log entry to
-       contain version version of the label.
-
-   3.  Verify that rightmost is a distinguished log entry to the right
-       of the first version of the label, or that it was the rightmost
-       distinguished log entry immediately after the label was first
-       inserted.
-
-   While access control decisions generally belong solely to the
-   application, users must be able to monitor versions of a label they
-   previously looked up, even if they would no longer be allowed to make
-   the same query.  One simple way for a user to prove that they were
-   previously allowed to lookup a particular version of a label would be
-   for them to provide the commitment opening for the version.  However,
-   there is no provision for this in the protocol; it would need to be
-   done in the application layer.
-
-   If the request is valid and passes access control, the Transparency
-   Log responds with a MonitorResponse structure:
-
-   struct {
-     uint32 versions<0..2^8-1>;
-   } MonitorLabelVersions;
+   The Transparency Log verifies that each MonitorMapEntry in entries is
+   sorted in ascending order by position, that no position or version is
+   duplicate, and that position always lies on the direct path of the
+   first log entry to contain the associated version of the label.  In
+   turn, the Transparency Log responds with a ContactMonitorResponse
+   structure:
 
    struct {
      FullTreeHead full_tree_head;
-     MonitorLabelVersions label_versions<0..2^8-1>;
      CombinedTreeProof monitor;
-   } MonitorResponse;
+   } ContactMonitorResponse;
 
    The monitor field contains the output of updating the user's view of
-   the tree to match FullTreeHead.tree_head.size followed by monitoring
-   each label in labels, in the order provided.  Each MonitorLabel
-   structure where rightmost was present has a corresponding entry in
-   label_versions containing the greatest version of the label present
-   in a number of subsequent distinguished log entries.
+   the tree to match TreeHead.tree_size followed by executing the
+   algorithm in Section 8.2.  Users verify a ContactMonitorResponse by
+   following these steps:
 
-   Users verify a MonitorResponse by following these steps:
+   1.  Verify the proof in monitor as described in Section 8.2.
 
-   1.  Verify that the number of entries in label_versions is equal to
-       the number of MonitorLabel structures in labels with rightmost
-       present.  If a MonitorLabel has a rightmost field that is not the
-       rightmost distinguished log entry, verify that the corresponding
-       MonitorLabelVersion's versions field is not empty.
-
-   2.  Verify the proof in monitor as described in Section 11.3.
-
-   3.  Compute a candidate root value for the tree from the proof in
+   2.  Compute a candidate root value for the tree from the proof in
        monitor.inclusion and any previously retained full subtrees of
        the log tree.
 
-   4.  With the candidate root value for the tree, verify FullTreeHead.
+   3.  With the candidate root value for the tree, verify FullTreeHead
+       as described in Section 10.4.
 
-   Some information is omitted from MonitorResponse in the interest of
-   efficiency, because the user would have already seen and verified it
-   as part of conducting other queries.  In particular, VRF proofs for
-   different versions of each label are not provided, given that these
-   can be cached from the original Search or Update query.
+   While access control decisions generally belong solely to the
+   application, users of a Transparency Log deployed in Contact
+   Monitoring mode MUST be able to monitor versions of a label they
+   previously looked up, even if they would no longer be allowed to make
+   the same query.  One simple way for a user to prove that they were
+   previously allowed to lookup a particular version of a label would be
+   for them to provide the corresponding commitment opening.
 
-12.4.  Credentials
+12.3.  Owner Initialization
+
+   Users that wish to initialize their owner state for a label submit a
+   OwnerInitRequest to the Transparency Log containing the label they
+   wish to take ownership of and their desired starting log entry.
+
+   struct {
+     optional<uint64> last;
+
+     opaque label<0..2^8-1>;
+     uint64 start;
+   } OwnerInitRequest;
+
+   The Transparency Log verifies that start identifies a log entry that
+   is unexpired and distinguished.  In turn, the Transparency Log
+   responds with an OwnerInitResponse structure:
+
+   struct {
+     FullTreeHead full_tree_head;
+
+     uint32 greatest_versions<0..2^8-1>;
+     BinaryLadderStep binary_ladder<0..2^16-1>;
+     CombinedTreeProof init;
+   } OwnerInitResponse;
+
+   The greatest_versions field contains the greatest version of the
+   label that exists in each log entry computed in step 1 of the first
+   algorithm in Section 8.3, ending at the first log entry where the
+   label doesn't exist.
+
+   The binary_ladder field contains one entry for each version computed
+   in step 3 of the first algorithm in Section 8.3, in ascending order
+   by version.  If a version of the label exists, the commitment to the
+   label's value at that version is provided in the commitment field of
+   the BinaryLadderStep.
+
+   The init field contains the output of updating the user's view of the
+   tree to match TreeHead.tree_size followed by executing the first
+   algorithm in Section 8.3.
+
+   Users verify an OwnerInitResponse by following these steps:
+
+   1.  Verify that the number of entries in greatest_versions is less
+       than or equal to the number of computed log entries, and that
+       greatest_versions is in descending order.
+
+   2.  Verify that the expected number of entries is present in
+       binary_ladder and that a commitment is provided for each version
+       in greatest_versions.  (Note that the existence of a version does
+       not require the existence of lesser versions.)
+
+   3.  Verify the proof in init as described in the first algorithm of
+       Section 8.3.
+
+   4.  Compute a candidate root value for the tree from the proof in
+       init.inclusion and any previously retained full subtrees of the
+       log tree.
+
+   5.  With the candidate root value for the tree, verify FullTreeHead
+       as described in Section 10.4.
+
+12.4.  Owner Monitoring
+
+   Users that wish to monitor a label they own submit an
+   OwnerMonitorRequest to the Transparency Log containing the label they
+   wish to monitor and their current monitoring state.
+
+   struct {
+     optional <uint64> last;
+
+     opaque label<0..2^8-1>;
+     MonitorMapEntry entries<0..2^8-1>;
+     uint64 start;
+     uint32 greatest_version;
+   } OwnerMonitorRequest;
+
+   The entries list contains the label owner's monitoring state for
+   versions of the label that have not yet been included in a
+   distinguished log entry.  The start field contains the rightmost
+   distinguished log entry that the label owner has verified as correct.
+   The greatest_version field contains the greatest version of the label
+   that the label owner is aware of.
+
+   The Transparency Log verifies an OwnerMonitorRequest by following
+   these steps:
+
+   1.  Verify that each MonitorMapEntry in entries is sorted in
+       ascending order by position, that no position or version is
+       duplicate, and that position always lies on the direct path of
+       the first log entry to contain the associated version of the
+       label.
+
+   2.  Verify that start corresponds to a distinguished log entry and
+       that greatest_version is less than or equal to the greatest
+       version of the label.
+
+   In turn, the Transparency Log responds with an OwnerMonitorResponse
+   structure:
+
+   struct {
+     FullTreeHead full_tree_head;
+     CombinedTreeProof monitor;
+   } OwnerMonitorResponse;
+
+   The monitor field contains the output of updating the user's view of
+   the tree to match TreeHead.tree_size, followed by executing the
+   algorithm in Section 8.2, followed by executing the second algorithm
+   in Section 8.3.  Users verify an OwnerMonitorResponse by following
+   these steps:
+
+   1.  Verify the proof in monitor as described in Section 8.2 and the
+       second algorithm of Section 8.3.
+
+   2.  Compute a candidate root value for the tree from the proof in
+       monitor.inclusion and any previously retained full subtrees of
+       the log tree.
+
+   3.  With the candidate root value for the tree, verify FullTreeHead
+       as described in Section 10.4.
+
+12.5.  Credentials
 
    *Credentials* are proofs that are designed to be sent directly
    between users and verified without direct interaction with the
