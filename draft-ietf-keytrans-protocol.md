@@ -498,16 +498,9 @@ When users make queries to the Transparency Log, they advertise the size of the
 last tree head they observed. If the Transparency Log responds with an
 updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
-following:
-
-- In the new implicit binary search tree, compute the direct path of the log
-  entry with index `size-1`, where `size` is the tree size advertised by the
-  user. Provide the timestamp of each log entry in the direct path whose index
-  is greater than or equal to `size`.
-- The last of these log entries will lie on the new tree's frontier. From
-  this log entry, compute the remainder of the frontier. That is, compute the
-  log entry's right child, the right child's right child, and so on. Provide
-  the timestamps for these log entries as well.
+timestamp of each new log entry that is on the path between the log entry
+`size-1`, where `size` is the tree size advertised by the user, and the new most
+recently created log entry.
 
 Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
