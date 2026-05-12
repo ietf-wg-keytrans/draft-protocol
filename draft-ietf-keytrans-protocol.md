@@ -498,9 +498,9 @@ When users make queries to the Transparency Log, they advertise the size of the
 last tree head they observed. If the Transparency Log responds with an
 updated tree head, it first provides a consistency proof to show that the new
 tree head is an extension of the previous one. It then also provides the
-timestamp of each new log entry that is on the path between the log entry
-`size-1`, where `size` is the tree size advertised by the user, and the new most
-recently created log entry.
+timestamp of each new log entry that is on the path between the log entry with
+index `size-1`, where `size` is the tree size advertised by the user, and the
+new most recently created log entry.
 
 Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
