@@ -832,19 +832,9 @@ an unexpected downgrade.
 
 Binary ladders provided for the purpose of monitoring are called **monitoring
 binary ladders** and follow the series of lookups described in
-{{binary-ladder}}, but with two optimizations:
-
-First, any lookup for a version greater than the target version is omitted. As a
-result, all lookups in the binary ladder will result in an inclusion proof if
-the Transparency Log is behaving honestly.
-
-Second, any lookup that would be omitted from a binary ladder for the log entry
-when executing a fixed-version or greatest-version search for the label-version
-pair is also omitted here. That is, when preparing a binary ladder for a log
-entry, the Transparency Log considers the log entries that are in its direct
-path and to its left. If, during a search for the label-version pair being
-monitored, the user would receive an inclusion proof for some version from
-one of these log entries, then the lookup for this version is omitted.
+{{binary-ladder}}, omitting any lookup for a version greater than the target
+version. As a result, all lookups in the binary ladder will result in an
+inclusion proof if the Transparency Log is behaving honestly.
 
 ## Contact Algorithm
 
@@ -869,6 +859,11 @@ rightmost to leftmost log entry:
    2. Remove all entries that are to the left of the log entry.
    3. If any of the remaining log entries are distinguished, terminate the list
       just after the first distinguished log entry.
+   4. If the Contact Monitoring operation is being executed in the context of an
+      Owner Monitoring operation, and the log entry in the monitoring map is
+      equal to or to the right of the owner's advertised `start` position, skip
+      inspecting the final distinguished log entry. This log entry will be
+      inspected by the algorithm in {{owner-algorithm}}.
 
 3. For each log entry in the computed list, from left to right:
 
@@ -1010,9 +1005,7 @@ Whenever a log entry is added to the Transparency Log that contains some new
 versions of a label, the Transparency Log informs the label owner of the
 following:
 
-- The new greatest version of the label.
 - The index of the log entry where the new versions were inserted.
-- The value of each new version of the label.
 - The commitment openings that were chosen for each new version of the label.
 - If the Transparency Log is deployed with a Third-Party Manager, the signatures
   produced by the Service Operator over each new value.
@@ -1080,7 +1073,7 @@ its right. Given this, the user executes the following algorithm:
    ladder for the new greatest version. Verify that all lookups result in an
    inclusion proof.
 
-   If the log entry is not distinguished in the current tree, obtain a
+4. If the log entry is not distinguished in the current tree, obtain a
    `PrefixProof` from it with lookups corresponding to a search binary ladder
    where the target version is the new greatest version of the label, omitting
    redundant lookups, additionally including all other new versions of the
@@ -1931,9 +1924,9 @@ The Transparency Log verifies an OwnerMonitorRequest by following these steps:
    `position`, that no `position` or `version` is duplicate, and that `position`
    always lies on the direct path of the first log entry to contain the
    associated `version` of the label.
-2. Verify that `start` corresponds to a distinguished log entry and that
-   `greatest_version` is less than or equal to the greatest version of the
-   label.
+2. Verify that `greatest_version` is less than or equal to the greatest version
+   of the label, and greater than or equal to the greatest version of the label
+   that existed at `start`.
 
 In turn, the Transparency Log responds with an OwnerMonitorResponse structure:
 
