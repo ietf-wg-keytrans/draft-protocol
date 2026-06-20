@@ -1029,8 +1029,8 @@ its right. Given this, the user executes the following algorithm:
 
 1. Starting from the root log entry of the previous tree, proceed down the
    frontier of the previous tree and identify the first log entry that is not
-   distinguished in the current tree. This may be the root itself. If there is
-   no such log entry, skip to step 3.
+   distinguished in the current tree. If there is no such log entry, skip to
+   step 3.
 
 2. Starting from the identified log entry, proceed down the remainder of the
    previous tree's frontier from left to right:
@@ -1042,9 +1042,9 @@ its right. Given this, the user executes the following algorithm:
       is the previous greatest version of the label that existed, or 0 if no
       version of the label existed. Lookups that would be omitted in a
       greatest-version search for the label are also omitted here. Note that
-      this means that lookups that would occur in the rightmost distinguished
-      log entry, or in log entries that were skipped by step 2.1, will still be
-      omitted as if the log entries had been inspected.
+      this means that lookups that would occur in log entries that were skipped
+      by step 2.1 will still be omitted as if the log entries had been
+      inspected.
 
    3. Verify that the binary ladder terminates in a way that is consistent with
       the previous greatest version of the label being the greatest that
@@ -1053,8 +1053,8 @@ its right. Given this, the user executes the following algorithm:
 3. If the log entry where the new versions were added is distinguished in the
    current tree, obtain a `PrefixProof` from it with lookups corresponding only
    to new versions of the label that would not be looked up in a search binary
-   ladder for the new greatest version. Verify that all lookups result in an
-   inclusion proof.
+   ladder for the new greatest version, with lookups in ascending order by
+   version. Verify that all lookups result in an inclusion proof.
 
    If all checks succeed, the label owner retains the position and new greatest
    version of the label for later verification with {{owner-algorithm}}.
@@ -1062,10 +1062,14 @@ its right. Given this, the user executes the following algorithm:
 4. If the log entry is not distinguished in the current tree, obtain a
    `PrefixProof` from it with lookups corresponding to a search binary ladder
    where the target version is the new greatest version of the label, omitting
-   redundant lookups, additionally including all other new versions of the
-   label. Verify that the binary ladder lookups are consistent with the new
-   greatest version of the label being the greatest that exists, and that the
-   lookups for new but lesser versions result in an inclusion proof.
+   redundant lookups. Verify that all lookups terminate in a way that is
+   consistent with the new greatest version of the label being the greatest that
+   exists.
+
+   Additionally obtain a second `PrefixProof` from the log entry with lookups
+   corresponding to any new versions of the label that weren't included in the
+   search binary ladder, with lookups in ascending order by version. Verify that
+   all lookups result in an inclusion proof.
 
    If all checks succeed, the label owner retains the position and new greatest
    version of the label for later verification with {{owner-algorithm}}. The
