@@ -2321,7 +2321,7 @@ the Transparency Log over an anonymous channel.
 
 Key Transparency provides users with a limited assurance that query responses
 are authentic: a network attacker will not be able to forge false responses to
-queries but may provide responses which are up to `max_behind` milliseconds
+queries, but may provide responses which are up to `max_behind` milliseconds
 stale. Key Transparency provides no privacy from network observers and does not
 have the ability to authenticate specific users to the Transparency Log. To
 mitigate these limitations, users SHOULD contact the Transparency Log over a
@@ -2331,11 +2331,11 @@ authentication for both parties.
 
 # IANA Considerations
 
-This document requests the creation of the following new IANA registries:
+This document requests the creation of the following new IANA registry:
 
 * KT Cipher Suites ({{kt-cipher-suites}})
 
-All of these registries should be under a heading of "Key Transparency",
+This registry should be under a heading of "Key Transparency",
 and assignments are made via the Specification Required policy {{!RFC8126}}. See
 {{de}} for additional information about the KT Designated Experts (DEs).
 
@@ -2530,17 +2530,17 @@ def base_binary_ladder(n):
 
     return out
 
-# Returns the set of versions that would be looked up in a binary ladder for a
-# fixed-version search where the target version is t and the greatest version of
-# the label that exists in a given version of the prefix tree is n.
-def fixed_version_binary_ladder(
+# Returns the set of versions that would be looked up in a search binary ladder
+# where the target version is t and the greatest version of the label that
+# exists in a given version of the prefix tree is n.
+def search_binary_ladder(
     t, n,
     left_inclusion = [], right_non_inclusion = []
 ):
     def would_end(v):
-        # (Proof of inclusion for a version greater than or equal to t) OR
+        # (Proof of inclusion for a version greater than t) OR
         # (Proof of non-inclusion for a version less than or equal to t)
-        return (v <= n and v >= t) or (v > n and v <= t)
+        return (v <= n and v > t) or (v > n and v <= t)
 
     def would_be_duplicate(v):
         return (v in left_inclusion) or (v in right_non_inclusion)
@@ -2551,35 +2551,11 @@ def fixed_version_binary_ladder(
 
     return filtered_out
 
-# Returns the set of versions that would be looked up in a binary ladder for a
-# monitoring query where the monitored version of the label is t.
-def monitor_binary_ladder(t, left_inclusion = []):
+# Returns the set of versions that would be looked up in a monitoring binary
+# ladder where the monitored version of the label is t.
+def monitoring_binary_ladder(t, left_inclusion = []):
     out = base_binary_ladder(t)
     filtered_out = [v for v in out if v <= t and v not in left_inclusion]
-
-    return filtered_out
-
-# Returns the set of versions that would be looked up in a binary ladder for a
-# greatest-version search where the greatest version of a label that exists
-# globally is t but the greatest version of the label in a given version of the
-# prefix tree is n.
-def greatest_version_binary_ladder(
-    t, n, distinguished,
-    left_inclusion = [], right_non_inclusion = [], same_entry = []
-):
-    def would_end(v):
-        # Proof of non-inclusion for a version less than or equal to t
-        return (v > n and v <= t)
-
-    def would_be_duplicate(v):
-        if distinguished:
-            return v in same_entry
-        else:
-            return (v in left_inclusion) or (v in right_non_inclusion)
-
-    out = base_binary_ladder(t)
-    end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
-    filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
 
     return filtered_out
 ~~~
