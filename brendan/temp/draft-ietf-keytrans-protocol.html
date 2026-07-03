@@ -4093,16 +4093,41 @@ value for each version of a label is authorized.<a href="#section-13.1-1" class=
 directly to the Service Operator and are forwarded to the Third-Party Manager if
 they pass access control. While other operations are forwarded by the Service
 Operator unchanged, <code>UpdateRequest</code> structures are forwarded to the Third-Party
-Manager with the Service Operator's signature attached:<a href="#section-13.1-2" class="pilcrow">¶</a></p>
+Manager with the Service Operator's signature over each new value:<a href="#section-13.1-2" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-13.1-3">
 <pre>
 struct {
   UpdateRequest request;
-  opaque signature&lt;0..2^16-1&gt;;
+  optional&lt;uint64&gt; last;
+
+  opaque label&lt;0..2^8-1&gt;;
+  optional&lt;uint32&gt; greatest_version;
+  UpdateValue values&lt;0..2^8-1&gt;;
+
+  uint32 signed_version;
 } ManagerUpdateRequest;
 </pre><a href="#section-13.1-3" class="pilcrow">¶</a>
 </div>
-<p id="section-13.1-4">The signature is computed as described in <a href="#update-format" class="auto internal xref">Section 10.5</a>.<a href="#section-13.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.1-4">This structure is the same as <code>UpdateRequest</code>, except that the <code>values</code> field is
+an array of <code>UpdateValue</code> structures with the Service Operator's signature over
+each value, computed as described in <a href="#update-format" class="auto internal xref">Section 10.5</a>.<a href="#section-13.1-4" class="pilcrow">¶</a></p>
+<p id="section-13.1-5">This structure also contains a <code>signed_version</code> field. If <code>values</code> is empty, the
+<code>signed_version</code> field is always zero. If <code>values</code> is non-empty, the
+<code>signed_version</code> field contains the version that was used in the computation of
+the Service Operator's signature over the first element of <code>values</code>.<a href="#section-13.1-5" class="pilcrow">¶</a></p>
+<p id="section-13.1-6">If <code>values</code> is non-empty and <code>signed_version</code> is greater than the next greatest
+version of the label to be created, the Manager <span class="bcp14">MUST</span> insert a sufficient number
+of "dummy" entries into the Transparency Log's prefix tree such that the next
+greatest version of the label to be created is <code>signed_version</code>, and sequence at
+least one new log entry containing the updated prefix tree root, before creating
+the versions requested in the <code>ManagerUpdateRequest</code>. These dummy entries in the
+prefix tree map the VRF output for the label-version pair to an all-zero
+commitment. As a result, the Manager will also need to provide an
+<code>UpdateResponse</code> to the user that covers the dummy versions of the label before
+providing an <code>UpdateResponse</code> that covers the requested versions.<a href="#section-13.1-6" class="pilcrow">¶</a></p>
+<p id="section-13.1-7">If <code>signed_version</code> is less than the next greatest version of the label to be
+created, this generally indicates a bug in the Service Operator and the request
+<span class="bcp14">MUST</span> be rejected by the Manager.<a href="#section-13.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="auditing">
@@ -4226,7 +4251,7 @@ include allowing users to gossip with each other, or allowing users to contact
 the Transparency Log over an anonymous channel.<a href="#section-14-4" class="pilcrow">¶</a></p>
 <p id="section-14-5">Key Transparency provides users with a limited assurance that query responses
 are authentic: a network attacker will not be able to forge false responses to
-queries but may provide responses which are up to <code>max_behind</code> milliseconds
+queries, but may provide responses which are up to <code>max_behind</code> milliseconds
 stale. Key Transparency provides no privacy from network observers and does not
 have the ability to authenticate specific users to the Transparency Log. To
 mitigate these limitations, users <span class="bcp14">SHOULD</span> contact the Transparency Log over a
@@ -4239,13 +4264,13 @@ authentication for both parties.<a href="#section-14-5" class="pilcrow">¶</a></
       <h2 id="name-iana-considerations">
 <a href="#section-15" class="section-number selfRef">15. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-15-1">This document requests the creation of the following new IANA registries:<a href="#section-15-1" class="pilcrow">¶</a></p>
+<p id="section-15-1">This document requests the creation of the following new IANA registry:<a href="#section-15-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-15-2.1">
           <p id="section-15-2.1.1">KT Cipher Suites (<a href="#kt-cipher-suites" class="auto internal xref">Section 15.1</a>)<a href="#section-15-2.1.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-15-3">All of these registries should be under a heading of "Key Transparency",
+<p id="section-15-3">This registry should be under a heading of "Key Transparency",
 and assignments are made via the Specification Required policy <span>[<a href="#RFC8126" class="cite xref">RFC8126</a>]</span>. See
 <a href="#de" class="auto internal xref">Section 15.2</a> for additional information about the KT Designated Experts (DEs).<a href="#section-15-3" class="pilcrow">¶</a></p>
 <p id="section-15-4">RFC EDITOR: Please replace XXXX throughout with the RFC number assigned to
@@ -4585,17 +4610,17 @@ def base_binary_ladder(n):
 
     return out
 
-# Returns the set of versions that would be looked up in a binary ladder for a
-# fixed-version search where the target version is t and the greatest version of
-# the label that exists in a given version of the prefix tree is n.
-def fixed_version_binary_ladder(
+# Returns the set of versions that would be looked up in a search binary ladder
+# where the target version is t and the greatest version of the label that
+# exists in a given version of the prefix tree is n.
+def search_binary_ladder(
     t, n,
     left_inclusion = [], right_non_inclusion = []
 ):
     def would_end(v):
-        # (Proof of inclusion for a version greater than or equal to t) OR
+        # (Proof of inclusion for a version greater than t) OR
         # (Proof of non-inclusion for a version less than or equal to t)
-        return (v &lt;= n and v &gt;= t) or (v &gt; n and v &lt;= t)
+        return (v &lt;= n and v &gt; t) or (v &gt; n and v &lt;= t)
 
     def would_be_duplicate(v):
         return (v in left_inclusion) or (v in right_non_inclusion)
@@ -4606,35 +4631,11 @@ def fixed_version_binary_ladder(
 
     return filtered_out
 
-# Returns the set of versions that would be looked up in a binary ladder for a
-# monitoring query where the monitored version of the label is t.
-def monitor_binary_ladder(t, left_inclusion = []):
+# Returns the set of versions that would be looked up in a monitoring binary
+# ladder where the monitored version of the label is t.
+def monitoring_binary_ladder(t, left_inclusion = []):
     out = base_binary_ladder(t)
     filtered_out = [v for v in out if v &lt;= t and v not in left_inclusion]
-
-    return filtered_out
-
-# Returns the set of versions that would be looked up in a binary ladder for a
-# greatest-version search where the greatest version of a label that exists
-# globally is t but the greatest version of the label in a given version of the
-# prefix tree is n.
-def greatest_version_binary_ladder(
-    t, n, distinguished,
-    left_inclusion = [], right_non_inclusion = [], same_entry = []
-):
-    def would_end(v):
-        # Proof of non-inclusion for a version less than or equal to t
-        return (v &gt; n and v &lt;= t)
-
-    def would_be_duplicate(v):
-        if distinguished:
-            return v in same_entry
-        else:
-            return (v in left_inclusion) or (v in right_non_inclusion)
-
-    out = base_binary_ladder(t)
-    end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
-    filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
 
     return filtered_out
 </pre><a href="#appendix-B-2" class="pilcrow">¶</a>

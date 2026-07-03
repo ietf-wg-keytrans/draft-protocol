@@ -2403,14 +2403,46 @@ Table of Contents
    Manager if they pass access control.  While other operations are
    forwarded by the Service Operator unchanged, UpdateRequest structures
    are forwarded to the Third-Party Manager with the Service Operator's
-   signature attached:
+   signature over each new value:
 
    struct {
      UpdateRequest request;
-     opaque signature<0..2^16-1>;
+     optional<uint64> last;
+
+     opaque label<0..2^8-1>;
+     optional<uint32> greatest_version;
+     UpdateValue values<0..2^8-1>;
+
+     uint32 signed_version;
    } ManagerUpdateRequest;
 
-   The signature is computed as described in Section 10.5.
+   This structure is the same as UpdateRequest, except that the values
+   field is an array of UpdateValue structures with the Service
+   Operator's signature over each value, computed as described in
+   Section 10.5.
+
+   This structure also contains a signed_version field.  If values is
+   empty, the signed_version field is always zero.  If values is non-
+   empty, the signed_version field contains the version that was used in
+   the computation of the Service Operator's signature over the first
+   element of values.
+
+   If values is non-empty and signed_version is greater than the next
+   greatest version of the label to be created, the Manager MUST insert
+   a sufficient number of "dummy" entries into the Transparency Log's
+   prefix tree such that the next greatest version of the label to be
+   created is signed_version, and sequence at least one new log entry
+   containing the updated prefix tree root, before creating the versions
+   requested in the ManagerUpdateRequest.  These dummy entries in the
+   prefix tree map the VRF output for the label-version pair to an all-
+   zero commitment.  As a result, the Manager will also need to provide
+   an UpdateResponse to the user that covers the dummy versions of the
+   label before providing an UpdateResponse that covers the requested
+   versions.
+
+   If signed_version is less than the next greatest version of the label
+   to be created, this generally indicates a bug in the Service Operator
+   and the request MUST be rejected by the Manager.
 
 13.2.  Auditing
 
@@ -2527,7 +2559,7 @@ Table of Contents
 
    Key Transparency provides users with a limited assurance that query
    responses are authentic: a network attacker will not be able to forge
-   false responses to queries but may provide responses which are up to
+   false responses to queries, but may provide responses which are up to
    max_behind milliseconds stale.  Key Transparency provides no privacy
    from network observers and does not have the ability to authenticate
    specific users to the Transparency Log. To mitigate these
@@ -2538,14 +2570,14 @@ Table of Contents
 15.  IANA Considerations
 
    This document requests the creation of the following new IANA
-   registries:
+   registry:
 
    *  KT Cipher Suites (Section 15.1)
 
-   All of these registries should be under a heading of "Key
-   Transparency", and assignments are made via the Specification
-   Required policy [RFC8126].  See Section 15.2 for additional
-   information about the KT Designated Experts (DEs).
+   This registry should be under a heading of "Key Transparency", and
+   assignments are made via the Specification Required policy [RFC8126].
+   See Section 15.2 for additional information about the KT Designated
+   Experts (DEs).
 
    RFC EDITOR: Please replace XXXX throughout with the RFC number
    assigned to this document
@@ -2822,17 +2854,17 @@ Appendix B.  Binary Ladder
 
        return out
 
-   # Returns the set of versions that would be looked up in a binary ladder for a
-   # fixed-version search where the target version is t and the greatest version of
-   # the label that exists in a given version of the prefix tree is n.
-   def fixed_version_binary_ladder(
+   # Returns the set of versions that would be looked up in a search binary ladder
+   # where the target version is t and the greatest version of the label that
+   # exists in a given version of the prefix tree is n.
+   def search_binary_ladder(
        t, n,
        left_inclusion = [], right_non_inclusion = []
    ):
        def would_end(v):
-           # (Proof of inclusion for a version greater than or equal to t) OR
+           # (Proof of inclusion for a version greater than t) OR
            # (Proof of non-inclusion for a version less than or equal to t)
-           return (v <= n and v >= t) or (v > n and v <= t)
+           return (v <= n and v > t) or (v > n and v <= t)
 
        def would_be_duplicate(v):
            return (v in left_inclusion) or (v in right_non_inclusion)
@@ -2843,35 +2875,11 @@ Appendix B.  Binary Ladder
 
        return filtered_out
 
-   # Returns the set of versions that would be looked up in a binary ladder for a
-   # monitoring query where the monitored version of the label is t.
-   def monitor_binary_ladder(t, left_inclusion = []):
+   # Returns the set of versions that would be looked up in a monitoring binary
+   # ladder where the monitored version of the label is t.
+   def monitoring_binary_ladder(t, left_inclusion = []):
        out = base_binary_ladder(t)
        filtered_out = [v for v in out if v <= t and v not in left_inclusion]
-
-       return filtered_out
-
-   # Returns the set of versions that would be looked up in a binary ladder for a
-   # greatest-version search where the greatest version of a label that exists
-   # globally is t but the greatest version of the label in a given version of the
-   # prefix tree is n.
-   def greatest_version_binary_ladder(
-       t, n, distinguished,
-       left_inclusion = [], right_non_inclusion = [], same_entry = []
-   ):
-       def would_end(v):
-           # Proof of non-inclusion for a version less than or equal to t
-           return (v > n and v <= t)
-
-       def would_be_duplicate(v):
-           if distinguished:
-               return v in same_entry
-           else:
-               return (v in left_inclusion) or (v in right_non_inclusion)
-
-       out = base_binary_ladder(t)
-       end = next((i+1 for i,v in enumerate(out) if would_end(v)), len(out))
-       filtered_out = [v for v in out[:end] if not would_be_duplicate(v)]
 
        return filtered_out
 
