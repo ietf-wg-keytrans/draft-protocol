@@ -1852,8 +1852,8 @@ Table of Contents
       ladder.
 
    The timestamps are provided to allow both the client and server to
-   verify that the user's requested starting position is unexpired and
-   distinguished.
+   verify the precondition that the user's requested starting position
+   is unexpired and distinguished.
 
 11.3.6.  Owner Monitoring
 
@@ -1872,33 +1872,27 @@ Table of Contents
    For a label owner to verify that some new versions of a label have
    been correctly inserted, the following is provided:
 
-   *  The timestamps necessary to identify the first non-distinguished
-      log entry on the previous tree's frontier, as described in the
-      algorithm in Section 9.1.
+   *  The timestamp of each log entry on the path from the root to the
+      parent of the rightmost log entry of the previous tree, stopping
+      if a non-distinguished log entry is established.
 
-   *  The timestamps necessary to determine whether the log entry where
-      the new versions were added is distinguished.
+   *  The timestamp of each log entry on the path from the root to the
+      parent of the log entry where the new versions were inserted,
+      stopping if a non-distinguished log entry is established.
 
-   *  For each log entry that reaches step 2.2 of the algorithm in
-      Section 9.1, a PrefixProof corresponding to a binary ladder.
-
-   *  If step 4 is reached, a PrefixProof corresponding to a binary
-      ladder from the log entry where the new versions were added.
-
-   *  If multiple new versions were created, a PrefixProof from the log
-      entry where the new versions were added with the lookups specified
-      in either step 3 or 4 of the algorithm in Section 9.1.
+   *  Any PrefixProof structures that may be required by steps 2.2, 3,
+      or 4 of the algorithm in Section 9.1.
 
 12.  User Operations
 
    The basic user operations are organized as a request-response
    protocol between a user and the Transparency Log.
 
-   Users MUST retain the most recent TreeHead they've successfully
-   verified as part of any query response and populate the last field of
-   any query request with the tree_size from this TreeHead.  This
-   ensures that all operations performed by the user return consistent
-   results.
+   Users MUST retain the most recent TreeHead and AuditorTreeHead
+   they've successfully verified as part of any query response, and
+   populate the last field of any subsequent query request with the
+   tree_size of the last TreeHead.  This ensures that all operations
+   performed by the user return consistent results.
 
    Modifications to a user's state MUST only be persisted once the query
    response has been fully verified.  Queries that fail full
@@ -1964,21 +1958,26 @@ Table of Contents
 
    2.  Verify that the expected number of entries is present in
        binary_ladder and that no commitment value is provided for the
-       target version.  Compute the VRF output for each version of the
-       label from the provided proofs.
+       target version.
 
-   3.  Verify the proof in search as described in Section 11.3.
+   3.  Compute the VRF output for each version of the label from the
+       proofs in binary_ladder.  Compute the commitment to the value of
+       the target version with opening and value.
 
-   4.  Compute a candidate root value for the tree from the proof in
+   4.  If SearchRequest.version is absent, verify the proof in search as
+       described in Section 6.3.  Otherwise, verify the proof in search
+       as described in Section 7.2.
+
+   5.  Compute a candidate root value for the tree from the proof in
        search.inclusion and any previously retained full subtrees of the
        log tree.
 
-   5.  With the candidate root value for the tree, verify FullTreeHead
+   6.  With the candidate root value for the tree, verify FullTreeHead
        as described in Section 10.4.
 
 12.2.  Contact Monitor
 
-   If a Transparency Log is deployed in Contact Monitoring mode, users
+   If the Transparency Log is deployed in Contact Monitoring mode, users
    that looked up a label initiate a Contact Monitoring operation by
    submitting a ContactMonitorRequest to the Transparency Log containing
    information about the label they wish to monitor.
@@ -2026,12 +2025,12 @@ Table of Contents
    Monitoring mode MUST be able to monitor versions of a label they
    previously looked up, even if they would no longer be allowed to make
    the same query.  One simple way for a user to prove that they were
-   previously allowed to lookup a particular version of a label would be
-   for them to provide the corresponding commitment opening.
+   previously allowed to look up a particular version of a label would
+   be for them to provide the corresponding commitment opening.
 
 12.3.  Owner Initialization
 
-   Users that wish to initialize their owner state for a label submit a
+   Users that wish to initialize their owner state for a label submit an
    OwnerInitRequest to the Transparency Log containing the label they
    wish to take ownership of and their desired starting log entry.
 
@@ -2072,13 +2071,15 @@ Table of Contents
    Users verify an OwnerInitResponse by following these steps:
 
    1.  Verify that the number of entries in greatest_versions is less
-       than or equal to the number of computed log entries, and that
-       greatest_versions is in descending order.
+       than or equal to the number of log entries in the computed list,
+       and that greatest_versions is in descending order.
 
    2.  Verify that the expected number of entries is present in
        binary_ladder and that a commitment is provided for each version
        in greatest_versions.  (Note that the existence of a version does
-       not require the existence of lesser versions.)
+       not require the existence of all lesser versions.)  Compute the
+       VRF output for each version of the label from the proofs in
+       binary_ladder.
 
    3.  Verify the proof in init as described in the first algorithm of
        Section 8.3.
@@ -2106,8 +2107,8 @@ Table of Contents
    } OwnerMonitorRequest;
 
    The entries list contains the label owner's monitoring state for
-   versions of the label that have not yet been included in a
-   distinguished log entry.  The start field contains the rightmost
+   versions of the label that have not yet been proven to be included in
+   a distinguished log entry.  The start field contains the rightmost
    distinguished log entry that the label owner has verified as correct.
    The greatest_version field contains the greatest version of the label
    that the label owner is aware of, if any.
@@ -2154,9 +2155,9 @@ Table of Contents
 
 12.5.  Updating a Label
 
-   Users initiate an Update operation by submitting an UpdateRequest to
-   the Transparency Log containing the label and the new values to
-   store.
+   Users that wish to create one or more new versions of a label they
+   own submit an UpdateRequest to the Transparency Log containing the
+   label and the new values to store.
 
    struct {
      opaque value<0..2^32-1>;
@@ -2173,16 +2174,17 @@ Table of Contents
    The greatest_version field contains the greatest version of the label
    that the user is aware of, if any.  The values field contains the
    values for the new versions of the label that the user would like to
-   create.  The values field MAY be empty if the user only wishes to be
-   informed of already-existing versions of the label greater than
-   greatest_version.
+   create.  The values field MAY be empty to indicate that the user only
+   wishes to be informed of already-existing versions of the label
+   greater than greatest_version, rather than create any new ones.
 
    If greatest_version matches the current greatest version of the label
-   that exists and values is non-empty, the Transparency Log adds the
-   new values for the label to the next log entry.  Version counters are
-   assigned sequentially and in the same order as given in values.  If
-   the greatest_version field does not match the current greatest
-   version of the label that exists, values is disregarded.
+   that exists and values is non-empty, the Transparency Log inserts the
+   new versions of the label into the prefix tree and sequences a new
+   log entry.  Version counters are assigned sequentially and in the
+   same order as given in values.  If the greatest_version field does
+   not match the current greatest version of the label that exists,
+   values is disregarded.
 
    The Transparency Log returns an UpdateResponse structure:
 
@@ -2214,13 +2216,13 @@ Table of Contents
    UpdateRequest.values was disregarded by the Transparency Log.
    Inversely, if UpdateResponse.values is empty, this indicates that all
    of the new versions of the label in UpdateRequest.values were
-   successfully created and no versions other than those in
+   successfully created and no versions of the label other than those in
    UpdateRequest.values were created in the log entry position.
 
    The info field contains an UpdateInfo for each new version of the
    label created in the log entry position.  The entries of info
    correspond to the entries of UpdateResponse.values if it is non-
-   empty, or UpdateRequest.values if not.
+   empty, and to the entries of UpdateRequest.values otherwise.
 
    The opening field of an UpdateInfo structure contains the commitment
    opening that was chosen for the version of the label and, if in
@@ -2233,7 +2235,10 @@ Table of Contents
    greatest_version, the commitment to the label's value at that version
    is provided in the commitment field of the BinaryLadderStep.
 
-   Users verify an UpdateResponse by following these steps:
+   The update field contains the output of updating the user's view of
+   the tree to match TreeHead.tree_size, followed by executing the
+   algorithm in Section 9.1.  Users verify an UpdateResponse by
+   following these steps:
 
    1.  Verify that position is to the right of where the previous
        greatest version of the label was inserted.  If this is the first

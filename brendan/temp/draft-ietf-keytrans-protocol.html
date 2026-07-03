@@ -32,7 +32,7 @@ timely manner.
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.1
+    wcwidth 0.8.2
 -->
 <link href="draft-ietf-keytrans-protocol.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -3473,8 +3473,9 @@ requested starting position.<a href="#section-11.3.5-2.1.1" class="pilcrow">¶</
 <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, a <code>PrefixProof</code> corresponding to a search binary ladder.<a href="#section-11.3.5-2.2.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
-<p id="section-11.3.5-3">The timestamps are provided to allow both the client and server to verify that
-the user's requested starting position is unexpired and distinguished.<a href="#section-11.3.5-3" class="pilcrow">¶</a></p>
+<p id="section-11.3.5-3">The timestamps are provided to allow both the client and server to verify the
+precondition that the user's requested starting position is unexpired and
+distinguished.<a href="#section-11.3.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="owner-monitoring">
@@ -3504,26 +3505,18 @@ the user's requested starting position is unexpired and distinguished.<a href="#
 correctly inserted, the following is provided:<a href="#section-11.3.7-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-11.3.7-2.1">
-              <p id="section-11.3.7-2.1.1">The timestamps necessary to identify the first non-distinguished log entry on
-the previous tree's frontier, as described in the algorithm in
-<a href="#update-algorithm" class="auto internal xref">Section 9.1</a>.<a href="#section-11.3.7-2.1.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.7-2.1.1">The timestamp of each log entry on the path from the root to the parent of the
+rightmost log entry of the previous tree, stopping if a non-distinguished log
+entry is established.<a href="#section-11.3.7-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-11.3.7-2.2">
-              <p id="section-11.3.7-2.2.1">The timestamps necessary to determine whether the log entry where the new
-versions were added is distinguished.<a href="#section-11.3.7-2.2.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.7-2.2.1">The timestamp of each log entry on the path from the root to the parent of the
+log entry where the new versions were inserted, stopping if a
+non-distinguished log entry is established.<a href="#section-11.3.7-2.2.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-11.3.7-2.3">
-              <p id="section-11.3.7-2.3.1">For each log entry that reaches step 2.2 of the algorithm in
-<a href="#update-algorithm" class="auto internal xref">Section 9.1</a>, a <code>PrefixProof</code> corresponding to a binary ladder.<a href="#section-11.3.7-2.3.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-11.3.7-2.4">
-              <p id="section-11.3.7-2.4.1">If step 4 is reached, a <code>PrefixProof</code> corresponding to a binary ladder from
-the log entry where the new versions were added.<a href="#section-11.3.7-2.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-11.3.7-2.5">
-              <p id="section-11.3.7-2.5.1">If multiple new versions were created, a <code>PrefixProof</code> from the log entry
-where the new versions were added with the lookups specified in either step 3
-or 4 of the algorithm in <a href="#update-algorithm" class="auto internal xref">Section 9.1</a>.<a href="#section-11.3.7-2.5.1" class="pilcrow">¶</a></p>
+              <p id="section-11.3.7-2.3.1">Any <code>PrefixProof</code> structures that may be required by steps 2.2, 3, or 4 of the
+algorithm in <a href="#update-algorithm" class="auto internal xref">Section 9.1</a>.<a href="#section-11.3.7-2.3.1" class="pilcrow">¶</a></p>
 </li>
           </ul>
 </section>
@@ -3539,10 +3532,11 @@ or 4 of the algorithm in <a href="#update-algorithm" class="auto internal xref">
       </h2>
 <p id="section-12-1">The basic user operations are organized as a request-response protocol between a
 user and the Transparency Log.<a href="#section-12-1" class="pilcrow">¶</a></p>
-<p id="section-12-2">Users <span class="bcp14">MUST</span> retain the most recent <code>TreeHead</code> they've successfully verified as
-part of any query response and populate the <code>last</code> field of any query request
-with the <code>tree_size</code> from this <code>TreeHead</code>. This ensures that all operations
-performed by the user return consistent results.<a href="#section-12-2" class="pilcrow">¶</a></p>
+<p id="section-12-2">Users <span class="bcp14">MUST</span> retain the most recent <code>TreeHead</code> and <code>AuditorTreeHead</code> they've
+successfully verified as part of any query response, and populate the <code>last</code>
+field of any subsequent query request with the <code>tree_size</code> of the last
+<code>TreeHead</code>. This ensures that all operations performed by the user return
+consistent results.<a href="#section-12-2" class="pilcrow">¶</a></p>
 <p id="section-12-3">Modifications to a user's state <span class="bcp14">MUST</span> only be persisted once the query response
 has been fully verified. Queries that fail full verification <span class="bcp14">MUST NOT</span> modify the
 user's protocol state in any way.<a href="#section-12-3" class="pilcrow">¶</a></p>
@@ -3551,7 +3545,7 @@ user's protocol state in any way.<a href="#section-12-3" class="pilcrow">¶</a><
         <h3 id="name-search">
 <a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-search" class="section-name selfRef">Search</a>
         </h3>
-<p id="section-12.1-1">Users initiate a Search operation by submitting a SearchRequest to the
+<p id="section-12.1-1">Users initiate a Search operation by submitting a <code>SearchRequest</code> to the
 Transparency Log containing the label that they wish to search for. Users can
 optionally specify a version of the label that they'd like to receive, if not
 the greatest one.<a href="#section-12.1-1" class="pilcrow">¶</a></p>
@@ -3608,19 +3602,25 @@ greatest-version search for the requested label.<a href="#section-12.1-7" class=
 </li>
           <li id="section-12.1-9.2">
             <p id="section-12.1-9.2.1">Verify that the expected number of entries is present in <code>binary_ladder</code> and
-that no commitment value is provided for the target version. Compute the VRF
-output for each version of the label from the provided proofs.<a href="#section-12.1-9.2.1" class="pilcrow">¶</a></p>
+that no commitment value is provided for the target version.<a href="#section-12.1-9.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.1-9.3">
-            <p id="section-12.1-9.3.1">Verify the proof in <code>search</code> as described in <a href="#proof-combined-tree" class="auto internal xref">Section 11.3</a>.<a href="#section-12.1-9.3.1" class="pilcrow">¶</a></p>
+            <p id="section-12.1-9.3.1">Compute the VRF output for each version of the label from the proofs in
+<code>binary_ladder</code>. Compute the commitment to the value of the target version
+with <code>opening</code> and <code>value</code>.<a href="#section-12.1-9.3.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.1-9.4">
-            <p id="section-12.1-9.4.1">Compute a candidate root value for the tree from the proof in
-<code>search.inclusion</code> and any previously retained full subtrees of the log tree.<a href="#section-12.1-9.4.1" class="pilcrow">¶</a></p>
+            <p id="section-12.1-9.4.1">If <code>SearchRequest.version</code> is absent, verify the proof in <code>search</code> as
+described in <a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>. Otherwise, verify the proof in <code>search</code> as
+described in <a href="#fv-algorithm" class="auto internal xref">Section 7.2</a>.<a href="#section-12.1-9.4.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.1-9.5">
-            <p id="section-12.1-9.5.1">With the candidate root value for the tree, verify <code>FullTreeHead</code> as
-described in <a href="#full-tree-head-verification" class="auto internal xref">Section 10.4</a>.<a href="#section-12.1-9.5.1" class="pilcrow">¶</a></p>
+            <p id="section-12.1-9.5.1">Compute a candidate root value for the tree from the proof in
+<code>search.inclusion</code> and any previously retained full subtrees of the log tree.<a href="#section-12.1-9.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li id="section-12.1-9.6">
+            <p id="section-12.1-9.6.1">With the candidate root value for the tree, verify <code>FullTreeHead</code> as
+described in <a href="#full-tree-head-verification" class="auto internal xref">Section 10.4</a>.<a href="#section-12.1-9.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 </section>
@@ -3630,9 +3630,9 @@ described in <a href="#full-tree-head-verification" class="auto internal xref">S
         <h3 id="name-contact-monitor">
 <a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-contact-monitor" class="section-name selfRef">Contact Monitor</a>
         </h3>
-<p id="section-12.2-1">If a Transparency Log is deployed in Contact Monitoring mode, users that looked
-up a label initiate a Contact Monitoring operation by submitting a
-ContactMonitorRequest to the Transparency Log containing information about the
+<p id="section-12.2-1">If the Transparency Log is deployed in Contact Monitoring mode, users that
+looked up a label initiate a Contact Monitoring operation by submitting a
+<code>ContactMonitorRequest</code> to the Transparency Log containing information about the
 label they wish to monitor.<a href="#section-12.2-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.2-2">
 <pre>
@@ -3649,11 +3649,11 @@ struct {
 } ContactMonitorRequest;
 </pre><a href="#section-12.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-12.2-3">The Transparency Log verifies that each MonitorMapEntry in <code>entries</code> is sorted
+<p id="section-12.2-3">The Transparency Log verifies that each <code>MonitorMapEntry</code> in <code>entries</code> is sorted
 in ascending order by <code>position</code>, that no <code>position</code> or <code>version</code> is duplicate,
 and that <code>position</code> always lies on the direct path of the first log entry to
-contain the associated <code>version</code> of the label. In turn, the Transparency Log
-responds with a ContactMonitorResponse structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
+contain the associated version of the label. In turn, the Transparency Log
+responds with a <code>ContactMonitorResponse</code> structure:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.2-4">
 <pre>
 struct {
@@ -3664,15 +3664,16 @@ struct {
 </div>
 <p id="section-12.2-5">The <code>monitor</code> field contains the output of updating the user's view of the tree
 to match <code>TreeHead.tree_size</code> followed by executing the algorithm in
-<a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>. Users verify a ContactMonitorResponse by following these
-steps:<a href="#section-12.2-5" class="pilcrow">¶</a></p>
+<a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>. Users verify a <code>ContactMonitorResponse</code> by following
+these steps:<a href="#section-12.2-5" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.2-6">
 <li id="section-12.2-6.1">
             <p id="section-12.2-6.1.1">Verify the proof in <code>monitor</code> as described in <a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>.<a href="#section-12.2-6.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.2-6.2">
             <p id="section-12.2-6.2.1">Compute a candidate root value for the tree from the proof in
-<code>monitor.inclusion</code> and any previously retained full subtrees of the log tree.<a href="#section-12.2-6.2.1" class="pilcrow">¶</a></p>
+<code>monitor.inclusion</code> and any previously retained full subtrees of the log
+tree.<a href="#section-12.2-6.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.2-6.3">
             <p id="section-12.2-6.3.1">With the candidate root value for the tree, verify <code>FullTreeHead</code> as
@@ -3683,7 +3684,7 @@ described in <a href="#full-tree-head-verification" class="auto internal xref">S
 of a Transparency Log deployed in Contact Monitoring mode <span class="bcp14">MUST</span> be able to
 monitor versions of a label they previously looked up, even if they would no
 longer be allowed to make the same query. One simple way for a user to prove
-that they were previously allowed to lookup a particular version of a label
+that they were previously allowed to look up a particular version of a label
 would be for them to provide the corresponding commitment opening.<a href="#section-12.2-7" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -3692,8 +3693,8 @@ would be for them to provide the corresponding commitment opening.<a href="#sect
         <h3 id="name-owner-initialization-2">
 <a href="#section-12.3" class="section-number selfRef">12.3. </a><a href="#name-owner-initialization-2" class="section-name selfRef">Owner Initialization</a>
         </h3>
-<p id="section-12.3-1">Users that wish to initialize their owner state for a label submit a
-OwnerInitRequest to the Transparency Log containing the label they wish to
+<p id="section-12.3-1">Users that wish to initialize their owner state for a label submit an
+<code>OwnerInitRequest</code> to the Transparency Log containing the label they wish to
 take ownership of and their desired starting log entry.<a href="#section-12.3-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.3-2">
 <pre>
@@ -3707,7 +3708,7 @@ struct {
 </div>
 <p id="section-12.3-3">The Transparency Log verifies that <code>start</code> identifies a log entry that is
 unexpired and distinguished. In turn, the Transparency Log responds with an
-OwnerInitResponse structure:<a href="#section-12.3-3" class="pilcrow">¶</a></p>
+<code>OwnerInitResponse</code> structure:<a href="#section-12.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.3-4">
 <pre>
 struct {
@@ -3726,22 +3727,23 @@ exist.<a href="#section-12.3-5" class="pilcrow">¶</a></p>
 <p id="section-12.3-6">The <code>binary_ladder</code> field contains one entry for each version computed in step 3
 of the first algorithm in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, in ascending order by version. If
 a version of the label exists, the commitment to the label's value at that
-version is provided in the <code>commitment</code> field of the BinaryLadderStep.<a href="#section-12.3-6" class="pilcrow">¶</a></p>
+version is provided in the <code>commitment</code> field of the <code>BinaryLadderStep</code>.<a href="#section-12.3-6" class="pilcrow">¶</a></p>
 <p id="section-12.3-7">The <code>init</code> field contains the output of updating the user's view of the tree to
 match <code>TreeHead.tree_size</code> followed by executing the first algorithm in
 <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-12.3-7" class="pilcrow">¶</a></p>
-<p id="section-12.3-8">Users verify an OwnerInitResponse by following these steps:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
+<p id="section-12.3-8">Users verify an <code>OwnerInitResponse</code> by following these steps:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.3-9">
 <li id="section-12.3-9.1">
             <p id="section-12.3-9.1.1">Verify that the number of entries in <code>greatest_versions</code> is less than or
-equal to the number of computed log entries, and that <code>greatest_versions</code> is
-in descending order.<a href="#section-12.3-9.1.1" class="pilcrow">¶</a></p>
+equal to the number of log entries in the computed list, and that
+<code>greatest_versions</code> is in descending order.<a href="#section-12.3-9.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.3-9.2">
             <p id="section-12.3-9.2.1">Verify that the expected number of entries is present in <code>binary_ladder</code> and
 that a commitment is provided for each version in <code>greatest_versions</code>. (Note
-that the existence of a version does not require the existence of lesser
-versions.)<a href="#section-12.3-9.2.1" class="pilcrow">¶</a></p>
+that the existence of a version does not require the existence of all lesser
+versions.) Compute the VRF output for each version of the label from the
+proofs in <code>binary_ladder</code>.<a href="#section-12.3-9.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.3-9.3">
             <p id="section-12.3-9.3.1">Verify the proof in <code>init</code> as described in the first algorithm of
@@ -3763,8 +3765,8 @@ described in <a href="#full-tree-head-verification" class="auto internal xref">S
         <h3 id="name-owner-monitoring-2">
 <a href="#section-12.4" class="section-number selfRef">12.4. </a><a href="#name-owner-monitoring-2" class="section-name selfRef">Owner Monitoring</a>
         </h3>
-<p id="section-12.4-1">Users that wish to monitor a label they own submit an OwnerMonitorRequest to the
-Transparency Log containing the label they wish to monitor and their current
+<p id="section-12.4-1">Users that wish to monitor a label they own submit an <code>OwnerMonitorRequest</code> to
+the Transparency Log containing the label they wish to monitor and their current
 monitoring state.<a href="#section-12.4-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.4-2">
 <pre>
@@ -3779,17 +3781,17 @@ struct {
 </pre><a href="#section-12.4-2" class="pilcrow">¶</a>
 </div>
 <p id="section-12.4-3">The <code>entries</code> list contains the label owner's monitoring state for versions of
-the label that have not yet been included in a distinguished log entry. The
+the label that have not yet been proven to be included in a distinguished log entry. The
 <code>start</code> field contains the rightmost distinguished log entry that the label
 owner has verified as correct. The <code>greatest_version</code> field contains the
 greatest version of the label that the label owner is aware of, if any.<a href="#section-12.4-3" class="pilcrow">¶</a></p>
-<p id="section-12.4-4">The Transparency Log verifies an OwnerMonitorRequest by following these steps:<a href="#section-12.4-4" class="pilcrow">¶</a></p>
+<p id="section-12.4-4">The Transparency Log verifies an <code>OwnerMonitorRequest</code> by following these steps:<a href="#section-12.4-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.4-5">
 <li id="section-12.4-5.1">
             <p id="section-12.4-5.1.1">Verify that each MonitorMapEntry in <code>entries</code> is sorted in ascending order by
 <code>position</code>, that no <code>position</code> or <code>version</code> is duplicate, and that <code>position</code>
 always lies on the direct path of the first log entry to contain the
-associated <code>version</code> of the label.<a href="#section-12.4-5.1.1" class="pilcrow">¶</a></p>
+associated version of the label.<a href="#section-12.4-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-12.4-5.2">
             <p id="section-12.4-5.2.1">Verify that <code>start</code> is less than the size of the tree.<a href="#section-12.4-5.2.1" class="pilcrow">¶</a></p>
@@ -3801,7 +3803,7 @@ existed at <code>start</code>, that <code>greatest_version</code> is present and
 equal to that version.<a href="#section-12.4-5.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-12.4-6">In turn, the Transparency Log responds with an OwnerMonitorResponse structure:<a href="#section-12.4-6" class="pilcrow">¶</a></p>
+<p id="section-12.4-6">In turn, the Transparency Log responds with an <code>OwnerMonitorResponse</code> structure:<a href="#section-12.4-6" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.4-7">
 <pre>
 struct {
@@ -3813,7 +3815,7 @@ struct {
 <p id="section-12.4-8">The <code>monitor</code> field contains the output of updating the user's view of the tree
 to match <code>TreeHead.tree_size</code>, followed by executing the algorithm in
 <a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>, followed by executing the second algorithm in
-<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>. Users verify an OwnerMonitorResponse by following these
+<a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>. Users verify an <code>OwnerMonitorResponse</code> by following these
 steps:<a href="#section-12.4-8" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.4-9">
 <li id="section-12.4-9.1">
@@ -3837,8 +3839,9 @@ described in <a href="#full-tree-head-verification" class="auto internal xref">S
         <h3 id="name-updating-a-label-3">
 <a href="#section-12.5" class="section-number selfRef">12.5. </a><a href="#name-updating-a-label-3" class="section-name selfRef">Updating a Label</a>
         </h3>
-<p id="section-12.5-1">Users initiate an Update operation by submitting an UpdateRequest to the
-Transparency Log containing the label and the new values to store.<a href="#section-12.5-1" class="pilcrow">¶</a></p>
+<p id="section-12.5-1">Users that wish to create one or more new versions of a label they own submit an
+<code>UpdateRequest</code> to the Transparency Log containing the label and the new values
+to store.<a href="#section-12.5-1" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.5-2">
 <pre>
 struct {
@@ -3857,15 +3860,16 @@ struct {
 <p id="section-12.5-3">The <code>greatest_version</code> field contains the greatest version of the label that the
 user is aware of, if any. The <code>values</code> field contains the values for the new
 versions of the label that the user would like to create. The <code>values</code> field <span class="bcp14">MAY</span>
-be empty if the user only wishes to be informed of already-existing versions of
-the label greater than <code>greatest_version</code>.<a href="#section-12.5-3" class="pilcrow">¶</a></p>
+be empty to indicate that the user only wishes to be informed of
+already-existing versions of the label greater than <code>greatest_version</code>, rather
+than create any new ones.<a href="#section-12.5-3" class="pilcrow">¶</a></p>
 <p id="section-12.5-4">If <code>greatest_version</code> matches the current greatest version of the label that
-exists and <code>values</code> is non-empty, the Transparency Log adds the new values for
-the label to the next log entry. Version counters are assigned sequentially and
-in the same order as given in <code>values</code>. If the <code>greatest_version</code> field does not
-match the current greatest version of the label that exists, <code>values</code> is
-disregarded.<a href="#section-12.5-4" class="pilcrow">¶</a></p>
-<p id="section-12.5-5">The Transparency Log returns an UpdateResponse structure:<a href="#section-12.5-5" class="pilcrow">¶</a></p>
+exists and <code>values</code> is non-empty, the Transparency Log inserts the new versions
+of the label into the prefix tree and sequences a new log entry. Version
+counters are assigned sequentially and in the same order as given in <code>values</code>.
+If the <code>greatest_version</code> field does not match the current greatest version of
+the label that exists, <code>values</code> is disregarded.<a href="#section-12.5-4" class="pilcrow">¶</a></p>
+<p id="section-12.5-5">The Transparency Log returns an <code>UpdateResponse</code> structure:<a href="#section-12.5-5" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-12.5-6">
 <pre>
 struct {
@@ -3894,12 +3898,12 @@ ascending order by version. If <code>UpdateResponse.values</code> is non-empty, 
 indicates that <code>UpdateRequest.values</code> was disregarded by the Transparency Log.
 Inversely, if <code>UpdateResponse.values</code> is empty, this indicates that all of the
 new versions of the label in <code>UpdateRequest.values</code> were successfully created
-and no versions other than those in <code>UpdateRequest.values</code> were created in the
-log entry <code>position</code>.<a href="#section-12.5-8" class="pilcrow">¶</a></p>
+and no versions of the label other than those in <code>UpdateRequest.values</code> were
+created in the log entry <code>position</code>.<a href="#section-12.5-8" class="pilcrow">¶</a></p>
 <p id="section-12.5-9">The <code>info</code> field contains an <code>UpdateInfo</code> for each new version of the label
 created in the log entry <code>position</code>. The entries of <code>info</code> correspond to the
-entries of <code>UpdateResponse.values</code> if it is non-empty, or <code>UpdateRequest.values</code>
-if not.<a href="#section-12.5-9" class="pilcrow">¶</a></p>
+entries of <code>UpdateResponse.values</code> if it is non-empty, and to the entries of
+<code>UpdateRequest.values</code> otherwise.<a href="#section-12.5-9" class="pilcrow">¶</a></p>
 <p id="section-12.5-10">The <code>opening</code> field of an <code>UpdateInfo</code> structure contains the commitment opening
 that was chosen for the version of the label and, if in Third-Party Management
 mode, the <code>suffix</code> field contains the Service Operator's signature over the new
@@ -3909,7 +3913,9 @@ value.<a href="#section-12.5-10" class="pilcrow">¶</a></p>
 exists and is less than or equal to the user's advertised <code>greatest_version</code>,
 the commitment to the label's value at that version is provided in the
 <code>commitment</code> field of the BinaryLadderStep.<a href="#section-12.5-11" class="pilcrow">¶</a></p>
-<p id="section-12.5-12">Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-12.5-12" class="pilcrow">¶</a></p>
+<p id="section-12.5-12">The <code>update</code> field contains the output of updating the user's view of the tree
+to match <code>TreeHead.tree_size</code>, followed by executing the algorithm in
+<a href="#update-algorithm" class="auto internal xref">Section 9.1</a>. Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-12.5-12" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-12.5-13">
 <li id="section-12.5-13.1">
             <p id="section-12.5-13.1.1">Verify that <code>position</code> is to the right of where the previous greatest version
