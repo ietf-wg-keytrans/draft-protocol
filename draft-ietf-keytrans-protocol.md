@@ -2179,16 +2179,44 @@ All user queries specified in {{user-operations}} are initially sent by users
 directly to the Service Operator and are forwarded to the Third-Party Manager if
 they pass access control. While other operations are forwarded by the Service
 Operator unchanged, `UpdateRequest` structures are forwarded to the Third-Party
-Manager with the Service Operator's signature attached:
+Manager with the Service Operator's signature over each new value:
 
 ~~~ tls-presentation
 struct {
   UpdateRequest request;
-  opaque signature<0..2^16-1>;
+  optional<uint64> last;
+
+  opaque label<0..2^8-1>;
+  optional<uint32> greatest_version;
+  UpdateValue values<0..2^8-1>;
+
+  uint32 signed_version;
 } ManagerUpdateRequest;
 ~~~
 
-The signature is computed as described in {{update-format}}.
+This structure is the same as `UpdateRequest`, except that the `values` field is
+an array of `UpdateValue` structures with the Service Operator's signature over
+each value, computed as described in {{update-format}}.
+
+This structure also contains a `signed_version` field. If `values` is empty, the
+`signed_version` field is always zero. If `values` is non-empty, the
+`signed_version` field contains the version that was used in the computation of
+the Service Operator's signature over the first element of `values`.
+
+If `values` is non-empty and `signed_version` is greater than the next greatest
+version of the label to be created, the Manager MUST insert a sufficient number
+of "dummy" entries into the Transparency Log's prefix tree such that the next
+greatest version of the label to be created is `signed_version`, and sequence at
+least one new log entry containing the updated prefix tree root, before creating
+the versions requested in the `ManagerUpdateRequest`. These dummy entries in the
+prefix tree map the VRF output for the label-version pair to an all-zero
+commitment. As a result, the Manager will also need to provide an
+`UpdateResponse` to the user that covers the dummy versions of the label before
+providing an `UpdateResponse` that covers the requested versions.
+
+If `signed_version` is less than the next greatest version of the label to be
+created, this generally indicates a bug in the Service Operator and the request
+MUST be rejected by the Manager.
 
 ## Auditing
 
