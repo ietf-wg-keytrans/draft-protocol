@@ -2068,7 +2068,8 @@ response to a single `UpdateRequest`, each corresponding to a subsequent
 - `values` remains unchanged until the first `UpdateResponse` with an empty
   `values` field is received, and is empty from then on.
 
-## Credentials
+
+# Credentials
 
 **Credentials** are proofs that are designed to be sent directly between users
 and verified without direct interaction with the Transparency Log. They are
@@ -2088,6 +2089,9 @@ enum {
 
 struct {
   CredentialType credential_type;
+  uint64 position;
+
+  opaque label<0..2^8-1>;
 
   uint32 version;
   opaque opening[Nc];
@@ -2096,52 +2100,82 @@ struct {
   BinaryLadderStep binary_ladder<0..2^8-1>;
   select (Credential.credential_type) {
     case standard:
-      uint64 tree_size;
       PrefixProof distinguished;
     case provisional:
-      FullTreeHead full_tree_head;
+      TreeHead tree_head;
       CombinedTreeProof search;
   };
 } Credential;
 ~~~
 
+In essence, credentials in KT are implemented as a greatest-version search for a
+user's `label`. As such, the fields `version`, `opening`, `value`, and
+`binary_ladder` are the same as they would be in a `SearchResponse` for a
+greatest-version search, described in {{search}}.
+
 The `credential_type` field specifies whether the credential is of the
 `standard` type, meaning that the target label-version pair is included in a
-distinguished log entry, or is of the `provisional` type, meaning that it is
-not. All of the fields `version` through `binary_ladder` are the same as they
-would be in a `SearchResponse` for a greatest-version search, as described in
-{{search}}.
+distinguished log entry, or is of the `provisional` type, meaning that the
+label-version pair is not yet included in a distinguished log entry.
 
-If the credential is standard, the `tree_size` and `distinguished` fields are
-present. The `tree_size` field contains the minimum tree size that the verifier
-should be aware of. The `distinguished` field contains lookups corresponding to
-a search binary ladder for the target version of the label in a recently issued
-distinguished log entry. Applications define their own policy for what
-constitutes a "recently issued" distinguished log entry. Users learn of and
-retain all of the recently issued distinguished log entries by monitoring their
-own labels, or by monitoring a neutral label provided for this purpose, using
-the algorithm in {{owner-algorithm}}. Once a distinguished log entry is no
-longer considered "recent", users may delete their knowledge of it as the
-associated credentials are considered expired.
+The `position` field contains the position of a recently issued distinguished
+log entry, and this log entry will be the basis for verifying the credential.
+Applications define their own policy for what constitutes a "recently issued"
+distinguished log entry. Users can learn of and retain all of the recently
+issued distinguished log entries by making a `DistinguishedRequest`, or through
+the process of monitoring labels they own. Once a distinguished log entry no
+longer meets the application's definition of "recent", any credentials relying
+on the log entry are considered expired.
+
+Regardless of credential type, users follow these steps to process a credential:
+
+1. Verify that the user is aware of a recently issued distinguished log entry at
+   `position`. To preserve client anonymity, implementations MUST NOT use a
+   verification failure at this point as a prompt to request an updated tree
+   head from the Transparency Log.
+
+2. Verify `value` as described in {{update-format}}.
+
+3. Verify that the expected number of entries is present in `binary_ladder` and
+   that no commitment value is provided for the target version.
+
+4. Compute the VRF output for each version of the label from the proofs in
+   `binary_ladder`. Compute the commitment to the value of the target version
+   with `opening` and `value`.
+
+Additional verification based on credential type is described in the following
+two subsections.
+
+## Standard
+
+If the credential is standard, the `distinguished` field is present and contains
+lookups corresponding to a search binary ladder for the target version of the
+label in a recently issued distinguished log entry.
 
 Users follow these steps to verify a standard credential:
 
-1. Verify that they have executed the algorithm in {{owner-algorithm}} such that
-   it reached the rightmost distinguished log entry when the tree size was
-   greater than or equal to `tree_size`.
-2. Verify that the binary ladder lookups in `distinguished` terminate in a way
+1. Verify that the binary ladder in `distinguished` terminates in a way
    that is consistent with `version` being the greatest version of the label
    that exists.
-3. Verify that the prefix tree root value produced by evaluating `distinguished`
-   matches the prefix tree root value of one of the recently issued
-   distinguished log entries.
 
-If the credential is provisional, the `full_tree_head` and `search` fields are
-present. These fields correspond to the same values as they would in a
-`SearchResponse` for a greatest-version search for the label where
-`SearchRequest.last` was not present. Users verify the `Credential` as they
-would a greatest-version search, and additionally verify that the terminal node
-of the search is to the right of the rightmost distinguished log entry.
+2. Verify that the prefix tree root value produced by evaluating `distinguished`
+   matches that of the recently issued distinguished log entry at `position`.
+
+## Provisional
+
+If the credential is provisional, the `tree_head` and `search` fields are
+present. The `tree_head` field contains a signature from the Transparency Log
+over a view of the tree that includes the log entry at `position`. The `search`
+field contains the output of updating the user's view of the tree from a tree
+size of `position+1` to `TreeHead.tree_size`, followed by a greatest-version
+search for `label`.
+
+show
+the user that the terminal log entry of the search and the next distinguished
+log entry are consistent. It will also allow the user to compute the root value
+of the log tree containing all leaves up to the point of the next distinguished
+log entry. The user verifies this against their retained full subtrees
+
 
 Verifying a credential MUST NOT have any effect on the state used for the user's
 direct interactions with the Transparency Log, or on the verification of other
@@ -2156,6 +2190,59 @@ provisional credential expires, the user that provided it MUST provide a
 standard credential:
 
 TODO
+
+1. Verify that the user is aware of a recently issued distinguished log entry at
+   `position`. Again, verification failure at this point MUST NOT trigger a
+   request to the Transparency Log.
+
+2. Verify `value` as described in {{update-format}}.
+
+3. Verify that the expected number of entries is present in `binary_ladder` and
+   that no commitment value is provided for the target version.
+
+4. Compute the VRF output for each version of the label from the proofs in
+   `binary_ladder`. Compute the commitment to the value of the target version
+   with `opening` and `value`.
+
+5. Verify the proof in `search` as described in {{gv-algorithm}}.
+
+6. Verify that the terminal log entry of the search is the rightmost log entry.
+
+
+### Forks
+
+In a user's typical interactions with a Transparency Log, every response is
+required to prove that it comes from the same view of the log tree as every
+prior response. However, this model doesn't work for credential verification.
+Since credentials are provided in a non-interactive and peer-to-peer manner,
+when a user is creating a credential they have no way to know what other
+credentials (and therefore which tree heads) the receiving user(s) may want to
+check consistency with. In fact, even trying to convey this information to the
+user creating a credential risks violating the anonymity of the receiving user's
+other contacts.
+
+KT addresses this by using the recently issued distinguished log entries as
+common points of reference for the state of the log tree. Users compute and
+retain the full subtrees of the log tree at each point where a recently issued
+distinguished log entry is the log's rightmost log entry. This retained state is
+then used either implicitly or explicitly in credential verification.
+
+In particular, when a provisional credential is received, the proof in
+`Credential.search` is constructed as if the user advertised a previously
+observed tree size of `Credential.position+1`. As a result, computing the
+candidate root value for the log tree requires incorporating the user's retained
+full subtrees for the log tree up to this point. This prevents the user from
+accepting a view of the log that forked at any point prior to the log entry at
+`Credential.position`.
+
+Once a `ContactMonitorResponse` is received for the credential, it will
+necessarily include a proof of inclusion for the first distinguished log entry
+that's to the right of the search's terminal log entry. Users take this proof,
+compute the full subtrees of the log tree just up to the point of the subsequent
+distinguished log entry, and verify that it matches their retained state. This
+ensures that the terminal log entry of the search, containing the value of the
+label that the user consumed, is also contained in a fully-consistent view of
+the log tree.
 
 
 # Third Parties
