@@ -1084,10 +1084,43 @@ In essence, this algorithm has two phases. The first phase is doing a
 greatest-version search in the previous tree. This is necessary to prevent forms
 of misbehavior where a Transparency Log might create a malicious version of a
 label, later change the corresponding value to something non-malicious, and try
-to only inform the label owner of the non-malicious version. The second phase is
+to only inform the label owner of the non-malicious value. The second phase is
 verifying how the new versions of the label were created in the claimed log
 entry. This depends on whether the log entry is distinguished or not to minimize
 redundant lookups with the second algorithm of {{owner-algorithm}}.
+
+
+# Walking Distinguished Heads
+
+There are many cases in KT where it can be useful to allow a user to walk the
+most recently issued distinguished log entries. One particular case where this
+is useful is in deployments that rely on credentials, explained further in
+{{credentials}}. It can also be helpful for new label owners, running the first
+algorithm of {{owner-algorithm}}, in deciding what they want their "starting"
+log entry to be. And perhaps most importantly, walking the recent distinguished
+log entries gives users common reference points in the log tree and allows them
+to verify, if they have access to an anonymous channel, that they aren't being
+shown a fork (discussed in {{Section 3.3 of ARCH}}).
+
+## Algorithm {#distinguished-algorithm}
+
+Walking the recent distinguished log entries is essentially done as a
+right-to-left depth-first search in the log tree. Users and the Transparency Log
+share an application-defined concept of what a "recent" distinguished log entry
+is, and enumerate all of the log entries that meet this definition. Users can
+optionally provide the Transparency Log with a **stopping position**
+corresponding to a point where the enumeration can stop early if hit.
+
+This is described below as a recursive algorithm, starting with the root log
+entry:
+
+1. If the current log entry is not distinguished, stop.
+2. If the current log entry has a right child, recurse to the right child.
+3. If a stopping position was provided and the current log entry's position is
+   less than or equal to the requested stopping position, stop.
+4. If the current log entry doesn't meet the application's definition of
+   "recent", stop.
+5. If the current log entry has a left child, recurse to the left child.
 
 
 # Cryptographic Computations
@@ -1691,6 +1724,14 @@ correctly inserted, the following is provided:
 - Any `PrefixProof` structures that may be required by steps 2.2, 3, or 4 of the
   algorithm in {{update-algorithm}}.
 
+### Walking Distinguished Heads
+
+For a user to walk the most recent distinguished log entries, the following is
+provided:
+
+- The timestamp of each log entry that reaches step 2 of the algorithm in
+  {{distinguished-algorithm}}.
+
 
 # User Operations
 
@@ -2068,6 +2109,37 @@ response to a single `UpdateRequest`, each corresponding to a subsequent
 - `values` remains unchanged until the first `UpdateResponse` with an empty
   `values` field is received, and is empty from then on.
 
+## Walking Distinguished Heads
+
+Users that wish to walk the recently issued distinguished log entries submit a
+`DistinguishedRequest` to the Transparency Log, optionally containing their
+requested stopping position.
+
+~~~ tls-presentation
+struct {
+  optional<uint64> last;
+  optional<uint64> stop;
+} DistinguishedRequest;
+~~~
+
+In turn, the Transparency Log responds with a `DistinguishedResponse` structure:
+
+~~~ tls-presentation
+struct {
+  FullTreeHead full_tree_head;
+  CombinedTreeProof distinguished;
+} DistinguishedResponse;
+~~~
+
+Users verify a `DistinguishedResponse` by following these steps:
+
+1. Verify the proof in `distinguished` as described in
+   {{distinguished-algorithm}}.
+2. Compute a candidate root value for the tree from the proof in
+   `distinguished.inclusion` and any previously retained full subtrees of the
+   log tree.
+3. With the candidate root value for the tree, verify `FullTreeHead` as
+   described in {{full-tree-head-verification}}.
 
 # Credentials
 
