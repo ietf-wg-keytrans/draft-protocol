@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 5 January 2027                                      4 July 2026
+Expires: 6 January 2027                                      5 July 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 5 January 2027.
+   This Internet-Draft will expire on 6 January 2027.
 
 Copyright Notice
 
@@ -74,6 +74,7 @@ Table of Contents
 
    1.  Introduction
    2.  Conventions and Definitions
+     2.1.  Presentation Language
    3.  Tree Construction
      3.1.  Terminology
      3.2.  Log Tree
@@ -164,6 +165,8 @@ Table of Contents
    BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
    capitals, as shown here.
 
+2.1.  Presentation Language
+
    This document uses the TLS presentation language [RFC8446] to
    describe the structure of protocol messages, but does not require the
    use of a specific transport protocol.  As such, implementations do
@@ -172,6 +175,18 @@ Table of Contents
    application.  However, cryptographic computations MUST be done with
    the TLS presentation language format to ensure the protocol's
    security properties are maintained.
+
+   An optional value is encoded with a presence-signaling octet,
+   followed by the value itself if present.  When decoding, a presence
+   octet with a value other than 0 or 1 MUST be rejected as malformed.
+
+   struct {
+       uint8 present;
+       select (present) {
+           case 0: struct{};
+           case 1: T value;
+       };
+   } optional<T>;
 
 3.  Tree Construction
 
@@ -451,12 +466,12 @@ Table of Contents
    searched.
 
    Note that, while a Transparency Log implementation would likely
-   maintain a single logical prefix tree, each modification of the
-   prefix tree results in a new root value which is then stored in the
-   log tree.  As part of the protocol, the Transparency Log is often
-   required to perform lookups in different versions of the prefix tree.
-   Different versions of the prefix tree are identified by the log entry
-   where their root value was stored.
+   maintain a single logical prefix tree, every modification to the
+   prefix tree changes its root value, and the updated root value is
+   then stored in the log tree.  As part of the protocol, the
+   Transparency Log is often required to perform lookups in different
+   versions of the prefix tree.  Different versions of the prefix tree
+   are identified by the log entry where their root value was stored.
 
            o                                   o
       o----+----.                   o----------+---------o
@@ -468,6 +483,14 @@ Table of Contents
      tree structure.  Every new log entry added contains the timestamp
         T_n of when it was created and the new prefix tree root hash
                                    PT_n.
+
+   It's also worth noting that an arbitrary number of label-version
+   pairs can be added or removed from the prefix tree between subsequent
+   log entries.  That is, the Transparency Log is not constrained to
+   making one change to the prefix tree per log entry.  This allows
+   changes to the prefix tree to be efficiently batched, and batching
+   prefix tree modifications allows Transparency Logs to achieve
+   significantly higher throughput than they otherwise would be able to.
 
 4.  Updating Views of the Tree
 
