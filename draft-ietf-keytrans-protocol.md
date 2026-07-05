@@ -2762,3 +2762,114 @@ def monitoring_binary_ladder(t, left_inclusion = []):
 
     return filtered_out
 ~~~
+
+# Log Entry Maximum Lifetime and the Reasonable Monitoring Window
+
+The log entry maximum lifetime is an optional configuration parameter that a
+Transparency Log can define to allow pruning. Transparency Logs are only
+required to retain a logarithmic number of log entries that have passed their
+maximum lifetime, and aren't required to retain any versions of the prefix tree
+that have passed their maximum lifetime. This prevents the amount of storage
+that the Transparency Log needs from growing infinitely over time, which
+naturally allows the Transparency Log to remain operational much longer that it
+otherwise would be able to.
+
+The Reasonable Monitoring Window (RMW) is a similar but mandatory parameter
+defined by the Transparency Log, and represents the general frequency with which
+users are expected to monitor labels they own. The protocol creates roughly one
+distinguished log entry per every interval of the RMW, and these distinguished
+log entries act as common reference points for all users in their monitoring of
+the Transparency Log.
+
+Similar to how the log entry maximum lifetime bounds the amount of state that
+the Transparency Log needs to maintain, the Reasonable Monitoring Window bounds
+how log users need to retain certain monitoring-related state. Importantly, the
+log entry maximum lifetime, if defined, will always be greater than the RMW.
+This ensures that users are able to take advantage of the common reference
+points provided by distinguished log entries prior to the Transparency Log
+permanently deleting them.
+
+The log entry maximum lifetime and the RMW can interact in somewhat subtle ways,
+and this section hopes to clarify those interactions.
+
+**The rightmost distinguished log entry is always on the frontier.** The
+algorithm for computing distinguished log entries is structured such that if a
+given log entry is distinguished, then its parent will always be distinguished
+as well. Every log entry in the implicit binary search tree is either on the
+frontier itself, or in the left subtree of a log entry that is on the frontier.
+Given these two points, if a log entry is distinguished and not on the frontier,
+then it has in its direct path a frontier log entry that is also distinguished
+and to its right.
+
+**The rightmost distinguished log entry is never expired.** This is obviously
+true in the case where the rightmost distinguished log entry is the rightmost
+log entry, since the rightmost log entry is never expired by definition.
+
+If the rightmost distinguished log entry is not the rightmost log entry, then it
+has a right child. Say that `T_i` is the timestamp of the rightmost
+distinguished log entry and that `T_rightmost` is the timestamp of the rightmost
+log entry. The right child of the rightmost distinguished log entry obviously
+can not itself be distinguished. Through the algorithm in
+{{reasonable-monitoring-window}}, this corresponds to the statement that
+`T_rightmost - T_i < RMW`. Since we know by definition that the RMW is less than
+the log entry maximum lifetime, or that `RMW < ML`, this directly implies that
+`T_rightmost - T_i < RMW < ML`, or that the rightmost distinguished log entry is
+not expired.
+
+This property is particularly important for the algorithms in KT since it means
+that, once a distinguished log entry is created in a Transparency Log, there
+will always be at least one unexpired distinguished log entry that users can
+inspect and use as a common reference point for monitoring.
+
+**The Contact Monitoring algorithm will always intersect the first distinguished
+log entry established to its right.** The Contact Monitoring algorithm takes as
+input a log entry that is, or was previously, to the right of the rightmost
+distinguished log entry. It computes the direct path of this log entry and
+checks that the (newly created) log entries on the right side of this path are
+constructed correctly, stopping once it reaches the first distinguished log
+entry. The claim here is that, assuming the monitored log entry doesn't itself
+become distinguished, this algorithm always intersects the first distinguished
+log entry established to the right of the monitored log entry. Equivalently, the
+claim is that the algorithm terminates within a bounded amount of time, being
+roughly the RMW.
+
+Assume we know the position of the first distinguished log entry established to
+the right of the monitored log entry. Then one of the following cases apply:
+
+- **Case 1:** The monitored log entry is in the left subtree of the
+  distinguished log entry. In this case, the claim of this section is
+  true by definition.
+
+- **Case 2:** The distinguished log entry is in the right subtree of the
+  monitored log entry. Recalling that if a log entry is distinguished then it's
+  parent is also always distinguished, then in this case the monitored log entry
+  is now itself distinguished. In this case, the Contact Monitoring algorithm
+  removes the version of the label from monitoring without further inspection.
+
+- **Case 3:** Neither of the above cases apply. In this case, there is a
+  "middle" log entry where the monitored log entry is in its left subtree and
+  the distinguished log entry is in its right subtree. Because the middle log
+  entry is a parent of the distinguished log entry, it must be distinguished as
+  well. This is a contradiction, since the distinguished log entry can not be
+  the "first" distinguished log entry if the middle log entry is distinguished
+  and to its left.
+
+**Assuming no clock skew and no Transparency Log outages, a user that performs
+Contact Monitoring every interval of the RMW will never hit an expired log
+entry.** Each Contact Monitoring request follows a path from a monitored log
+entry to a frontier log entry. The frontier log entry, if it is not
+distinguished, becomes the monitored log entry in the user's subsequent Contact
+Monitoring request.
+
+As a result of this structure, each Contact Monitoring request only inspects log
+entries that were created since the prior Contact Monitoring request. If the
+rightmost log entry's timestamp during the first request was `T_rightmost`, then
+the rightmost log entry's timestamp during the subsequent request will be
+approximately `T_rightmost + RMW`, and all inspected log entries will have a
+timestamp in this range. Since the RMW is less than the log entry maximum
+lifetime, no log entry in this range can be expired.
+
+However, clock skew is permitted by the protocol, configurable by the
+`max_ahead` and `max_behind` parameters, and some degree of service outages
+are generally unavoidable. The maximum lifetime parameter needs to be set with
+sufficient allowance for both of these eventualities.
