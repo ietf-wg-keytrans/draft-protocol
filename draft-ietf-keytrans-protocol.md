@@ -108,6 +108,8 @@ protocol can be deployed can be found in {{!ARCH=I-D.ietf-keytrans-architecture}
 
 {::boilerplate bcp14-tagged}
 
+## Presentation Language
+
 This document uses the TLS presentation language {{!RFC8446}} to describe the
 structure of protocol messages, but does not require the use of a specific
 transport protocol. As such, implementations do not necessarily need to transmit
@@ -116,6 +118,19 @@ best suits their application. However, cryptographic computations MUST be done
 with the TLS presentation language format to ensure the protocol's security
 properties are maintained.
 
+An optional value is encoded with a presence-signaling octet, followed by the
+value itself if present. When decoding, a presence octet with a value other than
+0 or 1 MUST be rejected as malformed.
+
+~~~ tls-presentation
+struct {
+    uint8 present;
+    select (present) {
+        case 0: struct{};
+        case 1: T value;
+    };
+} optional<T>;
+~~~
 
 # Tree Construction
 
@@ -380,12 +395,12 @@ the timestamp of when it was published. With some caveats, this combined
 structure supports both efficient consistency proofs and can be efficiently
 searched.
 
-Note that, while a Transparency Log implementation would likely maintain a single logical prefix tree,
-each modification of the prefix tree results in a new root value which is then
-stored in the log tree. As part of the protocol, the Transparency Log is often
-required to perform lookups in different versions of the prefix tree. Different
-versions of the prefix tree are identified by the log entry where their root
-value was stored.
+Note that, while a Transparency Log implementation would likely maintain a
+single logical prefix tree, every modification to the prefix tree changes its
+root value, and the updated root value is then stored in the log tree. As part
+of the protocol, the Transparency Log is often required to perform lookups in
+different versions of the prefix tree. Different versions of the prefix tree are
+identified by the log entry where their root value was stored.
 
 ~~~ aasvg
         o                                   o
@@ -397,6 +412,13 @@ value was stored.
 {: title="An example evolution of the log tree in the combined tree structure.
 Every new log entry added contains the timestamp T_n of when it was created and
 the new prefix tree root hash PT_n."}
+
+It's also worth noting that an arbitrary number of label-version pairs can be
+added or removed from the prefix tree between subsequent log entries. That is,
+the Transparency Log is not constrained to making one change to the prefix tree
+per log entry. This allows changes to the prefix tree to be efficiently batched,
+and batching prefix tree modifications allows Transparency Logs to achieve
+significantly higher throughput than they otherwise would be able to.
 
 
 # Updating Views of the Tree
