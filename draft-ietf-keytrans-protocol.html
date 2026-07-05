@@ -1380,7 +1380,10 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
             <p id="section-toc.1-1.20.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-binary-ladder-4" class="internal xref">Binary Ladder</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
-            <p id="section-toc.1-1.21.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.21.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-log-entry-maximum-lifetime-" class="internal xref">Log Entry Maximum Lifetime and the Reasonable Monitoring Window</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.22">
+            <p id="section-toc.1-1.22.1"><a href="#appendix-D" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -4939,8 +4942,116 @@ def monitoring_binary_ladder(t, left_inclusion = []):
 </div>
 </section>
 </div>
-<div id="authors-addresses">
+<div id="log-entry-maximum-lifetime-and-the-reasonable-monitoring-window">
 <section id="appendix-C">
+      <h2 id="name-log-entry-maximum-lifetime-">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-log-entry-maximum-lifetime-" class="section-name selfRef">Log Entry Maximum Lifetime and the Reasonable Monitoring Window</a>
+      </h2>
+<p id="appendix-C-1">The log entry maximum lifetime is an optional configuration parameter that a
+Transparency Log can define to allow pruning. Transparency Logs are only
+required to retain a logarithmic number of log entries that have passed their
+maximum lifetime, and aren't required to retain any versions of the prefix tree
+that have passed their maximum lifetime. This prevents the amount of storage
+that the Transparency Log needs from growing infinitely over time, which
+naturally allows the Transparency Log to remain operational much longer that it
+otherwise would be able to.<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<p id="appendix-C-2">The Reasonable Monitoring Window (RMW) is a similar but mandatory parameter
+defined by the Transparency Log, and represents the general frequency with which
+users are expected to monitor labels they own. The protocol creates roughly one
+distinguished log entry per every interval of the RMW, and these distinguished
+log entries act as common reference points for all users in their monitoring of
+the Transparency Log.<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-3">Similar to how the log entry maximum lifetime bounds the amount of state that
+the Transparency Log needs to maintain, the Reasonable Monitoring Window bounds
+how log users need to retain certain monitoring-related state. Importantly, the
+log entry maximum lifetime, if defined, will always be greater than the RMW.
+This ensures that users are able to take advantage of the common reference
+points provided by distinguished log entries prior to the Transparency Log
+permanently deleting them.<a href="#appendix-C-3" class="pilcrow">¶</a></p>
+<p id="appendix-C-4">The log entry maximum lifetime and the RMW can interact in somewhat subtle ways,
+and this section hopes to clarify those interactions.<a href="#appendix-C-4" class="pilcrow">¶</a></p>
+<p id="appendix-C-5"><strong>The rightmost distinguished log entry is always on the frontier.</strong> The
+algorithm for computing distinguished log entries is structured such that if a
+given log entry is distinguished, then its parent will always be distinguished
+as well. Every log entry in the implicit binary search tree is either on the
+frontier itself, or in the left subtree of a log entry that is on the frontier.
+Given these two points, if a log entry is distinguished and not on the frontier,
+then it has in its direct path a frontier log entry that is also distinguished
+and to its right.<a href="#appendix-C-5" class="pilcrow">¶</a></p>
+<p id="appendix-C-6"><strong>The rightmost distinguished log entry is never expired.</strong> This is obviously
+true in the case where the rightmost distinguished log entry is the rightmost
+log entry, since the rightmost log entry is never expired by definition.<a href="#appendix-C-6" class="pilcrow">¶</a></p>
+<p id="appendix-C-7">If the rightmost distinguished log entry is not the rightmost log entry, then it
+has a right child. Say that <code>T_i</code> is the timestamp of the rightmost
+distinguished log entry and that <code>T_rightmost</code> is the timestamp of the rightmost
+log entry. The right child of the rightmost distinguished log entry obviously
+can not itself be distinguished. Through the algorithm in
+<a href="#reasonable-monitoring-window" class="auto internal xref">Section 6.1</a>, this corresponds to the statement that
+<code>T_rightmost - T_i &lt; RMW</code>. Since we know by definition that the RMW is less than
+the log entry maximum lifetime, or that <code>RMW &lt; ML</code>, this directly implies that
+<code>T_rightmost - T_i &lt; RMW &lt; ML</code>, or that the rightmost distinguished log entry is
+not expired.<a href="#appendix-C-7" class="pilcrow">¶</a></p>
+<p id="appendix-C-8">This property is particularly important for the algorithms in KT since it means
+that, once a distinguished log entry is created in a Transparency Log, there
+will always be at least one unexpired distinguished log entry that users can
+inspect and use as a common reference point for monitoring.<a href="#appendix-C-8" class="pilcrow">¶</a></p>
+<p id="appendix-C-9"><strong>The Contact Monitoring algorithm will always intersect the first distinguished
+log entry established to its right.</strong> The Contact Monitoring algorithm takes as
+input a log entry that is, or was previously, to the right of the rightmost
+distinguished log entry. It computes the direct path of this log entry and
+checks that the (newly created) log entries on the right side of this path are
+constructed correctly, stopping once it reaches the first distinguished log
+entry. The claim here is that, assuming the monitored log entry doesn't itself
+become distinguished, this algorithm always intersects the first distinguished
+log entry established to the right of the monitored log entry. Equivalently, the
+claim is that the algorithm terminates within a bounded amount of time, being
+roughly the RMW.<a href="#appendix-C-9" class="pilcrow">¶</a></p>
+<p id="appendix-C-10">Assume we know the position of the first distinguished log entry established to
+the right of the monitored log entry. Then one of the following cases apply:<a href="#appendix-C-10" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C-11.1">
+          <p id="appendix-C-11.1.1"><strong>Case 1:</strong> The monitored log entry is in the left subtree of the
+distinguished log entry. In this case, the claim of this section is
+true by definition.<a href="#appendix-C-11.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-11.2">
+          <p id="appendix-C-11.2.1"><strong>Case 2:</strong> The distinguished log entry is in the right subtree of the
+monitored log entry. Recalling that if a log entry is distinguished then it's
+parent is also always distinguished, then in this case the monitored log entry
+is now itself distinguished. In this case, the Contact Monitoring algorithm
+removes the version of the label from monitoring without further inspection.<a href="#appendix-C-11.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-C-11.3">
+          <p id="appendix-C-11.3.1"><strong>Case 3:</strong> Neither of the above cases apply. In this case, there is a
+"middle" log entry where the monitored log entry is in its left subtree and
+the distinguished log entry is in its right subtree. Because the middle log
+entry is a parent of the distinguished log entry, it must be distinguished as
+well. This is a contradiction, since the distinguished log entry can not be
+the "first" distinguished log entry if the middle log entry is distinguished
+and to its left.<a href="#appendix-C-11.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+<p id="appendix-C-12"><strong>Assuming no clock skew and no Transparency Log outages, a user that performs
+Contact Monitoring every interval of the RMW will never hit an expired log
+entry.</strong> Each Contact Monitoring request follows a path from a monitored log
+entry to a frontier log entry. The frontier log entry, if it is not
+distinguished, becomes the monitored log entry in the user's subsequent Contact
+Monitoring request.<a href="#appendix-C-12" class="pilcrow">¶</a></p>
+<p id="appendix-C-13">As a result of this structure, each Contact Monitoring request only inspects log
+entries that were created since the prior Contact Monitoring request. If the
+rightmost log entry's timestamp during the first request was <code>T_rightmost</code>, then
+the rightmost log entry's timestamp during the subsequent request will be
+approximately <code>T_rightmost + RMW</code>, and all inspected log entries will have a
+timestamp in this range. Since the RMW is less than the log entry maximum
+lifetime, no log entry in this range can be expired.<a href="#appendix-C-13" class="pilcrow">¶</a></p>
+<p id="appendix-C-14">However, clock skew is permitted by the protocol, configurable by the
+<code>max_ahead</code> and <code>max_behind</code> parameters, and some degree of service outages
+are generally unavoidable. The maximum lifetime parameter needs to be set with
+sufficient allowance for both of these eventualities.<a href="#appendix-C-14" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-D">
       <h2 id="name-authors-addresses">
 <a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
       </h2>
