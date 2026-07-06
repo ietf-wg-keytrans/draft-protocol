@@ -1121,8 +1121,7 @@ is useful is in deployments that rely on credentials, explained further in
 algorithm of {{owner-algorithm}}, in deciding what they want their "starting"
 log entry to be. And perhaps most importantly, walking the recent distinguished
 log entries gives users common reference points in the log tree and allows them
-to verify, if they have access to an anonymous channel, that they aren't being
-shown a fork (discussed in {{Section 3.3 of ARCH}}).
+to verify that they aren't being shown a fork.
 
 ## Algorithm {#distinguished-algorithm}
 
@@ -1143,6 +1142,56 @@ entry:
 4. If the current log entry doesn't meet the application's definition of
    "recent", stop.
 5. If the current log entry has a left child, recurse to the left child.
+
+This algorithm works with any definition of "recent" for distinguished log
+entries that is monotonic. However, the two simplest possible definitions are:
+a.) a distinguished log entry is "recent" if it is one of the `n` rightmost, or
+b.) a distinguished log entry is "recent" if subtracting its timestamp from the
+timestamp of the rightmost log entry yield a value less than some threshold. It
+is RECOMMENDED that applications choose one of these definitions.
+
+## Detecting Forks
+
+As discussed in {{Section 3.3 of ARCH}}, two of the primary ways that a user can
+detect the existence of a fork is through either an anonymous channel, or some
+form of direct peer-to-peer communication. Both of these approaches rely on
+exchanging root values of the log tree in a way where the Transparency Log can't
+reliably partition users.
+
+To compute the log tree root values to exchange, a user follows the algorithm in
+{{distinguished-algorithm}}, using data provided through the same channel that
+the user typically interacts with the Transparency Log. The user then computes
+the log tree root value at each point where one of the recent distinguished log
+entries is the rightmost log entry. The exact number of distinguished log
+entries to use, and therefore the number of root values to compute, depends on
+the application. That said, using a larger number provides more resilience
+against clock skew and applications generally SHOULD compute at least two root
+values.
+
+Users then obtain the same information either by requesting it over their
+anonymous channel, or through direct peer-to-peer communication. The information
+exchanged can either be just the list of root values, if bandwidth is a
+particular concern, or a signed query response, if the ability to provide
+non-repudiable evidence of misbehavior is desired.
+
+The list of root values determined from the authenticated channel, and the list
+of root values received over the partition-resistent channel, are verified by
+checking that each list is either a prefix or a suffix of the other, having at
+least one root value in common. Example code for this is provided below:
+
+~~~ python
+def compare_roots(roots_a, roots_b):
+    if len(roots_a) != len(roots_b):
+        raise Exception('lists must be the same size')
+
+    N = len(roots_a)
+
+    for x in range(N):
+        if roots_a[:N-x] == roots_b[x:] or roots_b[:N-x] == roots_a[x:]:
+            return True
+
+    raise Exception('no valid overlap found')
+~~~
 
 
 # Cryptographic Computations
@@ -2762,6 +2811,30 @@ def monitoring_binary_ladder(t, left_inclusion = []):
 
     return filtered_out
 ~~~
+
+
+# CombinedTreeProof Implementation
+
+The `CombinedTreeProof` structure is designed to provide all of the information
+a user needs to evaluate the algorithms defined in this document with as little
+overhead as possible. The main strategy used to reduce overhead is
+deduplication, such that the same timestamp or prefix tree root value is never
+provided twice. Another strategy used is providing data in the specific order
+that it's required by the algorithm being executed, rather than explicitly
+indicating which timestamp or proof belongs to which log entry.
+
+As such, the generally simplest way to process a `CombinedTreeProof` is for an
+implementation to execute the algorithms specified in this document, and have
+the algorithm implementations call functions like `get_timestamp(x)` or
+`get_search_ladder(x, target_ver)` where `x` is the log entry's position. These
+functions can then pop the first timestamp or `PrefixProof` from the
+corresponding field as a queue, and associate this value with the log entry `x`
+for the purpose of deduplication and, eventually, evaluating the associated
+inclusion proof. These functions can also evenly enforce the invariants that all
+timestamps are monotonic, and that if there are multiple `PrefixProof`
+structures from the same log entry, that they all compute the same prefix tree
+root value.
+
 
 # Log Entry Maximum Lifetime and the Reasonable Monitoring Window
 
