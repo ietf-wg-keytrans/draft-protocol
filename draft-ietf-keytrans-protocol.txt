@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 7 January 2027                                      6 July 2026
+Expires: 22 January 2027                                    21 July 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 January 2027.
+   This Internet-Draft will expire on 22 January 2027.
 
 Copyright Notice
 
@@ -2943,6 +2943,10 @@ Table of Contents
    *  Kc: The byte sequence equal to the hex-encoded string
       d821f8790d97709796b4d7903357c3f5
 
+   *  Hash.Nh: 32
+
+   *  VRF.Nh: 32
+
    The KT_128_SHA256_P256 cipher suite is as follows:
 
    *  The signature algorithm is ECDSA over the NIST curve P-256.
@@ -2955,6 +2959,8 @@ Table of Contents
       [RFC9381].  Public keys are encoded as a compressed point as
       defined in SEC 1, Version 2.0, Section 2.3.3.
 
+      -  VRF.Np is 81.
+
    The KT_128_SHA256_Ed25519 cipher suite is as follows:
 
    *  The signature algorithm is Ed25519 as defined in [RFC8032].
@@ -2962,6 +2968,8 @@ Table of Contents
 
    *  The VRF algorithm is ECVRF-EDWARDS25519-SHA512-TAI as defined in
       [RFC9381] with the output truncated to 32 bytes.
+
+      -  VRF.Np is 80.
 
 17.2.  KT Designated Expert Pool
 
