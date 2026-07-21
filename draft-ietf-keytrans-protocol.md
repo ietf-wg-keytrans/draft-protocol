@@ -2647,6 +2647,8 @@ parameters:
 - The hash algorithm is SHA-256, as defined in {{SHS}}.
 - `Nc`: 16
 - `Kc`: The byte sequence equal to the hex-encoded string `d821f8790d97709796b4d7903357c3f5`
+- `Hash.Nh`: 32
+- `VRF.Nh`: 32
 
 The KT_128_SHA256_P256 cipher suite is as follows:
 
@@ -2657,6 +2659,7 @@ The KT_128_SHA256_P256 cipher suite is as follows:
 - The VRF algorithm is ECVRF-P256-SHA256-TAI as defined in {{!RFC9381}}. Public
   keys are encoded as a compressed point as defined in SEC 1, Version 2.0,
   Section 2.3.3.
+  - `VRF.Np` is 81.
 
 The KT_128_SHA256_Ed25519 cipher suite is as follows:
 
@@ -2664,6 +2667,7 @@ The KT_128_SHA256_Ed25519 cipher suite is as follows:
   signature encodings are as defined in {{RFC8032}}.
 - The VRF algorithm is ECVRF-EDWARDS25519-SHA512-TAI as defined in {{!RFC9381}}
   with the output truncated to 32 bytes.
+  - `VRF.Np` is 80.
 
 ## KT Designated Expert Pool {#de}
 
