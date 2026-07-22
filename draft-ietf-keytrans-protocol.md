@@ -118,6 +118,8 @@ best suits their application. However, cryptographic computations MUST be done
 with the TLS presentation language format to ensure the protocol's security
 properties are maintained.
 
+### Optional Values
+
 An optional value is encoded with a presence-signaling octet, followed by the
 value itself if present. When decoding, a presence octet with a value other than
 0 or 1 MUST be rejected as malformed.
@@ -131,6 +133,22 @@ struct {
     };
 } optional<T>;
 ~~~
+
+### Variable-Length Vectors
+
+Variable-length vectors are defined by specifying a subrange of legal lengths,
+inclusively, using the notation \<floor..ceiling\>.  When these are encoded, the
+actual length precedes the vector's contents in the byte stream.  The length
+will be in the form of a number consuming as many bytes as required to hold the
+vector's specified maximum length.
+
+In {{Section 3.4 of RFC8446}}, the `floor` and `ceiling` in this notation
+represent the minimum and maximum possible lengths of the encoded vector *in
+bytes*. In this document, the `floor` and `ceiling` in this notation represent
+the minimum and maximum possible number of elements in the vector. As such, the
+number of bytes required to represent an encoded vector is equal to the size of
+the element type multipled by the indicated length.
+
 
 # Tree Construction
 
@@ -1147,7 +1165,7 @@ This algorithm works with any definition of "recent" for distinguished log
 entries that is monotonic. However, the two simplest possible definitions are:
 a.) a distinguished log entry is "recent" if it is one of the `n` rightmost, or
 b.) a distinguished log entry is "recent" if subtracting its timestamp from the
-timestamp of the rightmost log entry yield a value less than some threshold. It
+timestamp of the rightmost log entry yields a value less than some threshold. It
 is RECOMMENDED that applications choose one of these definitions.
 
 ## Detecting Forks
@@ -1169,10 +1187,17 @@ against clock skew and applications generally SHOULD compute at least two root
 values.
 
 Users then obtain the same information either by requesting it over their
-anonymous channel, or through direct peer-to-peer communication. The information
-exchanged can either be just the list of root values, if bandwidth is a
-particular concern, or a signed query response, if the ability to provide
-non-repudiable evidence of misbehavior is desired.
+anonymous channel, or through direct peer-to-peer communication. If bandwidth is
+a concern, the information exchanged can be a `DistinguishedHead` structure
+containing just the list of root values in left-to-right order. Alternatively, a
+signed query response (a `DistinguishedResponse`) could be exchanged, which
+would provide non-repudiable evidence of misbehavior if detected.
+
+~~~ tls-presentation
+struct {
+  HashValue heads<0..2^8>;
+} DistinguishedHead;
+~~~
 
 The list of root values determined from the authenticated channel, and the list
 of root values received over the partition-resistent channel, are verified by
