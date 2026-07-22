@@ -1055,7 +1055,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 22 January 2027</td>
+<td class="center">Expires 23 January 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-07-21" class="published">21 July 2026</time>
+<time datetime="2026-07-22" class="published">22 July 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-01-22">22 January 2027</time></dd>
+<dd class="expires"><time datetime="2027-01-23">23 January 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1131,7 +1131,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 22 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 23 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1437,10 +1437,15 @@ messages according to the TLS format and can choose whichever encoding method
 best suits their application. However, cryptographic computations <span class="bcp14">MUST</span> be done
 with the TLS presentation language format to ensure the protocol's security
 properties are maintained.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
-<p id="section-2.1-2">An optional value is encoded with a presence-signaling octet, followed by the
+<div id="optional-values">
+<section id="section-2.1.1">
+          <h4 id="name-optional-values">
+<a href="#section-2.1.1" class="section-number selfRef">2.1.1. </a><a href="#name-optional-values" class="section-name selfRef">Optional Values</a>
+          </h4>
+<p id="section-2.1.1-1">An optional value is encoded with a presence-signaling octet, followed by the
 value itself if present. When decoding, a presence octet with a value other than
-0 or 1 <span class="bcp14">MUST</span> be rejected as malformed.<a href="#section-2.1-2" class="pilcrow">¶</a></p>
-<div class="lang-tls-presentation sourcecode" id="section-2.1-3">
+0 or 1 <span class="bcp14">MUST</span> be rejected as malformed.<a href="#section-2.1.1-1" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-2.1.1-2">
 <pre>
 struct {
     uint8 present;
@@ -1449,7 +1454,27 @@ struct {
         case 1: T value;
     };
 } optional&lt;T&gt;;
-</pre><a href="#section-2.1-3" class="pilcrow">¶</a>
+</pre><a href="#section-2.1.1-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="variable-length-vectors">
+<section id="section-2.1.2">
+          <h4 id="name-variable-length-vectors">
+<a href="#section-2.1.2" class="section-number selfRef">2.1.2. </a><a href="#name-variable-length-vectors" class="section-name selfRef">Variable-Length Vectors</a>
+          </h4>
+<p id="section-2.1.2-1">Variable-length vectors are defined by specifying a subrange of legal lengths,
+inclusively, using the notation &lt;floor..ceiling&gt;.  When these are encoded, the
+actual length precedes the vector's contents in the byte stream.  The length
+will be in the form of a number consuming as many bytes as required to hold the
+vector's specified maximum length.<a href="#section-2.1.2-1" class="pilcrow">¶</a></p>
+<p id="section-2.1.2-2">In <span><a href="https://rfc-editor.org/rfc/rfc8446#section-3.4" class="relref">Section 3.4</a> of [<a href="#RFC8446" class="cite xref">RFC8446</a>]</span>, the <code>floor</code> and <code>ceiling</code> in this notation
+represent the minimum and maximum possible lengths of the encoded vector <em>in
+bytes</em>. In this document, the <code>floor</code> and <code>ceiling</code> in this notation represent
+the minimum and maximum possible number of elements in the vector. As such, the
+number of bytes required to represent an encoded vector is equal to the size of
+the element type multipled by the indicated length.<a href="#section-2.1.2-2" class="pilcrow">¶</a></p>
+</section>
 </div>
 </section>
 </div>
@@ -2865,7 +2890,7 @@ less than or equal to the requested stopping position, stop.<a href="#section-10
 entries that is monotonic. However, the two simplest possible definitions are:
 a.) a distinguished log entry is "recent" if it is one of the <code>n</code> rightmost, or
 b.) a distinguished log entry is "recent" if subtracting its timestamp from the
-timestamp of the rightmost log entry yield a value less than some threshold. It
+timestamp of the rightmost log entry yields a value less than some threshold. It
 is <span class="bcp14">RECOMMENDED</span> that applications choose one of these definitions.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -2889,15 +2914,23 @@ the application. That said, using a larger number provides more resilience
 against clock skew and applications generally <span class="bcp14">SHOULD</span> compute at least two root
 values.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
 <p id="section-10.2-3">Users then obtain the same information either by requesting it over their
-anonymous channel, or through direct peer-to-peer communication. The information
-exchanged can either be just the list of root values, if bandwidth is a
-particular concern, or a signed query response, if the ability to provide
-non-repudiable evidence of misbehavior is desired.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
-<p id="section-10.2-4">The list of root values determined from the authenticated channel, and the list
+anonymous channel, or through direct peer-to-peer communication. If bandwidth is
+a concern, the information exchanged can be a <code>DistinguishedHead</code> structure
+containing just the list of root values in left-to-right order. Alternatively, a
+signed query response (a <code>DistinguishedResponse</code>) could be exchanged, which
+would provide non-repudiable evidence of misbehavior if detected.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+<div class="lang-tls-presentation sourcecode" id="section-10.2-4">
+<pre>
+struct {
+  HashValue heads&lt;0..2^8&gt;;
+} DistinguishedHead;
+</pre><a href="#section-10.2-4" class="pilcrow">¶</a>
+</div>
+<p id="section-10.2-5">The list of root values determined from the authenticated channel, and the list
 of root values received over the partition-resistent channel, are verified by
 checking that each list is either a prefix or a suffix of the other, having at
-least one root value in common. Example code for this is provided below:<a href="#section-10.2-4" class="pilcrow">¶</a></p>
-<div class="lang-python sourcecode" id="section-10.2-5">
+least one root value in common. Example code for this is provided below:<a href="#section-10.2-5" class="pilcrow">¶</a></p>
+<div class="lang-python sourcecode" id="section-10.2-6">
 <pre>
 def compare_roots(roots_a, roots_b):
     if len(roots_a) != len(roots_b):
@@ -2910,7 +2943,7 @@ def compare_roots(roots_a, roots_b):
             return True
 
     raise Exception('no valid overlap found')
-</pre><a href="#section-10.2-5" class="pilcrow">¶</a>
+</pre><a href="#section-10.2-6" class="pilcrow">¶</a>
 </div>
 </section>
 </div>
