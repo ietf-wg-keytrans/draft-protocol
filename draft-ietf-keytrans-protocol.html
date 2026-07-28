@@ -68,7 +68,6 @@ timely manner.
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -117,7 +116,6 @@ timely manner.
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -182,7 +180,6 @@ timely manner.
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -4100,6 +4097,10 @@ struct {
   FullTreeHead full_tree_head;
 
   uint64 position;
+  select (Configuration.mode) {
+    case thirdPartyManagement:
+      uint32 skipped_versions;
+  }
   LabelValue values&lt;0..2^8-1&gt;;
   UpdateInfo info&lt;0..2^8-1&gt;;
 
@@ -4110,84 +4111,91 @@ struct {
 </div>
 <p id="section-13.5-7">The <code>position</code> field contains the index of the log entry where the new versions
 of the label were inserted. This may or may not be the rightmost log entry.<a href="#section-13.5-7" class="pilcrow">¶</a></p>
-<p id="section-13.5-8">If <code>greatest_version</code> is less than the current greatest version of the label,
-<code>UpdateResponse.values</code> contains the values of all of the immediately subsequent
-versions of the label that were created in the log entry <code>position</code>, in
-ascending order by version. If <code>UpdateResponse.values</code> is non-empty, this
-indicates that <code>UpdateRequest.values</code> was disregarded by the Transparency Log.
-Inversely, if <code>UpdateResponse.values</code> is empty, this indicates that all of the
-new versions of the label in <code>UpdateRequest.values</code> were successfully created
-and no versions of the label other than those in <code>UpdateRequest.values</code> were
-created in the log entry <code>position</code>.<a href="#section-13.5-8" class="pilcrow">¶</a></p>
-<p id="section-13.5-9">The <code>info</code> field contains an <code>UpdateInfo</code> for each new version of the label
-created in the log entry <code>position</code>. The entries of <code>info</code> correspond to the
-entries of <code>UpdateResponse.values</code> if it is non-empty, and to the entries of
-<code>UpdateRequest.values</code> otherwise.<a href="#section-13.5-9" class="pilcrow">¶</a></p>
-<p id="section-13.5-10">The <code>opening</code> field of an <code>UpdateInfo</code> structure contains the commitment opening
+<p id="section-13.5-8">If a Third-Party Manager is present, the <code>skipped_versions</code> field contains the
+number of version counters that were skipped due to desynchronization between
+the Service Operator and the Third-Party Manager (discussed in <a href="#management" class="auto internal xref">Section 15.1</a>).
+Skipped versions are added to the prefix tree with an all-zero commitment value,
+and are given lower version counters than any unskipped versions created in the
+same log entry.<a href="#section-13.5-8" class="pilcrow">¶</a></p>
+<p id="section-13.5-9">If <code>greatest_version</code> is less than the current greatest version of the label,
+<code>UpdateResponse.values</code> contains the values of all of the subsequent versions of
+the label that were created in the log entry <code>position</code>, in ascending order by
+version, not including skipped versions. If <code>UpdateResponse.values</code> is
+non-empty, this indicates that <code>UpdateRequest.values</code> was disregarded by the
+Transparency Log. Inversely, if <code>UpdateResponse.values</code> is empty, this indicates
+that all of the new versions of the label in <code>UpdateRequest.values</code> were
+successfully created and no versions of the label other than the indicated
+number of skipped versions, followed by those in <code>UpdateRequest.values</code>, were
+created in the log entry <code>position</code>.<a href="#section-13.5-9" class="pilcrow">¶</a></p>
+<p id="section-13.5-10">The <code>info</code> field contains an <code>UpdateInfo</code> for each new and unskipped version of
+the label created in the log entry <code>position</code>. The entries of <code>info</code> correspond
+to the entries of <code>UpdateResponse.values</code> if it is non-empty, and to the entries
+of <code>UpdateRequest.values</code> otherwise.<a href="#section-13.5-10" class="pilcrow">¶</a></p>
+<p id="section-13.5-11">The <code>opening</code> field of an <code>UpdateInfo</code> structure contains the commitment opening
 that was chosen for the version of the label and, if in Third-Party Management
 mode, the <code>suffix</code> field contains the Service Operator's signature over the new
-value.<a href="#section-13.5-10" class="pilcrow">¶</a></p>
-<p id="section-13.5-11">The <code>binary_ladder</code> field contains VRF proofs for the versions specified in
+value.<a href="#section-13.5-11" class="pilcrow">¶</a></p>
+<p id="section-13.5-12">The <code>binary_ladder</code> field contains VRF proofs for the versions specified in
 <a href="#update-algorithm" class="auto internal xref">Section 9.1</a> in ascending order by version. If a version of a label
 exists and is less than or equal to the user's advertised <code>greatest_version</code>,
 the commitment to the label's value at that version is provided in the
-<code>commitment</code> field of the BinaryLadderStep.<a href="#section-13.5-11" class="pilcrow">¶</a></p>
-<p id="section-13.5-12">The <code>update</code> field contains the output of updating the user's view of the tree
+<code>commitment</code> field of the BinaryLadderStep.<a href="#section-13.5-12" class="pilcrow">¶</a></p>
+<p id="section-13.5-13">The <code>update</code> field contains the output of updating the user's view of the tree
 to match <code>TreeHead.tree_size</code>, followed by executing the algorithm in
-<a href="#update-algorithm" class="auto internal xref">Section 9.1</a>. Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-13.5-12" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-13.5-13">
-<li id="section-13.5-13.1">
-            <p id="section-13.5-13.1.1">Verify that <code>position</code> is to the right of where the previous greatest version
+<a href="#update-algorithm" class="auto internal xref">Section 9.1</a>. Users verify an <code>UpdateResponse</code> by following these steps:<a href="#section-13.5-13" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-13.5-14">
+<li id="section-13.5-14.1">
+            <p id="section-13.5-14.1.1">Verify that <code>position</code> is to the right of where the previous greatest version
 of the label was inserted. If this is the first version inserted since the
 user became the label owner, verify that <code>position</code> is to the right of the
-starting position chosen in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-13.5-13.1.1" class="pilcrow">¶</a></p>
+starting position chosen in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-13.5-14.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.2">
-            <p id="section-13.5-13.2.1">If <code>UpdateResponse.values</code> is non-empty, verify that the length of <code>info</code> is
+          <li id="section-13.5-14.2">
+            <p id="section-13.5-14.2.1">If <code>UpdateResponse.values</code> is non-empty, verify that the length of <code>info</code> is
 equal to that of <code>UpdateResponse.values</code>. Otherwise, verify that the length
 of <code>info</code> is equal to that of <code>UpdateRequest.values</code>. Regardless, verify that
-<code>info</code> is non-empty.<a href="#section-13.5-13.2.1" class="pilcrow">¶</a></p>
+<code>info</code> is non-empty.<a href="#section-13.5-14.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.3">
-            <p id="section-13.5-13.3.1">If the Transparency Log is deployed with a Third-Party Manager, verify that
-the signatures provided in each element of <code>info</code> are valid.<a href="#section-13.5-13.3.1" class="pilcrow">¶</a></p>
+          <li id="section-13.5-14.3">
+            <p id="section-13.5-14.3.1">If the Transparency Log is deployed with a Third-Party Manager, verify that
+the signatures provided in each element of <code>info</code> are valid.<a href="#section-13.5-14.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.4">
-            <p id="section-13.5-13.4.1">Verify that the expected number of entries is present in <code>binary_ladder</code>,
+          <li id="section-13.5-14.4">
+            <p id="section-13.5-14.4.1">Verify that the expected number of entries is present in <code>binary_ladder</code>,
 that all of the proofs properly evaluate into a VRF output, and that no
-commitment is provided for any version greater than <code>greatest_version</code>.<a href="#section-13.5-13.4.1" class="pilcrow">¶</a></p>
+commitment is provided for any version greater than <code>greatest_version</code>.<a href="#section-13.5-14.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.5">
-            <p id="section-13.5-13.5.1">Verify the proof in <code>update</code> as described in <a href="#update-algorithm" class="auto internal xref">Section 9.1</a>.<a href="#section-13.5-13.5.1" class="pilcrow">¶</a></p>
+          <li id="section-13.5-14.5">
+            <p id="section-13.5-14.5.1">Verify the proof in <code>update</code> as described in <a href="#update-algorithm" class="auto internal xref">Section 9.1</a>.<a href="#section-13.5-14.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.6">
-            <p id="section-13.5-13.6.1">Compute a candidate root value for the tree from the proof in
-<code>update.inclusion</code> and any previously retained full subtrees of the log tree.<a href="#section-13.5-13.6.1" class="pilcrow">¶</a></p>
+          <li id="section-13.5-14.6">
+            <p id="section-13.5-14.6.1">Compute a candidate root value for the tree from the proof in
+<code>update.inclusion</code> and any previously retained full subtrees of the log tree.<a href="#section-13.5-14.6.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-13.5-13.7">
-            <p id="section-13.5-13.7.1">With the candidate root value for the tree, verify <code>FullTreeHead</code> as
-described in <a href="#full-tree-head-verification" class="auto internal xref">Section 11.4</a>.<a href="#section-13.5-13.7.1" class="pilcrow">¶</a></p>
+          <li id="section-13.5-14.7">
+            <p id="section-13.5-14.7.1">With the candidate root value for the tree, verify <code>FullTreeHead</code> as
+described in <a href="#full-tree-head-verification" class="auto internal xref">Section 11.4</a>.<a href="#section-13.5-14.7.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-13.5-14">The Transparency Log <span class="bcp14">MAY</span> provide multiple <code>UpdateResponse</code> structures in
+<p id="section-13.5-15">The Transparency Log <span class="bcp14">MAY</span> provide multiple <code>UpdateResponse</code> structures in
 response to a single <code>UpdateRequest</code>, each corresponding to a subsequent
 <code>position</code> where more new versions of the label were inserted. These
 <code>UpdateResponse</code> structures are processed by clients serially as if an
-<code>UpdateRequest</code> with the following parameters had been sent:<a href="#section-13.5-14" class="pilcrow">¶</a></p>
+<code>UpdateRequest</code> with the following parameters had been sent:<a href="#section-13.5-15" class="pilcrow">¶</a></p>
 <ul class="normal">
-<li class="normal" id="section-13.5-15.1">
-            <p id="section-13.5-15.1.1"><code>last</code> set to the tree size of the previously processed <code>UpdateResponse</code><a href="#section-13.5-15.1.1" class="pilcrow">¶</a></p>
+<li class="normal" id="section-13.5-16.1">
+            <p id="section-13.5-16.1.1"><code>last</code> set to the tree size of the previously processed <code>UpdateResponse</code><a href="#section-13.5-16.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-13.5-15.2">
-            <p id="section-13.5-15.2.1"><code>label</code> set to the same value as the previous <code>UpdateRequest</code><a href="#section-13.5-15.2.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-13.5-16.2">
+            <p id="section-13.5-16.2.1"><code>label</code> set to the same value as the previous <code>UpdateRequest</code><a href="#section-13.5-16.2.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-13.5-15.3">
-            <p id="section-13.5-15.3.1"><code>greatest_version</code> incremented to cover the versions created by the
-previously processed <code>UpdateResponse</code><a href="#section-13.5-15.3.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-13.5-16.3">
+            <p id="section-13.5-16.3.1"><code>greatest_version</code> incremented to cover the versions created by the
+previously processed <code>UpdateResponse</code><a href="#section-13.5-16.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li class="normal" id="section-13.5-15.4">
-            <p id="section-13.5-15.4.1"><code>values</code> remains unchanged until the first <code>UpdateResponse</code> with an empty
-<code>values</code> field is received, and is empty from then on.<a href="#section-13.5-15.4.1" class="pilcrow">¶</a></p>
+          <li class="normal" id="section-13.5-16.4">
+            <p id="section-13.5-16.4.1"><code>values</code> remains unchanged until the first <code>UpdateResponse</code> with an empty
+<code>values</code> field is received, and is empty from then on.<a href="#section-13.5-16.4.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 </section>
@@ -4518,16 +4526,13 @@ the Service Operator's signature over the first element of <code>values</code>.<
 <p id="section-15.1-6">If <code>values</code> is non-empty and <code>signed_version</code> is greater than the next greatest
 version of the label to be created, the Manager <span class="bcp14">MUST</span> insert a sufficient number
 of "dummy" entries into the Transparency Log's prefix tree such that the next
-greatest version of the label to be created is <code>signed_version</code>, and sequence at
-least one new log entry containing the updated prefix tree root, before creating
-the versions requested in the <code>ManagerUpdateRequest</code>. These dummy entries in the
-prefix tree map the VRF output for the label-version pair to an all-zero
-commitment. As a result, the Manager will also need to provide an
-<code>UpdateResponse</code> to the user that covers the dummy versions of the label before
-providing an <code>UpdateResponse</code> that covers the requested versions.<a href="#section-15.1-6" class="pilcrow">¶</a></p>
+greatest version of the label to be created is <code>signed_version</code>, before
+inserting the versions requested in the <code>ManagerUpdateRequest</code>. These dummy
+entries, which map the VRF output for each label-version pair to an all-zero
+commitment, serve the function of skipping the corresponding version counters.<a href="#section-15.1-6" class="pilcrow">¶</a></p>
 <p id="section-15.1-7">If <code>signed_version</code> is less than the next greatest version of the label to be
-created, this generally indicates a bug in the Service Operator and the request
-<span class="bcp14">MUST</span> be rejected by the Manager.<a href="#section-15.1-7" class="pilcrow">¶</a></p>
+created, this strongly indicates a serious bug in the Service Operator and the
+request <span class="bcp14">MUST</span> be rejected by the Manager.<a href="#section-15.1-7" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="auditing">

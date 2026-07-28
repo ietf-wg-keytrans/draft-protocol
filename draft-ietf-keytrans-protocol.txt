@@ -2370,6 +2370,10 @@ Table of Contents
      FullTreeHead full_tree_head;
 
      uint64 position;
+     select (Configuration.mode) {
+       case thirdPartyManagement:
+         uint32 skipped_versions;
+     }
      LabelValue values<0..2^8-1>;
      UpdateInfo info<0..2^8-1>;
 
@@ -2381,21 +2385,30 @@ Table of Contents
    versions of the label were inserted.  This may or may not be the
    rightmost log entry.
 
+   If a Third-Party Manager is present, the skipped_versions field
+   contains the number of version counters that were skipped due to
+   desynchronization between the Service Operator and the Third-Party
+   Manager (discussed in Section 15.1).  Skipped versions are added to
+   the prefix tree with an all-zero commitment value, and are given
+   lower version counters than any unskipped versions created in the
+   same log entry.
+
    If greatest_version is less than the current greatest version of the
    label, UpdateResponse.values contains the values of all of the
-   immediately subsequent versions of the label that were created in the
-   log entry position, in ascending order by version.  If
-   UpdateResponse.values is non-empty, this indicates that
+   subsequent versions of the label that were created in the log entry
+   position, in ascending order by version, not including skipped
+   versions.  If UpdateResponse.values is non-empty, this indicates that
    UpdateRequest.values was disregarded by the Transparency Log.
    Inversely, if UpdateResponse.values is empty, this indicates that all
    of the new versions of the label in UpdateRequest.values were
-   successfully created and no versions of the label other than those in
-   UpdateRequest.values were created in the log entry position.
+   successfully created and no versions of the label other than the
+   indicated number of skipped versions, followed by those in
+   UpdateRequest.values, were created in the log entry position.
 
-   The info field contains an UpdateInfo for each new version of the
-   label created in the log entry position.  The entries of info
-   correspond to the entries of UpdateResponse.values if it is non-
-   empty, and to the entries of UpdateRequest.values otherwise.
+   The info field contains an UpdateInfo for each new and unskipped
+   version of the label created in the log entry position.  The entries
+   of info correspond to the entries of UpdateResponse.values if it is
+   non-empty, and to the entries of UpdateRequest.values otherwise.
 
    The opening field of an UpdateInfo structure contains the commitment
    opening that was chosen for the version of the label and, if in
@@ -2763,18 +2776,14 @@ Table of Contents
    greatest version of the label to be created, the Manager MUST insert
    a sufficient number of "dummy" entries into the Transparency Log's
    prefix tree such that the next greatest version of the label to be
-   created is signed_version, and sequence at least one new log entry
-   containing the updated prefix tree root, before creating the versions
-   requested in the ManagerUpdateRequest.  These dummy entries in the
-   prefix tree map the VRF output for the label-version pair to an all-
-   zero commitment.  As a result, the Manager will also need to provide
-   an UpdateResponse to the user that covers the dummy versions of the
-   label before providing an UpdateResponse that covers the requested
-   versions.
+   created is signed_version, before inserting the versions requested in
+   the ManagerUpdateRequest.  These dummy entries, which map the VRF
+   output for each label-version pair to an all-zero commitment, serve
+   the function of skipping the corresponding version counters.
 
    If signed_version is less than the next greatest version of the label
-   to be created, this generally indicates a bug in the Service Operator
-   and the request MUST be rejected by the Manager.
+   to be created, this strongly indicates a serious bug in the Service
+   Operator and the request MUST be rejected by the Manager.
 
 15.2.  Auditing
 
