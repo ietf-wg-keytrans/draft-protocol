@@ -545,10 +545,12 @@ following:
   entry with index `size-1`, where `size` is the tree size advertised by the
   user. Provide the timestamp of each log entry in the direct path whose index
   is greater than or equal to `size`.
-- The last of these log entries will lie on the new tree's frontier. From
-  this log entry, compute the remainder of the frontier. That is, compute the
-  log entry's right child, the right child's right child, and so on. Provide
-  the timestamps for these log entries as well.
+- The last of these log entries will lie on the new tree's frontier, unless
+  there were no such log entries, in which case the log entry with index
+  `size-1` lies on the new tree's frontier. Starting from this frontier log
+  entry, compute the remainder of the frontier. That is, compute the log entry's
+  right child, the right child's right child, and so on. Provide the timestamps
+  for these log entries as well.
 
 Users verify that the first timestamp is greater than or equal to the timestamp
 of the rightmost log entry they retained, and that each subsequent timestamp is
@@ -954,7 +956,7 @@ on.
 ## Owner Algorithm
 
 Label owners initialize their state by providing the Transparency Log with a
-**starting position** coresponding to the log entry where they wish their
+**starting position** corresponding to the log entry where they wish their
 ownership of the label to begin. This starting position MUST correspond to an
 unexpired distinguished log entry. The user then executes the following
 algorithm:
@@ -1166,7 +1168,9 @@ entries that is monotonic. However, the two simplest possible definitions are:
 a.) a distinguished log entry is "recent" if it is one of the `n` rightmost, or
 b.) a distinguished log entry is "recent" if subtracting its timestamp from the
 timestamp of the rightmost log entry yields a value less than some threshold. It
-is RECOMMENDED that applications choose one of these definitions.
+is RECOMMENDED that applications choose one of these definitions. An
+application's definition of "recent" SHOULD NOT generally be expected to include
+more than ten distinguished log entries.
 
 ## Detecting Forks
 
@@ -1195,12 +1199,12 @@ would provide non-repudiable evidence of misbehavior if detected.
 
 ~~~ tls-presentation
 struct {
-  HashValue heads<0..2^8>;
+  HashValue heads<0..2^8-1>;
 } DistinguishedHead;
 ~~~
 
 The list of root values determined from the authenticated channel, and the list
-of root values received over the partition-resistent channel, are verified by
+of root values received over the partition-resistant channel, are verified by
 checking that each list is either a prefix or a suffix of the other, having at
 least one root value in common. Example code for this is provided below:
 
@@ -1284,7 +1288,6 @@ struct {
   opaque vrf_public_key<0..2^16-1>;
 
   select (Configuration.mode) {
-    case contactMonitoring:
     case thirdPartyManagement:
       opaque leaf_public_key<0..2^16-1>;
     case thirdPartyAuditing:
@@ -1707,7 +1710,7 @@ time. Additionally, when a user advertises a previously observed tree size in
 their request, log entry timestamps that the user is expected to have retained
 are always omitted from `timestamps`. This may result in there being elements of
 `prefix_proofs` that correspond to log entries whose timestamps are not included
-in `timestamps`. Users MUST verify that any such proof in `prefix_proof` is
+in `timestamps`. Users MUST verify that any such proof in `prefix_proofs` is
 consistent with their retained prefix tree root hash for the log entry, due to
 the fact that the log entry will not be included in `inclusion`.
 
@@ -1914,6 +1917,12 @@ Users verify a `SearchResponse` by following these steps:
    `search.inclusion` and any previously retained full subtrees of the log tree.
 6. With the candidate root value for the tree, verify `FullTreeHead` as
    described in {{full-tree-head-verification}}.
+
+Note that this document doesn't define a way to encode a negative result (for a
+missing label or version) in a `SearchResponse`. This functionality was omitted
+due to its low expected utility. Unless a client has adopted a documented
+protocol for encoding negative search results, clients MUST consider any
+`SearchResponse` with a negative result as invalid and having failed validation.
 
 ## Contact Monitor
 
@@ -2189,8 +2198,8 @@ to match `TreeHead.tree_size`, followed by executing the algorithm in
 5. Verify the proof in `update` as described in {{update-algorithm}}.
 6. Compute a candidate root value for the tree from the proof in
    `update.inclusion` and any previously retained full subtrees of the log tree.
-7. With the candidate root value for the tree, verify `FulTreeHead` as described
-   in {{full-tree-head-verification}}.
+7. With the candidate root value for the tree, verify `FullTreeHead` as
+   described in {{full-tree-head-verification}}.
 
 The Transparency Log MAY provide multiple `UpdateResponse` structures in
 response to a single `UpdateRequest`, each corresponding to a subsequent
@@ -2369,11 +2378,12 @@ struct {
 ~~~
 
 The `position` field identifies the first distinguished log entry to the right
-of the terminal log entry of the search. The proof in `monitor` then contains
-the output of executing the algorithm in {{contact-algorithm}}. The proof in
-`monitor.inclusion` is computed with a tree size of `position+1` and assumes
-that the user has retained the full subtrees of the log tree with size
-`Credential.tree_head.tree_size`.
+of the terminal log entry of the search, or if the terminal log entry is
+distinguished, the position of the terminal log entry itself. The proof in
+`monitor` then contains the output of executing the algorithm in
+{{contact-algorithm}}. The proof in `monitor.inclusion` is computed with a tree
+size of `position+1` and assumes that the user has retained the full subtrees of
+the log tree with size `Credential.tree_head.tree_size`.
 
 Users follow these steps to verify a `CredentialUpdate`:
 
@@ -2460,7 +2470,6 @@ Manager with the Service Operator's signature over each new value:
 
 ~~~ tls-presentation
 struct {
-  UpdateRequest request;
   optional<uint64> last;
 
   opaque label<0..2^8-1>;
@@ -2736,7 +2745,7 @@ The following Python code demonstrates efficient algorithms for navigating the
 implicit binary search tree:
 
 ~~~ python
-# The exponent of the largest power of 2 less than x. Equivalent to:
+# The exponent of the largest power of 2 less than or equal to x. Equivalent to:
 #   int(math.floor(math.log(x, 2)))
 def log2(x):
     if x == 0:
@@ -2765,14 +2774,14 @@ def root(n):
 def left(x):
     k = level(x)
     if k == 0:
-        raise Exception('leaf node has no children')
+        raise Exception('node has no left child')
     return x ^ (0x01 << (k - 1))
 
 # The right child of an intermediate node.
 def right(x, n):
     k = level(x)
-    if k == 0:
-        raise Exception('leaf node has no children')
+    if k == 0 or x == n-1:
+        raise Exception('node has no right child')
     x = x ^ (0x03 << (k - 1))
     while x >= n:
         x = left(x)
