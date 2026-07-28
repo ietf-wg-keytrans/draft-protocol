@@ -803,10 +803,11 @@ time starting back at step 1.
    1. If there is no such log entry, terminate the search with an error
       indicating that the target version of the label does not exist.
 
-   2. If any expired log entries were encountered in the search, and there are
-      no unexpired distinguished log entries to the left of the identified log
-      entry, terminate the search with an error indicating that the target
-      version of the label is expired.
+   2. If any expired log entries were encountered in the search, identify
+      whether any of the log entries inspected by the search are unexpired,
+      distinguished, and to the left of the identified log entry. If no such log
+      entries exist, terminate the search with an error indicating that the
+      target version of the label is expired.
 
       Clients MUST NOT accept a proof where the identified log entry is itself
       the leftmost unexpired and distinguished log entry. Since the target
@@ -1040,7 +1041,7 @@ themself or at least be informed of changes afterwards. This section describes
 the mechanism by which label owners ensure that new versions of a label are
 inserted correctly into the Transparency Log. Label owners MUST follow this
 process for every new version of a label that is created after their ownership
-begins.
+begins, processing each new version of the label in the order they were created.
 
 ## Algorithm {#update-algorithm}
 
@@ -1079,12 +1080,13 @@ its right. Given this, the user executes the following algorithm:
 2. Starting from the identified log entry, proceed down the remainder of the
    previous tree's frontier from left to right:
 
-   1. If a binary ladder would have already been received from this log entry in
-      step 2.2 when processing a previous label update, skip this log entry.
+   1. If a previous version of the label existed, and the current log entry's
+      index is less than or equal to the index of the log entry where the
+      previous greatest version was inserted, skip inspecting this log entry.
 
-   2. Obtain a search binary ladder from this log entry where the target version
-      is the previous greatest version of the label that existed, or 0 if no
-      version of the label existed. Lookups that would be omitted in a
+   2. Obtain a search binary ladder from the current log entry where the target
+      version is the previous greatest version of the label that existed, or 0
+      if no version of the label existed. Lookups that would be omitted in a
       greatest-version search for the label are also omitted here. Note that
       this means that lookups that would occur in log entries that were skipped
       by step 2.1 will still be omitted as if the log entries had been
@@ -1655,7 +1657,8 @@ value was:
 The `depth` field indicates the depth of the terminal node of the search and is
 provided to assist proof verification. The root node of the prefix tree
 corresponds to a depth of 0, the root's children correspond to a depth of 1, and
-so on recursively.
+so on recursively. In the context of a `nonInclusionParent` result, the `depth`
+field contains the depth of the missing child node, not the depth of the parent.
 
 The `elements` array consists of the fewest node values that can be hashed
 together with the provided leaves to produce the root. The contents of the
