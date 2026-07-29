@@ -2855,9 +2855,9 @@ def search_binary_ladder(
 
 # Returns the set of versions that would be looked up in a monitoring binary
 # ladder where the monitored version of the label is t.
-def monitoring_binary_ladder(t, left_inclusion = []):
+def monitoring_binary_ladder(t):
     out = base_binary_ladder(t)
-    filtered_out = [v for v in out if v <= t and v not in left_inclusion]
+    filtered_out = [v for v in out if v <= t]
 
     return filtered_out
 ~~~
