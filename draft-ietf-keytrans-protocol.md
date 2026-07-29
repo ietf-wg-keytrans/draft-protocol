@@ -2308,23 +2308,23 @@ The `position` field contains the position of a recently issued distinguished
 log entry, and this log entry will be the basis for verifying the credential.
 Applications define their own policy for what constitutes a "recently issued"
 distinguished log entry. Users can learn of and retain all of the recently
-issued distinguished log entries by making a `DistinguishedRequest`, or through
+issued distinguished log entries by making a `DistinguishedRequest` or through
 the process of monitoring labels they own. Once a distinguished log entry no
 longer meets the application's definition of "recent", any credentials relying
 on the log entry are considered expired.
 
 The `credential_type` field specifies whether the credential is of the
-`standard` type, meaning that the target label-version pair is included in a
-distinguished log entry, or is of the `provisional` type, meaning that the
-label-version pair is not yet included in a distinguished log entry.
+`standard` type, meaning that the target label-version pair is included in the
+chosen distinguished log entry, or is of the `provisional` type, meaning that
+the label-version pair is not included in chosen distinguished log entry.
 
 Regardless of credential type, users start verification of a credential by
 following these steps:
 
 1. Verify that the user is aware of a recently issued distinguished log entry at
-   `position`. To preserve user anonymity, implementations MUST NOT use a
-   verification failure at this point as a prompt to request an updated tree
-   head from the Transparency Log.
+   `position`. To preserve the efficiency of the protocol and (potentially) the
+   sender's anonymity, implementations MUST NOT use a verification failure at
+   this point as a prompt to request updates from the Transparency Log.
 2. Verify `value` as described in {{update-format}}.
 3. Verify that the expected number of entries is present in `binary_ladder` and
    that no commitment value is provided for the target version.
@@ -2339,7 +2339,7 @@ two subsections.
 
 If the credential type is standard, the `distinguished` field is present and
 contains lookups corresponding to a search binary ladder for the target version
-of the label in a recently issued distinguished log entry.
+of the label in the indicated log entry.
 
 Users follow these steps to verify a standard credential:
 
@@ -2353,12 +2353,12 @@ Users follow these steps to verify a standard credential:
 
 If the credential type is provisional, the `tree_head` and `search` fields are
 present. The `tree_head` field contains a signature from the Transparency Log
-over a view of the tree that, at minimum, includes the log entry at `position`.
-The `search` field contains the output of updating the user's view of the tree
-from a tree size of `position+1` to `TreeHead.tree_size`, followed by a
+over a view of the tree that includes `position` and additional log entries to
+its right. The `search` field contains the output of updating the user's view of
+the tree from a tree size of `position+1` to `TreeHead.tree_size`, followed by a
 greatest-version search for `label`.
 
-Users follow these steps to verify a provisional credential:
+Users follow these steps to *initially verify* a provisional credential:
 
 1. Verify that `TreeHead.tree_size` is greater than `position`.
 2. Verify the proof in `search` as described in {{gv-algorithm}}. Verify that
@@ -2368,61 +2368,80 @@ Users follow these steps to verify a provisional credential:
 4. With the candidate root value for the tree, verify `TreeHead.signature` as
    described in {{tree-head-signature}}.
 
-The verification process explicitly rejects a provisional credential if a
-standard credential could have been produced from the same log entry `position`.
-However, when generating a credential, users MAY choose to output a provisional
-credential from an older distinguished log entry rather than a standard
-credential from a newer distinguished log entry. This can allow users to
-accommodate reasonable delays in the distribution of newly issued distinguished
-log entries. Applications MAY define a policy restricting provisional
-credentials to a subset of recently issued distinguished log entries.
+Once initially verified, the contents of a credential can be consumed by the
+application. The initial verification process explicitly rejects a provisional
+credential if a standard credential could have been produced from the same log
+entry `position`. However, when generating a credential, users MAY choose to
+output a provisional credential from an older distinguished log entry rather
+than a standard credential from a newer distinguished log entry. This can allow
+users to accommodate reasonable delays in the distribution of newly issued
+distinguished log entries.
 
-Verifying a provisional credential MUST NOT have any effect on the state used
-for the user's direct interactions with the Transparency Log, or on the
-verification of other credentials (even for the same label). In particular, the
-view of the tree presented in a provisional credential MUST NOT cause a user to
-change its view of the tree for any other purpose. Successfully verified
-provisional credentials are retained by the receiving user until the sender
-provides a `CredentialUpdate` structure:
+Provisional credentials that pass initial verification are retained by the
+receiving user until the credential passes *final verification*. Final
+verification can occur through one of two ways:
+
+First, if the terminal log entry of the search in `Credential.search` is later
+determined to be distinguished, then the receiving user finally verifies the
+credential by:
+
+1. From the proof in `Credential.search`, compute the prefix tree root value of
+   the terminal log entry. Verify that this matches the user's retained state
+   (learned from making a `DistinguishedRequest` or through owner monitoring)
+   for the distinguished log entry at that position.
+
+Alternatively, the terminal log entry may never become distinguished. In this
+case, the position of the first distinguished log entry issued to the right of
+the terminal log entry is denoted `distinguished`. Once this distinguished log
+entry is established, the sender of the credential provides a `CredentialUpdate`
+structure:
 
 ~~~ tls-presentation
 struct {
-  uint64 position;
   CombinedTreeProof monitor;
 } CredentialUpdate;
 ~~~
 
-The `position` field identifies the first distinguished log entry to the right
-of the terminal log entry of the search, or if the terminal log entry is
-distinguished, the position of the terminal log entry itself. The proof in
-`monitor` then contains the output of executing the algorithm in
-{{contact-algorithm}}. The proof in `monitor.inclusion` is computed with a tree
-size of `position+1` and assumes that the user has retained the full subtrees of
-the log tree with size `Credential.tree_head.tree_size`.
+The proof in `monitor` contains the result of updating the user's view of the
+tree from a size of `Credential.tree_head.tree_size` to a size of
+`distinguished+1`. If the Transparency Log is deployed in Contact Monitoring
+mode, the proof in `monitor` then contains the output of executing the algorithm
+in {{contact-algorithm}}, which will follow the monitoring path from the
+terminal log entry to the log entry at `distinguished`.
 
-Users follow these steps to verify a `CredentialUpdate`:
+Users follow these steps to verify a `CredentialUpdate`, which finally verifies
+the provisional credential if successful:
 
-1. Verify that the user is aware of a recently issued distinguished log entry at
-   `position`. Again, a verification failure at this point MUST NOT prompt a
-   request for an updated tree head from the Transparency Log. Implementations
-   MAY retain the `CredentialUpdate` and re-attempt verification at a later
-   time.
-2. Verify that, according to the user's retained state, `position` is the first
-   distinguished log entry to the right of the terminal log entry of the search
-   done in `Credential.search`.
-3. Verify the proof in `monitor` as described in {{contact-algorithm}}.
-4. Compute a candidate root value for the tree from the proof in
-   `monitor.inclusion`. Verify that this matches the user's retained state for
-   the distinguished log entry at `position`.
+1. Verify that the user is aware of a recently issued distinguished log entry
+   with an index greater than or equal to that of the provisional credential's
+   terminal log entry. Again, a verification failure at this point MUST NOT
+   prompt a request for an updated tree head from the Transparency Log.
+2. Verify the proof in `monitor` as described in {{update-view-algorithm}} and,
+   if the Transparency Log is deployed in Contact Monitoring mode, as described
+   in {{contact-algorithm}}.
+3. Compute a candidate root value for the log tree with the proof in
+   `monitor.inclusion` and the full subtrees of the tree at size `tree_size` (as
+   computed from the proof in `Credential.search`). Verify that this matches the
+   user's retained state for the distinguished log entry at `distinguished`.
 
-If a user verifies a provisional credential and doesn't receive a
-`CredentialUpdate` from the sender before the credential expires, the user MUST
-fetch and verify a `CredentialUpdate` from the Transparency Log themself. The
-user SHOULD attempt to fetch the `CredentialUpdate` over an anonymous channel,
-to preserve the anonymity of the sending user as much as possible. If the user
-is still unable to obtain or verify a `CredentialUpdate` structure for a
-provisional credential, this SHOULD be reported to the user as evidence of
-potential misbehavior by the Transparency Log.
+Verifying a provisional credential or its associated `CredentialUpdate` MUST NOT
+have any effect on the state used for the user's direct interactions with the
+Transparency Log, or on the verification of other credentials (even for the same
+label). In particular, the view of the tree presented in a provisional
+credential MUST NOT cause a user to change its view of the tree for any other
+purpose.
+
+To minimize the potential for issues caused by clock skew, users SHOULD support
+receiving a `CredentialUpdate` before they're capable of verifying it (due to
+not knowing the necessary distinguished log entry yet) by queueing it for later
+verification. If a user initially verifies a provisional credential and is
+unable to finally verify it before the credential expires, the user MUST attempt
+to obtain and verify a `CredentialUpdate` from the Transparency Log directly.
+The user SHOULD attempt to fetch the `CredentialUpdate` over an anonymous
+channel, to preserve the anonymity of the sending user as much as possible. If
+the user is still unable to obtain or verify a `CredentialUpdate` structure for
+a provisional credential, the credential SHOULD be reported to the user as
+evidence of potential misbehavior by the Transparency Log.
 
 ### Detecting Forks
 
@@ -2432,9 +2451,7 @@ prior response. However, this model doesn't work for credential verification.
 Since credentials are provided in a non-interactive and peer-to-peer manner,
 when a user is creating a credential they have no way to know what other
 credentials (and therefore which tree heads) the receiving user(s) may want to
-check consistency with. In fact, trying to convey this information to the
-user creating a credential risks violating the anonymity of the receiving user's
-other contacts.
+check consistency with.
 
 KT addresses this by using the recently issued distinguished log entries as
 common reference points for the state of the log tree. Users compute and retain
@@ -2450,14 +2467,11 @@ full subtrees for the log tree up to this point. This prevents the user from
 accepting a view of the log that forked at any point prior to the log entry at
 `Credential.position`.
 
-Once a `CredentialUpdate` is received for the credential, it will necessarily
-include a proof of inclusion for the first distinguished log entry that's to the
-right of the search's terminal log entry. Users take this proof, compute the
-full subtrees of the log tree just up to the point of the subsequent
-distinguished log entry, and verify that it matches their retained state. This
-ensures that the terminal log entry of the search, containing the value of the
-label that the user consumed, is also contained in a fully-consistent view of
-the log tree.
+When a `CredentialUpdate` is received, the proof it contains extends the view of
+the tree presented in the credential to a size of `distinguished+1`. Users are
+able to compare this with their locally retained view of the tree at that size,
+ensuring that neither this view nor the one presented in the credential are
+inconsistent with the other views received from the Transparency Log directly.
 
 
 # Third Parties
