@@ -114,9 +114,11 @@ This document uses the TLS presentation language {{!RFC8446}} to describe the
 structure of protocol messages, but does not require the use of a specific
 transport protocol. As such, implementations do not necessarily need to transmit
 messages according to the TLS format and can choose whichever encoding method
-best suits their application. However, cryptographic computations MUST be done
-with the TLS presentation language format to ensure the protocol's security
-properties are maintained.
+best suits their application. However, it is RECOMMENDED that implementations
+transmit, or be able to transmit, messages in their TLS format to simplify
+interoperability testing. Regardless of the format that messages are transmitted
+in, cryptographic computations MUST be done with the TLS presentation language
+format to ensure that the protocol's security properties are maintained.
 
 ### Optional Values
 
