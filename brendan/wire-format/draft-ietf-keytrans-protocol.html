@@ -1432,7 +1432,7 @@ structure of protocol messages, but does not require the use of a specific
 transport protocol. As such, implementations do not necessarily need to transmit
 messages according to the TLS format and can choose whichever encoding method
 best suits their application. However, it is <span class="bcp14">RECOMMENDED</span> that implementations
-output, or be able to output, messages in their TLS format to simplify
+transmit, or be able to transmit, messages in their TLS format to simplify
 interoperability testing. Regardless of the format that messages are transmitted
 in, cryptographic computations <span class="bcp14">MUST</span> be done with the TLS presentation language
 format to ensure that the protocol's security properties are maintained.<a href="#section-2.1-1" class="pilcrow">¶</a></p>
