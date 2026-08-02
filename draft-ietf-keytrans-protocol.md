@@ -389,7 +389,7 @@ parent node is the hash of the combined values of its left and right children
 An inclusion proof is given by providing the leaf value, along with the value of
 each copath node along the search path. A non-inclusion proof is given by
 providing an abridged inclusion proof that follows the path for the intended
-search key, but ends either at a stand-in node or a leaf for a different search
+search key, but ends either at a stand-in leaf or a leaf for a different search
 key. In either case, the proof is verified by hashing together the leaf with the
 copath values and checking that the result equals the root value of the tree.
 
@@ -1644,26 +1644,29 @@ struct {
 } PrefixProof;
 ~~~
 
-The `results` field contains the search result for each individual value,
+The `results` field contains the search result for each search key,
 provided in the order requested. For `PrefixProof` structures that correspond to
 a binary ladder, this means the entries of `results` correspond directly with
-the lookups of the binary ladder. The `result_type` field of each
+the lookups done by the binary ladder. The `result_type` field of each
 `PrefixSearchResult` indicates what the terminal node of the search for that
 value was:
 
 - `inclusion` for a leaf node matching the requested search key.
 - `nonInclusionLeaf` for a leaf node not matching the requested search key. In
   this case, the terminal node is provided since it can not be inferred.
-- `nonInclusionParent` for a parent node that lacks the desired child.
+- `nonInclusionParent` for the stand-in leaf of a parent node that lacks the
+  desired child.
 
 The `depth` field indicates the depth of the terminal node of the search and is
 provided to assist proof verification. The root node of the prefix tree
 corresponds to a depth of 0, the root's children correspond to a depth of 1, and
 so on recursively. In the context of a `nonInclusionParent` result, the `depth`
-field contains the depth of the missing child node, not the depth of the parent.
+field contains the depth of the missing (stand-in) leaf node, not the depth of
+the parent.
 
-The `elements` array consists of the fewest node values that can be hashed
-together with the provided leaves to produce the root. The contents of the
+Each entry in the `results` array conveys the leaf node where a search
+terminated. The `elements` array consists of the fewest node values that can be
+hashed together with these leaves to produce the root. The contents of the
 `elements` array is kept in left-to-right order: if a node is present in the
 root's left subtree, its value is listed before any values from nodes that are
 in the root's right subtree, and so on recursively. In the event that a node
