@@ -1871,7 +1871,7 @@ parent node is the hash of the combined values of its left and right children
 <p id="section-3.3-9">An inclusion proof is given by providing the leaf value, along with the value of
 each copath node along the search path. A non-inclusion proof is given by
 providing an abridged inclusion proof that follows the path for the intended
-search key, but ends either at a stand-in node or a leaf for a different search
+search key, but ends either at a stand-in leaf or a leaf for a different search
 key. In either case, the proof is verified by hashing together the leaf with the
 copath values and checking that the result equals the root value of the tree.<a href="#section-3.3-9" class="pilcrow">¶</a></p>
 </section>
@@ -3454,10 +3454,10 @@ struct {
 } PrefixProof;
 </pre><a href="#section-12.2-2" class="pilcrow">¶</a>
 </div>
-<p id="section-12.2-3">The <code>results</code> field contains the search result for each individual value,
+<p id="section-12.2-3">The <code>results</code> field contains the search result for each search key,
 provided in the order requested. For <code>PrefixProof</code> structures that correspond to
 a binary ladder, this means the entries of <code>results</code> correspond directly with
-the lookups of the binary ladder. The <code>result_type</code> field of each
+the lookups done by the binary ladder. The <code>result_type</code> field of each
 <code>PrefixSearchResult</code> indicates what the terminal node of the search for that
 value was:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
 <ul class="normal">
@@ -3469,16 +3469,19 @@ value was:<a href="#section-12.2-3" class="pilcrow">¶</a></p>
 this case, the terminal node is provided since it can not be inferred.<a href="#section-12.2-4.2.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-12.2-4.3">
-            <p id="section-12.2-4.3.1"><code>nonInclusionParent</code> for a parent node that lacks the desired child.<a href="#section-12.2-4.3.1" class="pilcrow">¶</a></p>
+            <p id="section-12.2-4.3.1"><code>nonInclusionParent</code> for the stand-in leaf of a parent node that lacks the
+desired child.<a href="#section-12.2-4.3.1" class="pilcrow">¶</a></p>
 </li>
         </ul>
 <p id="section-12.2-5">The <code>depth</code> field indicates the depth of the terminal node of the search and is
 provided to assist proof verification. The root node of the prefix tree
 corresponds to a depth of 0, the root's children correspond to a depth of 1, and
 so on recursively. In the context of a <code>nonInclusionParent</code> result, the <code>depth</code>
-field contains the depth of the missing child node, not the depth of the parent.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
-<p id="section-12.2-6">The <code>elements</code> array consists of the fewest node values that can be hashed
-together with the provided leaves to produce the root. The contents of the
+field contains the depth of the missing (stand-in) leaf node, not the depth of
+the parent.<a href="#section-12.2-5" class="pilcrow">¶</a></p>
+<p id="section-12.2-6">Each entry in the <code>results</code> array conveys the leaf node where a search
+terminated. The <code>elements</code> array consists of the fewest node values that can be
+hashed together with these leaves to produce the root. The contents of the
 <code>elements</code> array is kept in left-to-right order: if a node is present in the
 root's left subtree, its value is listed before any values from nodes that are
 in the root's right subtree, and so on recursively. In the event that a node
