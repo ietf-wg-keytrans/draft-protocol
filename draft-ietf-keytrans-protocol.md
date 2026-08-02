@@ -606,8 +606,10 @@ The Transparency Log's query response always contains sufficient information to
 allow users to predict the outcome of each lookup (inclusion or non-inclusion of
 a particular version) in the binary ladder.
 
-Example code for computing the versions of a label that go in a binary ladder is
-provided in {{appendix-binary-ladder}}.
+The greatest possible version is `2^32-1`. Any lookup for a greater version is
+skipped and the algorithm above continues as if the lookup resulted in a
+non-inclusion proof. Example code for computing the versions of a label that go
+in a binary ladder is provided in {{appendix-binary-ladder}}.
 
 
 # Greatest-Version Search
@@ -2829,7 +2831,7 @@ def base_binary_ladder(n):
     while True:
         value = (1 << len(out)) - 1
         out.append(value)
-        if value > n:
+        if value > n or len(out) >= 34:
             break
 
     # Binary search between the established lower and upper bounds.
@@ -2839,12 +2841,12 @@ def base_binary_ladder(n):
     while lower_bound+1 < upper_bound:
         value = (lower_bound + upper_bound) // 2
         out.append(value)
-        if value <= n:
+        if value <= n and value < (1 << 32):
             lower_bound = value
         else:
             upper_bound = value
 
-    return out
+    return [v for v in out if v < (1 << 32)]
 
 # Returns the set of versions that would be looked up in a search binary ladder
 # where the target version is t and the greatest version of the label that
