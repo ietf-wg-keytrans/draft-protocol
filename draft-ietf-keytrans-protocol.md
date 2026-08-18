@@ -1173,8 +1173,9 @@ a.) a distinguished log entry is "recent" if it is one of the `n` rightmost, or
 b.) a distinguished log entry is "recent" if subtracting its timestamp from the
 timestamp of the rightmost log entry yields a value less than some threshold. It
 is RECOMMENDED that applications choose one of these definitions. An
-application's definition of "recent" SHOULD NOT generally be expected to include
-more than ten distinguished log entries.
+application's definition of "recent" SHOULD NOT include more than ten
+distinguished log entries, and MUST NOT include any expired distinguished log
+entries.
 
 ## Detecting Forks
 
@@ -2152,7 +2153,7 @@ struct {
   select (Configuration.mode) {
     case thirdPartyManagement:
       uint32 skipped_versions;
-  }
+  };
   LabelValue values<0..2^8-1>;
   UpdateInfo info<0..2^8-1>;
 
@@ -2318,10 +2319,18 @@ the process of monitoring labels they own. Once a distinguished log entry no
 longer meets the application's definition of "recent", any credentials relying
 on the log entry are considered expired.
 
+A user that supports receiving and verifying credentials SHOULD refresh its view
+of the recently issued distinguished log entries roughly as frequently as the
+RMW and MUST, if at all possible, refresh its view frequently enough to prevent
+gaps in its knowledge. Gaps in a user's knowledge of the recently issued
+distinguished log entries primarily occurs when a distinguished log entry is
+able to be issued and then fall out of the application's definition of "recent"
+before the user is able to make a `DistinguishedRequest`.
+
 The `credential_type` field specifies whether the credential is of the
 `standard` type, meaning that the target label-version pair is included in the
 chosen distinguished log entry, or is of the `provisional` type, meaning that
-the label-version pair is not included in chosen distinguished log entry.
+the label-version pair is not included in the chosen distinguished log entry.
 
 Regardless of credential type, users start verification of a credential by
 following these steps:
@@ -2384,7 +2393,7 @@ distinguished log entries.
 
 Provisional credentials that pass initial verification are retained by the
 receiving user until the credential passes *final verification*. Final
-verification can occur through one of two ways:
+verification occurs through one of two ways:
 
 First, if the terminal log entry of the search in `Credential.search` is later
 determined to be distinguished, then the receiving user finally verifies the
@@ -2834,7 +2843,7 @@ def base_binary_ladder(n):
     while True:
         value = (1 << len(out)) - 1
         out.append(value)
-        if value > n or len(out) >= 34:
+        if value > n:
             break
 
     # Binary search between the established lower and upper bounds.
