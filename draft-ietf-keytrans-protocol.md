@@ -1716,28 +1716,71 @@ struct {
 
 The `timestamps` field contains the timestamps of specific log entries, and the
 `prefix_proofs` field contains search proofs from the prefix trees of specific
-log entries. There is no explicit indication as to which log entry the elements
-correspond to, as they are provided in the order that the algorithm the user is
-executing would request them. The elements of the `prefix_roots` field are, in
-left-to-right order, the prefix tree root hashes for any log entries whose
-timestamp was provided in `timestamps` but a search proof was not provided in
-`prefix_proofs`.
+log entries. There is no explicit indication as to which log entry each element
+corresponds to. Instead, elements are provided in the order that the algorithm
+the user is executing would request them: the association between an element and
+a log entry is established only by executing the algorithm, and the structure is
+not designed to be interpreted independently of doing so.
 
-If a log entry's timestamp is referenced multiple times by algorithms in the
-same `CombinedTreeProof`, it is only added to the `timestamps` array the first
-time. Additionally, when a user advertises a previously observed tree size in
-their request, log entry timestamps that the user is expected to have retained
-are always omitted from `timestamps`. This may result in there being elements of
-`prefix_proofs` that correspond to log entries whose timestamps are not included
-in `timestamps`. Users MUST verify that any such proof in `prefix_proofs` is
-consistent with their retained prefix tree root hash for the log entry, due to
-the fact that the log entry will not be included in `inclusion`.
+Users process a `CombinedTreeProof` by executing the algorithms for the
+operation at hand, treating the `timestamps` and `prefix_proofs` fields as
+queues and maintaining a running association between log entries and the data
+consumed from the queues so far:
 
-If different algorithms in the same `CombinedTreeProof` require a search proof
-from the same log entry, the `prefix_proofs` array will contain multiple
-`PrefixProof` structures for the same log entry. Users MUST verify that all
-`PrefixProof` structures corresponding to the same log entry compute the same
-prefix tree root hash.
+- The first time an algorithm requires the timestamp of a given log entry, the
+  next element of `timestamps` is consumed and remembered as that log entry's
+  timestamp. If the timestamp of the same log entry is required again, whether
+  by the same algorithm or a later one, the remembered value is reused and
+  nothing is consumed. Repeated references are common: for example, the
+  timestamps of frontier log entries provided while updating the user's view of
+  the tree are required again when identifying the rightmost distinguished log
+  entry at the start of a greatest-version search, and the algorithm in
+  {{contact-algorithm}} inspects the overlapping direct paths of several
+  monitored log entries.
+- When the user has advertised a previously observed tree size in their
+  request, the timestamps of log entries that the user is expected to have
+  retained (those along the frontier of the previously observed tree) are never
+  present in `timestamps`; the retained values are used instead.
+- Each time an algorithm requires a series of lookups (such as a binary ladder)
+  from a log entry's prefix tree, the next element of `prefix_proofs` is
+  consumed and evaluated, producing a candidate prefix tree root hash that is
+  remembered as belonging to that log entry. If multiple proofs are consumed
+  for the same log entry, users MUST verify that they all produce the same
+  root hash. If the log entry is one whose data the user retained, users MUST
+  verify that the produced root hash matches their retained prefix tree root
+  hash for that log entry, due to the fact that the log entry will not be
+  covered by `inclusion`.
+
+The subsections below state, for each algorithm, which timestamps and which
+`PrefixProof` structures are provided. The contents of the remaining two fields
+are not specified per-algorithm because they are fully determined by the
+association established above:
+
+- The elements of the `prefix_roots` field are, in left-to-right order, the
+  prefix tree root hashes of the log entries that have an associated timestamp
+  from `timestamps` but no associated prefix tree root hash from
+  `prefix_proofs`. Combined with its timestamp, this allows the user to compute
+  each such log entry's leaf value.
+- The `inclusion` field contains the minimum set of node values from the log
+  tree that would allow a user to compute:
+
+  - The root value of the log tree, and
+  - If an `AuditorTreeHead` was provided by the Transparency Log, the root
+    value of the log tree when it had `AuditorTreeHead.tree_size` leaves,
+
+  from the following:
+
+  - The values of all leaf nodes whose timestamp was provided in `timestamps`,
+    and
+  - If the user advertised a previously observed tree size in their request,
+    any intermediate node values the user is expected to have retained.
+
+Note that this is the case even when an algorithm's subsection lists no
+additional timestamps: for example, a greatest-version search performed by a
+returning user typically results in a non-empty `prefix_roots` field (covering
+frontier log entries whose timestamps were provided while updating the user's
+view of the tree, but from which the search did not require a binary ladder)
+and a non-empty `inclusion` field.
 
 Users processing a `CombinedTreeProof` MUST verify that the `timestamps`,
 `prefix_proofs`, and `prefix_roots` fields contain exactly the expected number
@@ -1746,18 +1789,13 @@ timestamps explicitly included in `timestamps`, along with any retained
 timestamps, represent a monotonic series. That is, users verify that any given
 timestamp is greater than or equal to all observed timestamps to its left.
 
-Finally, the `inclusion` field contains the minimum set of node
-values from the log tree that would allow a user to compute:
-
-- The root value of the log tree, and
-- If an `AuditorTreeHead` was provided by the Transparency Log, the root value
-  of the log tree when it had `AuditorTreeHead.tree_size` leaves,
-
-from the following:
-
-- The values of all leaf nodes whose timestamp was provided in `timestamps`, and
-- If the user advertised a previously observed tree size in their request, any
-  intermediate node values the user is expected to have retained.
+The Transparency Log can construct a `CombinedTreeProof` by executing exactly
+the same algorithms as the user, appending each timestamp or search proof to
+the structure the first time it would be requested, rather than consuming it.
+This guarantees that the prover and the verifier agree on the contents and
+order of every field. This strategy, along with a worked example showing the
+exact contents of a `CombinedTreeProof` for a greatest-version search, is
+discussed further in {{appendix-combined-tree}}.
 
 ### Updating View
 
@@ -2909,7 +2947,7 @@ def monitoring_binary_ladder(t):
 ~~~
 
 
-# CombinedTreeProof Implementation
+# CombinedTreeProof Implementation {#appendix-combined-tree}
 
 The `CombinedTreeProof` structure is designed to provide all of the information
 a user needs to evaluate the algorithms defined in this document with as little
@@ -2930,6 +2968,79 @@ inclusion proof. These functions can also evenly enforce the invariants that all
 timestamps are monotonic, and that if there are multiple `PrefixProof`
 structures from the same log entry, that they all compute the same prefix tree
 root value.
+
+A Transparency Log can construct a `CombinedTreeProof` with the same strategy
+in reverse: it executes the same algorithms against its own data, and the first
+time a timestamp or search proof would be requested for a log entry, it appends
+the value to the corresponding field instead of popping it. Implementing the
+prover and the verifier over a single shared implementation of the algorithms,
+parameterized only by whether data is being recorded or consumed, guarantees
+that both sides agree on the contents and order of every field.
+
+## Worked Example
+
+Consider a Transparency Log with 13 log entries, numbered 0 through 12, with
+timestamps `T_0` through `T_12`. In the implicit binary search tree over these
+entries, the root is entry 7, the right child of entry 7 is entry 11, and the
+right child of entry 11 is entry 12, making entries 7, 11, and 12 the frontier.
+Suppose that:
+
+- A user previously observed the tree when it had 4 entries. From that time,
+  the user retained the head value of the log tree's single full subtree (the
+  balanced subtree with leaves 0 through 3) and the contents of log entry 3
+  (the previous tree's only frontier entry): its timestamp `T_3` and its prefix
+  tree root hash.
+- The user now performs a greatest-version search for a label whose greatest
+  version is 2. The versions looked up by a search binary ladder for target
+  version 2 are, in order: 0, 1, 3, 2. VRF proofs for exactly these versions
+  are provided in `SearchResponse.binary_ladder`.
+- `T_12 - T_7` is greater than or equal to the Reasonable Monitoring Window
+  while `T_12 - T_11` is less than it, so that entry 11 is the rightmost
+  distinguished log entry. (Entry 7 is also distinguished: the bounding
+  timestamps used to evaluate it are 0 and `T_12`.)
+
+The user first updates their view of the tree, as described in
+{{update-view-algorithm}}. The direct path of entry 3 in the new tree consists
+only of entry 7, so the timestamps provided are that of entry 7, followed by
+the timestamps of the remainder of the frontier:
+`timestamps = [T_7, T_11, T_12]`.
+
+The user then executes the greatest-version search described in
+{{gv-algorithm}}. Identifying the rightmost distinguished log entry requires
+the timestamps of entries 7, 11, and 12; all three are already associated, so
+nothing further is provided in `timestamps`. The search then starts at entry
+11:
+
+- From entry 11, a search binary ladder for target version 2 performs the
+  lookups 0, 1, 3, and 2. No lookup can be omitted, so the first `PrefixProof`
+  contains four results, in lookup order: inclusion of version 0, inclusion of
+  version 1, non-inclusion of version 3, and inclusion of version 2.
+- From entry 12, the lookups for versions 0, 1, and 2 are omitted, as inclusion
+  proofs for these versions were already provided for entry 11, which is to the
+  left of entry 12. The lookup for version 3 is not omitted: a non-inclusion
+  proof for version 3 was provided only for a log entry to the left, while
+  omission would require one from a log entry to the right. The second
+  `PrefixProof` therefore contains a single result: non-inclusion of version 3.
+
+Both binary ladders terminate in a way that is consistent with version 2 being
+the greatest that exists, and evaluating the two proofs produces candidate
+prefix tree root hashes for entries 11 and 12.
+
+At this point, entries 7, 11, and 12 have associated timestamps, but only
+entries 11 and 12 have associated prefix tree root hashes. The `prefix_roots`
+field therefore contains exactly one element: the prefix tree root hash of
+entry 7. The user is now able to compute the leaf values of log entries 7, 11,
+and 12.
+
+Finally, the `inclusion` field allows the user to compute the root value of the
+13-entry log tree from the three computed leaf values and the retained head of
+the subtree with leaves 0 through 3. It contains, in left-to-right order: the
+head value of the subtree with leaves 4 and 5, the value of leaf 6, the head
+value of the subtree with leaves 8 and 9, and the value of leaf 10. In the
+course of computing the root value, the user also computes the head values of
+the full subtrees of the new tree (leaves 0 through 7, leaves 8 through 11, and
+leaf 12), which it retains along with the log entries on the new frontier for
+use in future queries.
 
 
 # Log Entry Maximum Lifetime and the Reasonable Monitoring Window
