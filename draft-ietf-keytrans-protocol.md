@@ -1085,8 +1085,9 @@ its right. Given this, the user executes the following algorithm:
    previous tree's frontier from left to right:
 
    1. If a previous version of the label existed, and the current log entry's
-      index is less than or equal to the index of the log entry where the
-      previous greatest version was inserted, skip inspecting this log entry.
+      index is less than or equal to either the owner's starting position or the
+      index of the log entry where the previous greatest version was inserted,
+      skip inspecting this log entry.
 
    2. Obtain a search binary ladder from the current log entry where the target
       version is the previous greatest version of the label that existed, or 0
@@ -1136,6 +1137,13 @@ to only inform the label owner of the non-malicious value. The second phase is
 verifying how the new versions of the label were created in the claimed log
 entry. This depends on whether the log entry is distinguished or not to minimize
 redundant lookups with the second algorithm of {{owner-algorithm}}.
+
+Note that if a Third-Party Manager is present, desynchronization between the
+Service Provider and the Third-Party Manager can result in "skipped" versions
+(discussed in {{management}}). Skipped versions are inserted into the prefix
+tree with an all-zero commitment value. For the purpose of the algorithm
+described in this section, skipped versions are handled the same as unskipped
+versions.
 
 
 # Walking Distinguished Heads
@@ -2133,14 +2141,22 @@ be empty to indicate that the user only wishes to be informed of
 already-existing versions of the label greater than `greatest_version`, rather
 than create any new ones.
 
-If `greatest_version` matches the current greatest version of the label that
-exists and `values` is non-empty, the Transparency Log inserts the new versions
-of the label into the prefix tree and sequences a new log entry. Version
-counters are assigned sequentially and in the same order as given in `values`.
-If the `greatest_version` field does not match the current greatest version of
-the label that exists, `values` is disregarded.
+If `greatest_version` is less than the current greatest version of the label,
+`values` is disregarded and the Transparency Log responds with an
+`UpdateResponse` structure for the already-existing version `greatest_version+1`
+and any subsequent versions that were created in the same log entry.
 
-The Transparency Log returns an `UpdateResponse` structure:
+If `greatest_version` matches the current greatest version of the label and
+`values` is non-empty, the Transparency Log inserts the new versions of the
+label into the prefix tree, sequences a new log entry, and responds with an
+`UpdateResponse` structure. Version counters are assigned sequentially and in
+the same order as given in `values`.
+
+If `greatest_version` matches the current greatest version of the label and
+`values` is empty, or if `greatest_version` is greater than the current greatest
+version of the label, the Transparency Log provides no response.
+
+The `UpdateResponse` structure is defined as:
 
 ~~~ tls-presentation
 struct {
@@ -2174,7 +2190,7 @@ Skipped versions are added to the prefix tree with an all-zero commitment value,
 and are given lower version counters than any unskipped versions created in the
 same log entry.
 
-If `greatest_version` is less than the current greatest version of the label,
+If `greatest_version` was less than the current greatest version of the label,
 `UpdateResponse.values` contains the values of all of the subsequent versions of
 the label that were created in the log entry `position`, in ascending order by
 version, not including skipped versions. If `UpdateResponse.values` is
@@ -2197,9 +2213,9 @@ value.
 
 The `binary_ladder` field contains VRF proofs for the versions specified in
 {{update-algorithm}} in ascending order by version. If a version of a label
-exists and is less than or equal to the user's advertised `greatest_version`,
-the commitment to the label's value at that version is provided in the
-`commitment` field of the BinaryLadderStep.
+exists and is less than the user's advertised `greatest_version`, the commitment
+to the label's value at that version is provided in the `commitment` field of
+the BinaryLadderStep.
 
 The `update` field contains the output of updating the user's view of the tree
 to match `TreeHead.tree_size`, followed by executing the algorithm in
@@ -2213,8 +2229,8 @@ to match `TreeHead.tree_size`, followed by executing the algorithm in
    equal to that of `UpdateResponse.values`. Otherwise, verify that the length
    of `info` is equal to that of `UpdateRequest.values`. Regardless, verify that
    `info` is non-empty.
-3. If the Transparency Log is deployed with a Third-Party Manager, verify that
-   the signatures provided in each element of `info` are valid.
+3. If a Third-Party Manager is present, verify that the signatures provided in
+   each element of `info` are valid.
 4. Verify that the expected number of entries is present in `binary_ladder`,
    that all of the proofs properly evaluate into a VRF output, and that no
    commitment is provided for any version greater than `greatest_version`.
@@ -2232,8 +2248,8 @@ response to a single `UpdateRequest`, each corresponding to a subsequent
 
 - `last` set to the tree size of the previously processed `UpdateResponse`
 - `label` set to the same value as the previous `UpdateRequest`
-- `greatest_version` incremented to cover the versions created by the
-  previously processed `UpdateResponse`
+- `greatest_version` incremented to cover the versions created (including those
+  skipped) by the previously processed `UpdateResponse`
 - `values` remains unchanged until the first `UpdateResponse` with an empty
   `values` field is received, and is empty from then on.
 
