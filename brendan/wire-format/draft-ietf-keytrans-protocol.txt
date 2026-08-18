@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 2 February 2027                                   1 August 2026
+Expires: 19 February 2027                                 18 August 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 2 February 2027.
+   This Internet-Draft will expire on 19 February 2027.
 
 Copyright Notice
 
@@ -178,10 +178,10 @@ Table of Contents
    and can choose whichever encoding method best suits their
    application.  However, it is RECOMMENDED that implementations
    transmit, or be able to transmit, messages in their TLS format to
-   simplify interoperability testing.  Regardless of the format that
-   messages are transmitted in, cryptographic computations MUST be done
-   with the TLS presentation language format to ensure that the
-   protocol's security properties are maintained.
+   facilitate interoperability.  Regardless of the format that messages
+   are transmitted in, cryptographic computations MUST be done with the
+   TLS presentation language format to ensure that the protocol's
+   security properties are maintained.
 
 2.1.1.  Optional Values
 
