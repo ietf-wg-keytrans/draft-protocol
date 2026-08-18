@@ -1381,6 +1381,11 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21">
             <p id="section-toc.1-1.21.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-combinedtreeproof-implement" class="internal xref">CombinedTreeProof Implementation</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.21.2.1">
+                <p id="section-toc.1-1.21.2.1.1"><a href="#appendix-C.1" class="auto internal xref">C.1</a>.  <a href="#name-worked-example" class="internal xref">Worked Example</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.22">
             <p id="section-toc.1-1.22.1"><a href="#appendix-D" class="auto internal xref">Appendix D</a>.  <a href="#name-log-entry-maximum-lifetime-" class="internal xref">Log Entry Maximum Lifetime and the Reasonable Monitoring Window</a></p>
@@ -2844,7 +2849,7 @@ verifying how the new versions of the label were created in the claimed log
 entry. This depends on whether the log entry is distinguished or not to minimize
 redundant lookups with the second algorithm of <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-9.1-5" class="pilcrow">¶</a></p>
 <p id="section-9.1-6">Note that if a Third-Party Manager is present, desynchronization between the
-Service Provider and the Third-Party Manager can result in "skipped" versions
+Service Operator and the Third-Party Manager can result in "skipped" versions
 (discussed in <a href="#management" class="auto internal xref">Section 15.1</a>). Skipped versions are inserted into the prefix
 tree with an all-zero commitment value. For the purpose of the algorithm
 described in this section, skipped versions are handled the same as unskipped
@@ -3531,53 +3536,103 @@ struct {
 </div>
 <p id="section-12.3-5">The <code>timestamps</code> field contains the timestamps of specific log entries, and the
 <code>prefix_proofs</code> field contains search proofs from the prefix trees of specific
-log entries. There is no explicit indication as to which log entry the elements
-correspond to, as they are provided in the order that the algorithm the user is
-executing would request them. The elements of the <code>prefix_roots</code> field are, in
-left-to-right order, the prefix tree root hashes for any log entries whose
-timestamp was provided in <code>timestamps</code> but a search proof was not provided in
-<code>prefix_proofs</code>.<a href="#section-12.3-5" class="pilcrow">¶</a></p>
-<p id="section-12.3-6">If a log entry's timestamp is referenced multiple times by algorithms in the
-same <code>CombinedTreeProof</code>, it is only added to the <code>timestamps</code> array the first
-time. Additionally, when a user advertises a previously observed tree size in
-their request, log entry timestamps that the user is expected to have retained
-are always omitted from <code>timestamps</code>. This may result in there being elements of
-<code>prefix_proofs</code> that correspond to log entries whose timestamps are not included
-in <code>timestamps</code>. Users <span class="bcp14">MUST</span> verify that any such proof in <code>prefix_proofs</code> is
-consistent with their retained prefix tree root hash for the log entry, due to
-the fact that the log entry will not be included in <code>inclusion</code>.<a href="#section-12.3-6" class="pilcrow">¶</a></p>
-<p id="section-12.3-7">If different algorithms in the same <code>CombinedTreeProof</code> require a search proof
-from the same log entry, the <code>prefix_proofs</code> array will contain multiple
-<code>PrefixProof</code> structures for the same log entry. Users <span class="bcp14">MUST</span> verify that all
-<code>PrefixProof</code> structures corresponding to the same log entry compute the same
-prefix tree root hash.<a href="#section-12.3-7" class="pilcrow">¶</a></p>
-<p id="section-12.3-8">Users processing a <code>CombinedTreeProof</code> <span class="bcp14">MUST</span> verify that the <code>timestamps</code>,
+log entries. There is no explicit indication as to which log entry each element
+corresponds to. Instead, elements are provided in the order that the algorithm
+the user is executing would request them: the association between an element and
+a log entry is established only by executing the algorithm, and the structure is
+not designed to be interpreted independently of doing so.<a href="#section-12.3-5" class="pilcrow">¶</a></p>
+<p id="section-12.3-6">Users process a <code>CombinedTreeProof</code> by executing the algorithms for the
+operation at hand, treating the <code>timestamps</code> and <code>prefix_proofs</code> fields as
+queues and maintaining a running association between log entries and the data
+consumed from the queues so far:<a href="#section-12.3-6" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-12.3-7.1">
+            <p id="section-12.3-7.1.1">The first time an algorithm requires the timestamp of a given log entry, the
+next element of <code>timestamps</code> is consumed and remembered as that log entry's
+timestamp. If the timestamp of the same log entry is required again, whether
+by the same algorithm or a later one, the remembered value is reused and
+nothing is consumed. Repeated references are common: for example, the
+timestamps of frontier log entries provided while updating the user's view of
+the tree are required again when identifying the rightmost distinguished log
+entry at the start of a greatest-version search, and the algorithm in
+<a href="#contact-algorithm" class="auto internal xref">Section 8.2</a> inspects the overlapping direct paths of several
+monitored log entries.<a href="#section-12.3-7.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-12.3-7.2">
+            <p id="section-12.3-7.2.1">When the user has advertised a previously observed tree size in their
+request, the timestamps of log entries that the user is expected to have
+retained (those along the frontier of the previously observed tree) are never
+present in <code>timestamps</code>; the retained values are used instead.<a href="#section-12.3-7.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-12.3-7.3">
+            <p id="section-12.3-7.3.1">Each time an algorithm requires a series of lookups (such as a binary ladder)
+from a log entry's prefix tree, the next element of <code>prefix_proofs</code> is
+consumed and evaluated, producing a candidate prefix tree root hash that is
+remembered as belonging to that log entry. If multiple proofs are consumed
+for the same log entry, users <span class="bcp14">MUST</span> verify that they all produce the same
+root hash. If the log entry is one whose data the user retained, users <span class="bcp14">MUST</span>
+verify that the produced root hash matches their retained prefix tree root
+hash for that log entry, due to the fact that the log entry will not be
+covered by <code>inclusion</code>.<a href="#section-12.3-7.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="section-12.3-8">The subsections below state, for each algorithm, which timestamps and which
+<code>PrefixProof</code> structures are provided. The contents of the remaining two fields
+are not specified per-algorithm because they are fully determined by the
+association established above:<a href="#section-12.3-8" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-12.3-9.1">
+            <p id="section-12.3-9.1.1">The elements of the <code>prefix_roots</code> field are, in left-to-right order, the
+prefix tree root hashes of the log entries that have an associated timestamp
+from <code>timestamps</code> but no associated prefix tree root hash from
+<code>prefix_proofs</code>. Combined with its timestamp, this allows the user to compute
+each such log entry's leaf value.<a href="#section-12.3-9.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-12.3-9.2">
+            <p id="section-12.3-9.2.1">The <code>inclusion</code> field contains the minimum set of node values from the log
+tree that would allow a user to compute:<a href="#section-12.3-9.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-12.3-9.2.2.1">
+                <p id="section-12.3-9.2.2.1.1">The root value of the log tree, and<a href="#section-12.3-9.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-12.3-9.2.2.2">
+                <p id="section-12.3-9.2.2.2.1">If an <code>AuditorTreeHead</code> was provided by the Transparency Log, the root
+value of the log tree when it had <code>AuditorTreeHead.tree_size</code> leaves,<a href="#section-12.3-9.2.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+<p id="section-12.3-9.2.3">
+from the following:<a href="#section-12.3-9.2.3" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-12.3-9.2.4.1">
+                <p id="section-12.3-9.2.4.1.1">The values of all leaf nodes whose timestamp was provided in <code>timestamps</code>,
+and<a href="#section-12.3-9.2.4.1.1" class="pilcrow">¶</a></p>
+</li>
+              <li class="normal" id="section-12.3-9.2.4.2">
+                <p id="section-12.3-9.2.4.2.1">If the user advertised a previously observed tree size in their request,
+any intermediate node values the user is expected to have retained.<a href="#section-12.3-9.2.4.2.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+        </ul>
+<p id="section-12.3-10">Note that this is the case even when an algorithm's subsection lists no
+additional timestamps: for example, a greatest-version search performed by a
+returning user typically results in a non-empty <code>prefix_roots</code> field (covering
+frontier log entries whose timestamps were provided while updating the user's
+view of the tree, but from which the search did not require a binary ladder)
+and a non-empty <code>inclusion</code> field.<a href="#section-12.3-10" class="pilcrow">¶</a></p>
+<p id="section-12.3-11">Users processing a <code>CombinedTreeProof</code> <span class="bcp14">MUST</span> verify that the <code>timestamps</code>,
 <code>prefix_proofs</code>, and <code>prefix_roots</code> fields contain exactly the expected number
 of entries -- no more and no less. Additionally, users <span class="bcp14">MUST</span> verify that the
 timestamps explicitly included in <code>timestamps</code>, along with any retained
 timestamps, represent a monotonic series. That is, users verify that any given
-timestamp is greater than or equal to all observed timestamps to its left.<a href="#section-12.3-8" class="pilcrow">¶</a></p>
-<p id="section-12.3-9">Finally, the <code>inclusion</code> field contains the minimum set of node
-values from the log tree that would allow a user to compute:<a href="#section-12.3-9" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-12.3-10.1">
-            <p id="section-12.3-10.1.1">The root value of the log tree, and<a href="#section-12.3-10.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-12.3-10.2">
-            <p id="section-12.3-10.2.1">If an <code>AuditorTreeHead</code> was provided by the Transparency Log, the root value
-of the log tree when it had <code>AuditorTreeHead.tree_size</code> leaves,<a href="#section-12.3-10.2.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
-<p id="section-12.3-11">from the following:<a href="#section-12.3-11" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-12.3-12.1">
-            <p id="section-12.3-12.1.1">The values of all leaf nodes whose timestamp was provided in <code>timestamps</code>, and<a href="#section-12.3-12.1.1" class="pilcrow">¶</a></p>
-</li>
-          <li class="normal" id="section-12.3-12.2">
-            <p id="section-12.3-12.2.1">If the user advertised a previously observed tree size in their request, any
-intermediate node values the user is expected to have retained.<a href="#section-12.3-12.2.1" class="pilcrow">¶</a></p>
-</li>
-        </ul>
+timestamp is greater than or equal to all observed timestamps to its left.<a href="#section-12.3-11" class="pilcrow">¶</a></p>
+<p id="section-12.3-12">The Transparency Log can construct a <code>CombinedTreeProof</code> by executing exactly
+the same algorithms as the user, appending each timestamp or search proof to
+the structure the first time it would be requested, rather than consuming it.
+This guarantees that the prover and the verifier agree on the contents and
+order of every field. This strategy, along with a worked example showing the
+exact contents of a <code>CombinedTreeProof</code> for a greatest-version search, is
+discussed further in <a href="#appendix-combined-tree" class="auto internal xref">Appendix C</a>.<a href="#section-12.3-12" class="pilcrow">¶</a></p>
 <div id="updating-view">
 <section id="section-12.3.1">
           <h4 id="name-updating-view">
@@ -4105,7 +4160,7 @@ label into the prefix tree, sequences a new log entry, and responds with an
 the same order as given in <code>values</code>.<a href="#section-13.5-5" class="pilcrow">¶</a></p>
 <p id="section-13.5-6">If <code>greatest_version</code> matches the current greatest version of the label and
 <code>values</code> is empty, or if <code>greatest_version</code> is greater than the current greatest
-version of the label, the Transparency Log provides no response.<a href="#section-13.5-6" class="pilcrow">¶</a></p>
+version of the label, the Transparency Log rejects the request.<a href="#section-13.5-6" class="pilcrow">¶</a></p>
 <p id="section-13.5-7">The <code>UpdateResponse</code> structure is defined as:<a href="#section-13.5-7" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-13.5-8">
 <pre>
@@ -4322,8 +4377,8 @@ on the log entry are considered expired.<a href="#section-14-5" class="pilcrow">
 of the recently issued distinguished log entries roughly as frequently as the
 RMW and <span class="bcp14">MUST</span>, if at all possible, refresh its view frequently enough to prevent
 gaps in its knowledge. Gaps in a user's knowledge of the recently issued
-distinguished log entries primarily occurs when a distinguished log entry is
-able to be issued and then fall out of the application's definition of "recent"
+distinguished log entries primarily occur when a distinguished log entry is able
+to be issued and then fall out of the application's definition of "recent"
 before the user is able to make a <code>DistinguishedRequest</code>.<a href="#section-14-6" class="pilcrow">¶</a></p>
 <p id="section-14-7">The <code>credential_type</code> field specifies whether the credential is of the
 <code>standard</code> type, meaning that the target label-version pair is included in the
@@ -5103,7 +5158,7 @@ def monitoring_binary_ladder(t):
 </div>
 </section>
 </div>
-<div id="combinedtreeproof-implementation">
+<div id="appendix-combined-tree">
 <section id="appendix-C">
       <h2 id="name-combinedtreeproof-implement">
 <a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-combinedtreeproof-implement" class="section-name selfRef">CombinedTreeProof Implementation</a>
@@ -5126,6 +5181,89 @@ inclusion proof. These functions can also evenly enforce the invariants that all
 timestamps are monotonic, and that if there are multiple <code>PrefixProof</code>
 structures from the same log entry, that they all compute the same prefix tree
 root value.<a href="#appendix-C-2" class="pilcrow">¶</a></p>
+<p id="appendix-C-3">A Transparency Log can construct a <code>CombinedTreeProof</code> with the same strategy
+in reverse: it executes the same algorithms against its own data, and the first
+time a timestamp or search proof would be requested for a log entry, it appends
+the value to the corresponding field instead of popping it. Implementing the
+prover and the verifier over a single shared implementation of the algorithms,
+parameterized only by whether data is being recorded or consumed, guarantees
+that both sides agree on the contents and order of every field.<a href="#appendix-C-3" class="pilcrow">¶</a></p>
+<div id="worked-example">
+<section id="appendix-C.1">
+        <h3 id="name-worked-example">
+<a href="#appendix-C.1" class="section-number selfRef">C.1. </a><a href="#name-worked-example" class="section-name selfRef">Worked Example</a>
+        </h3>
+<p id="appendix-C.1-1">Consider a Transparency Log with 13 log entries, numbered 0 through 12, with
+timestamps <code>T_0</code> through <code>T_12</code>. In the implicit binary search tree over these
+entries, the root is entry 7, the right child of entry 7 is entry 11, and the
+right child of entry 11 is entry 12, making entries 7, 11, and 12 the frontier.
+Suppose that:<a href="#appendix-C.1-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C.1-2.1">
+            <p id="appendix-C.1-2.1.1">A user previously observed the tree when it had 4 entries. From that time,
+the user retained the head value of the log tree's single full subtree (the
+balanced subtree with leaves 0 through 3) and the contents of log entry 3
+(the previous tree's only frontier entry): its timestamp <code>T_3</code> and its prefix
+tree root hash.<a href="#appendix-C.1-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.1-2.2">
+            <p id="appendix-C.1-2.2.1">The user now performs a greatest-version search for a label whose greatest
+version is 2. The versions looked up by a search binary ladder for target
+version 2 are, in order: 0, 1, 3, 2. VRF proofs for exactly these versions
+are provided in <code>SearchResponse.binary_ladder</code>.<a href="#appendix-C.1-2.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.1-2.3">
+            <p id="appendix-C.1-2.3.1"><code>T_12 - T_7</code> is greater than or equal to the Reasonable Monitoring Window
+while <code>T_12 - T_11</code> is less than it, so that entry 11 is the rightmost
+distinguished log entry. (Entry 7 is also distinguished: the bounding
+timestamps used to evaluate it are 0 and <code>T_12</code>.)<a href="#appendix-C.1-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-C.1-3">The user first updates their view of the tree, as described in
+<a href="#update-view-algorithm" class="auto internal xref">Section 4.2</a>. The direct path of entry 3 in the new tree consists
+only of entry 7, so the timestamps provided are that of entry 7, followed by
+the timestamps of the remainder of the frontier:
+<code>timestamps = [T_7, T_11, T_12]</code>.<a href="#appendix-C.1-3" class="pilcrow">¶</a></p>
+<p id="appendix-C.1-4">The user then executes the greatest-version search described in
+<a href="#gv-algorithm" class="auto internal xref">Section 6.3</a>. Identifying the rightmost distinguished log entry requires
+the timestamps of entries 7, 11, and 12; all three are already associated, so
+nothing further is provided in <code>timestamps</code>. The search then starts at entry
+11:<a href="#appendix-C.1-4" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-C.1-5.1">
+            <p id="appendix-C.1-5.1.1">From entry 11, a search binary ladder for target version 2 performs the
+lookups 0, 1, 3, and 2. No lookup can be omitted, so the first <code>PrefixProof</code>
+contains four results, in lookup order: inclusion of version 0, inclusion of
+version 1, non-inclusion of version 3, and inclusion of version 2.<a href="#appendix-C.1-5.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="appendix-C.1-5.2">
+            <p id="appendix-C.1-5.2.1">From entry 12, the lookups for versions 0, 1, and 2 are omitted, as inclusion
+proofs for these versions were already provided for entry 11, which is to the
+left of entry 12. The lookup for version 3 is not omitted: a non-inclusion
+proof for version 3 was provided only for a log entry to the left, while
+omission would require one from a log entry to the right. The second
+<code>PrefixProof</code> therefore contains a single result: non-inclusion of version 3.<a href="#appendix-C.1-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<p id="appendix-C.1-6">Both binary ladders terminate in a way that is consistent with version 2 being
+the greatest that exists, and evaluating the two proofs produces candidate
+prefix tree root hashes for entries 11 and 12.<a href="#appendix-C.1-6" class="pilcrow">¶</a></p>
+<p id="appendix-C.1-7">At this point, entries 7, 11, and 12 have associated timestamps, but only
+entries 11 and 12 have associated prefix tree root hashes. The <code>prefix_roots</code>
+field therefore contains exactly one element: the prefix tree root hash of
+entry 7. The user is now able to compute the leaf values of log entries 7, 11,
+and 12.<a href="#appendix-C.1-7" class="pilcrow">¶</a></p>
+<p id="appendix-C.1-8">Finally, the <code>inclusion</code> field allows the user to compute the root value of the
+13-entry log tree from the three computed leaf values and the retained head of
+the subtree with leaves 0 through 3. It contains, in left-to-right order: the
+head value of the subtree with leaves 4 and 5, the value of leaf 6, the head
+value of the subtree with leaves 8 and 9, and the value of leaf 10. In the
+course of computing the root value, the user also computes the head values of
+the full subtrees of the new tree (leaves 0 through 7, leaves 8 through 11, and
+leaf 12), which it retains along with the log entries on the new frontier for
+use in future queries.<a href="#appendix-C.1-8" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="log-entry-maximum-lifetime-and-the-reasonable-monitoring-window">
