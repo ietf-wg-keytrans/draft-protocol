@@ -1139,7 +1139,7 @@ entry. This depends on whether the log entry is distinguished or not to minimize
 redundant lookups with the second algorithm of {{owner-algorithm}}.
 
 Note that if a Third-Party Manager is present, desynchronization between the
-Service Provider and the Third-Party Manager can result in "skipped" versions
+Service Operator and the Third-Party Manager can result in "skipped" versions
 (discussed in {{management}}). Skipped versions are inserted into the prefix
 tree with an all-zero commitment value. For the purpose of the algorithm
 described in this section, skipped versions are handled the same as unskipped
@@ -2154,7 +2154,7 @@ the same order as given in `values`.
 
 If `greatest_version` matches the current greatest version of the label and
 `values` is empty, or if `greatest_version` is greater than the current greatest
-version of the label, the Transparency Log provides no response.
+version of the label, the Transparency Log rejects the request.
 
 The `UpdateResponse` structure is defined as:
 
@@ -2341,8 +2341,8 @@ A user that supports receiving and verifying credentials SHOULD refresh its view
 of the recently issued distinguished log entries roughly as frequently as the
 RMW and MUST, if at all possible, refresh its view frequently enough to prevent
 gaps in its knowledge. Gaps in a user's knowledge of the recently issued
-distinguished log entries primarily occurs when a distinguished log entry is
-able to be issued and then fall out of the application's definition of "recent"
+distinguished log entries primarily occur when a distinguished log entry is able
+to be issued and then fall out of the application's definition of "recent"
 before the user is able to make a `DistinguishedRequest`.
 
 The `credential_type` field specifies whether the credential is of the
