@@ -367,6 +367,17 @@ leaf and the existing leaf would no longer reside in the same place. That is,
 until we reach the first bit that differs between the new search key and the existing
 search key.
 
+An existing key-value pair may be removed from the tree by removing the
+corresponding leaf node. If the removed leaf's sibling is a parent node, no
+other changes are made. If the removed leaf's sibling is another leaf, the
+remaining leaf replaces its parent, moving it up one level in the tree. This is
+repeated until the remaining leaf either has an existing sibling or becomes the
+root. This removes any intermediate parent nodes that were previously necessary
+only to separate the two leaves, resulting in the same tree as if the key-value
+pair had never been added. As a result, the prefix tree is *history
+independent*, meaning that it depends only on the key-value pairs it currently
+contains and not the history of additions and removals.
+
 ~~~ aasvg
                           X
                           |
@@ -2620,6 +2631,7 @@ struct {
 
   PrefixLeaf added<0..2^16-1>;
   PrefixLeaf removed<0..2^16-1>;
+  PrefixLeaf leaves<0..2^16-1>;
 
   PrefixProof proof;
 } AuditorUpdate;
@@ -2628,13 +2640,16 @@ struct {
 The `timestamp` field contains the timestamp of the corresponding log entry. The
 `added` field contains the list of `PrefixLeaf` structures that were added to
 the prefix tree in the corresponding log entry. The `removed` field contains the
-list of `PrefixLeaf` structures that were removed from the prefix tree.
+list of `PrefixLeaf` structures that were removed from the prefix tree. The
+`leaves` field contains the list of `PrefixLeaf` structures that were moved to a
+higher level (closer to the root) because their sibling became empty.
 
 The `proof` field contains a batch lookup proof in the previous log entry's
-prefix tree for all search keys referenced by `added` or `removed`. The
-`proof.results` field contains the result of the search for each element of
-`added` in the order provided, followed by the result of the search for each
-element of `removed` in the order provided.
+prefix tree for all search keys referenced by `added`, `removed`, or `leaves`.
+The `proof.results` field contains the search result for each element of `added`
+in the order provided, followed by the search result for each element of
+`removed` in the order provided, and finally the search result for each element
+of `leaves` in the order provided.
 
 An auditor processes a single `AuditorUpdate` by following these steps:
 
@@ -2643,22 +2658,24 @@ An auditor processes a single `AuditorUpdate` by following these steps:
 2. Verify that the elements of `added` are sorted in ascending order by
    `vrf_output` and that the same `vrf_output` is not present twice. Verify the
    same in `removed`. Note that a VRF output in `added` is also allowed to be in
-   `removed`.
+   `removed`. Verify that the elements of `leaves` are sorted in ascending order
+   by `vrf_output`, that the same `vrf_output` is not present twice, and that no
+   `vrf_output` in `leaves` is also in `added` or `removed`.
 3. For each element of `added` where the same VRF output is not in `removed`,
    verify that the `PrefixSearchResult` provided in `proof` has a `result_type`
    of `nonInclusionParent` or `nonInclusionLeaf`
 4. Verify that the `PrefixSearchResult` provided in `proof` for each element of
-   `removed` has a `result_type` of `inclusion`.
+   `removed` and `leaves` has a `result_type` of `inclusion`.
 5. For each element of `removed`, verify that, with the addition of the new log
    entry, the prefix tree leaf was published in at least one
    distinguished log entry before removal.
-6. With `proof` and the `PrefixLeaf` structures in `removed`, compute the root
-   value of the previous log entry's prefix tree. Verify that this matches the
-   auditor's state.
-7. With `proof` and the `PrefixLeaf` structures in `added` and `removed`,
-   compute the new root value of the prefix tree. Compute the new root value of
-   the log tree after adding a leaf with the specified `timestamp` and prefix
-   tree root value.
+6. With `proof` and the `PrefixLeaf` structures in `removed` and `leaves`,
+   compute the root value of the previous log entry's prefix tree. Verify that
+   this matches the auditor's state.
+7. With `proof` and the `PrefixLeaf` structures in `added`, `removed`, and
+   `leaves`, compute the new root value of the prefix tree. Compute the new root
+   value of the log tree after adding a leaf with the specified `timestamp` and
+   prefix tree root value.
 8. Optionally, provide an `AuditorTreeHead` to the Service Operator where
    `AuditorTreeHead.timestamp` is set to `timestamp` and
    `AuditorTreeHead.tree_size` is set to the new size of the log tree after the
