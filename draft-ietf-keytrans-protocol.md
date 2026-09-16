@@ -1661,8 +1661,8 @@ struct {
 } PrefixSearchResult;
 
 struct {
-  PrefixSearchResult results<0..2^8-1>;
-  HashValue elements<0..2^16-1>;
+  PrefixSearchResult results<0..2^32-1>;
+  HashValue elements<0..2^32-1>;
 } PrefixProof;
 ~~~
 
@@ -2629,9 +2629,9 @@ entry.
 struct {
   uint64 timestamp;
 
-  PrefixLeaf added<0..2^16-1>;
-  PrefixLeaf removed<0..2^16-1>;
-  PrefixLeaf leaves<0..2^16-1>;
+  PrefixLeaf added<0..2^32-1>;
+  PrefixLeaf removed<0..2^32-1>;
+  PrefixLeaf leaves<0..2^32-1>;
 
   PrefixProof proof;
 } AuditorUpdate;
@@ -2643,6 +2643,12 @@ the prefix tree in the corresponding log entry. The `removed` field contains the
 list of `PrefixLeaf` structures that were removed from the prefix tree. The
 `leaves` field contains the list of `PrefixLeaf` structures that were moved to a
 higher level (closer to the root) because their sibling became empty.
+
+The `leaves` field is necessary because without it only the hash of these leaf
+nodes would be present in the proof, and the auditor wouldn't know that their
+position in the tree should be changed (as discussed in {{prefix-tree}}). This
+would result in the auditor and the Service Operator computing different root
+values for the prefix tree.
 
 The `proof` field contains a batch lookup proof in the previous log entry's
 prefix tree for all search keys referenced by `added`, `removed`, or `leaves`.
