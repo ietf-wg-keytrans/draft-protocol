@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 19 March 2027                                 15 September 2026
+Expires: 20 March 2027                                 16 September 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 March 2027.
+   This Internet-Draft will expire on 20 March 2027.
 
 Copyright Notice
 
@@ -1852,8 +1852,8 @@ Table of Contents
    } PrefixSearchResult;
 
    struct {
-     PrefixSearchResult results<0..2^8-1>;
-     HashValue elements<0..2^16-1>;
+     PrefixSearchResult results<0..2^32-1>;
+     HashValue elements<0..2^32-1>;
    } PrefixProof;
 
    The results field contains the search result for each search key,
@@ -2911,9 +2911,9 @@ Table of Contents
    struct {
      uint64 timestamp;
 
-     PrefixLeaf added<0..2^16-1>;
-     PrefixLeaf removed<0..2^16-1>;
-     PrefixLeaf leaves<0..2^16-1>;
+     PrefixLeaf added<0..2^32-1>;
+     PrefixLeaf removed<0..2^32-1>;
+     PrefixLeaf leaves<0..2^32-1>;
 
      PrefixProof proof;
    } AuditorUpdate;
@@ -2925,6 +2925,12 @@ Table of Contents
    were removed from the prefix tree.  The leaves field contains the
    list of PrefixLeaf structures that were moved to a higher level
    (closer to the root) because their sibling became empty.
+
+   The leaves field is necessary because without it only the hash of
+   these leaf nodes would be present in the proof, and the auditor
+   wouldn't know that their position in the tree should be changed (as
+   discussed in Section 3.3).  This would result in the auditor and the
+   Service Operator computing different root values for the prefix tree.
 
    The proof field contains a batch lookup proof in the previous log
    entry's prefix tree for all search keys referenced by added, removed,
