@@ -931,12 +931,14 @@ rightmost to leftmost log entry:
 
 3. For each log entry in the computed list, from left to right:
 
-   1. Check if a binary ladder from this log entry was already provided in the
-      same query response. If so:
-      1. If the previously provided binary ladder had a greater target version
-         than the current map entry, then this version of the label no longer
-         needs to be monitored. Remove the position-version pair with the lesser
-         version from the map and move on to the next map entry.
+   1. Check if this log entry had an entry in the original (unmodified)
+      monitoring map, or if a binary ladder from this log entry has already been
+      provided in the same query response. If so:
+      1. If the original monitoring map entry had a greater associated version,
+         or if the previously provided binary ladder had a greater target
+         version, then this version of the label no longer needs to be
+         monitored. Remove the position-version pair with the lesser version
+         from the map and move on to the next map entry.
       2. If it had a target version less than or equal to that of the current
          map entry, terminate and return an error to the user.
 
@@ -974,13 +976,15 @@ on.
 Label owners initialize their state by providing the Transparency Log with a
 **starting position** corresponding to the log entry where they wish their
 ownership of the label to begin. This starting position MUST correspond to an
-unexpired distinguished log entry. The user then executes the following
-algorithm:
+unexpired distinguished log entry. Alternatively, label owners may omit the
+starting position to indicate that they wish to own the label from the start of
+the log's existence. The user then executes the following algorithm:
 
 1. Compute the list of log entries to inspect: this list starts with the log
    entry at the requested starting position, followed by the log entries that
    are on the starting position's direct path and to its left, ending just
-   before the first expired log entry.
+   before the first expired log entry. If no starting position was provided,
+   this list is empty.
 
 2. Obtain the greatest version of the label that existed as of each of these log
    entries. If the label did not exist, no value is provided. Verify that each
@@ -1004,19 +1008,30 @@ If any new versions of the label were created after the requested starting
 position, the label owner will need to process each of these individually as
 described in {{updating-a-label}}.
 
+If no starting position was provided, the algorithm above inspects no log
+entries and only provides the VRF proof for version zero of the label. The label
+owner's state then reflects that no log entries have been verified and that no
+versions of the label are known. The label owner processes every existing
+version of the label, starting with the one created first, as described in
+{{updating-a-label}}. This includes versions that were created in log entry 0,
+which could not otherwise be verified, since any starting position would
+correspond to a log entry where the label already existed.
+
 Once the label owner has fully initialized their state, through the algorithm
 above and by processing any remaining new versions, they can begin regular
 monitoring. The label owner advertises to the Transparency Log the greatest
 version of the label that they're aware of and the rightmost distinguished log
 entry that they've verified is correct. For a number of subsequent distinguished
 log entries, the Transparency Log provides a binary ladder proving that no new
-unexpected versions of the label exist. This is described below as a recursive
+unexpected versions of the label exist. If the label owner hasn't verified any
+distinguished log entry, the Transparency Log starts with the leftmost
+distinguished log entry that exists. This is described below as a recursive
 algorithm, starting with the root log entry:
 
 1. If the current log entry is not distinguished, stop.
 
-2. If the current log entry's index is less than or equal to that of the log
-   entry advertised by the user:
+2. If the user advertised a log entry, and the current log entry's index is less
+   than or equal to that of the log entry advertised by the user:
    1. If the current log entry has a right child, recurse to the right child.
    2. Regardless of the outcome of step 1, stop.
 
@@ -1082,23 +1097,24 @@ following:
 To ensure that the new versions of the label were inserted correctly, the label
 owner considers the Transparency Log as it existed at two points in time: The
 first is the **previous tree**, which is defined as the log tree up to but
-excluding the log entry where the new versions were added. The second is the
-**current tree**, which is defined as the log tree as it is currently presented
-to the user, containing the new log entry and potentially other log entries to
-its right. Given this, the user executes the following algorithm:
+excluding the log entry where the new versions were added.  If the new versions
+of the label were added in log entry 0, the previous tree is empty. The second
+is the **current tree**, which is defined as the log tree as it is currently
+presented to the user, containing the new log entry and potentially other log
+entries to its right. Given this, the user executes the following algorithm:
 
-1. Starting from the root log entry of the previous tree, proceed down the
-   frontier of the previous tree and identify the first log entry that is not
-   distinguished in the current tree. If there is no such log entry, skip to
-   step 3.
+1. If the previous tree is empty, skip to step 3. Otherwise, starting from the
+   root log entry of the previous tree, proceed down the frontier of the
+   previous tree and identify the first log entry that is not distinguished in
+   the current tree. If there is no such log entry, skip to step 3.
 
 2. Starting from the identified log entry, proceed down the remainder of the
    previous tree's frontier from left to right:
 
-   1. If a previous version of the label existed, and the current log entry's
-      index is less than or equal to either the owner's starting position or the
-      index of the log entry where the previous greatest version was inserted,
-      skip inspecting this log entry.
+   1. If the current log entry's index is less than or equal to either the
+      owner's starting position (if any) or the index of the log entry where the
+      previous greatest version was inserted (if any), skip inspecting this log
+      entry.
 
    2. Obtain a search binary ladder from the current log entry where the target
       version is the previous greatest version of the label that existed, or 0
@@ -1860,13 +1876,14 @@ For a label owner to initialize their state to begin monitoring a label, the
 following is provided:
 
 - The timestamp of each log entry on the path from the root to the user's
-  requested starting position.
+  requested starting position, if one was provided.
 - For each log entry in the list computed in the first algorithm of
   {{owner-algorithm}}, a `PrefixProof` corresponding to a search binary ladder.
 
 The timestamps are provided to allow both the client and server to verify the
 precondition that the user's requested starting position is unexpired and
-distinguished.
+distinguished. If no starting position was provided, nothing is provided beyond
+the output of updating the user's view of the tree.
 
 ### Owner Monitoring
 
@@ -2056,13 +2073,14 @@ struct {
   optional<uint64> last;
 
   opaque label<0..2^8-1>;
-  uint64 start;
+  optional<uint64> start;
 } OwnerInitRequest;
 ~~~
 
-The Transparency Log verifies that `start` identifies a log entry that is
-unexpired and distinguished. In turn, the Transparency Log responds with an
-`OwnerInitResponse` structure:
+If `start` is absent, the user wishes to own the label from the start of the
+log's existence. If `start` is present, the Transparency Log verifies that it
+identifies a log entry that is unexpired and distinguished. In turn, the
+Transparency Log responds with an `OwnerInitResponse` structure:
 
 ~~~ tls-presentation
 struct {
@@ -2081,8 +2099,9 @@ exist.
 
 The `binary_ladder` field contains one entry for each version computed in step 3
 of the first algorithm in {{owner-algorithm}}, in ascending order by version. If
-a version of the label exists, the commitment to the label's value at that
-version is provided in the `commitment` field of the `BinaryLadderStep`.
+a version of the label exists as of the starting position, the commitment to the
+label's value at that version is provided in the `commitment` field of the
+`BinaryLadderStep`.
 
 The `init` field contains the output of updating the user's view of the tree to
 match `TreeHead.tree_size` followed by executing the first algorithm in
@@ -2105,6 +2124,11 @@ Users verify an `OwnerInitResponse` by following these steps:
 5. With the candidate root value for the tree, verify `FullTreeHead` as
    described in {{full-tree-head-verification}}.
 
+Note that if `start` was absent in the request, the response `greatest_versions`
+will be empty and `binary_ladder` will contain only the VRF proof for version
+zero (with no commitment). All versions of the label are processed by the user
+through the algorithm in {{updating-a-label}}.
+
 ## Owner Monitoring
 
 Users that wish to monitor a label they own submit an `OwnerMonitorRequest` to
@@ -2117,7 +2141,7 @@ struct {
 
   opaque label<0..2^8-1>;
   MonitorMapEntry entries<0..2^8-1>;
-  uint64 start;
+  optional<uint64> start;
   optional<uint32> greatest_version;
 } OwnerMonitorRequest;
 ~~~
@@ -2125,8 +2149,10 @@ struct {
 The `entries` list contains the label owner's monitoring state for versions of
 the label that have not yet been proven to be included in a distinguished log entry. The
 `start` field contains the rightmost distinguished log entry that the label
-owner has verified as correct. The `greatest_version` field contains the
-greatest version of the label that the label owner is aware of, if any.
+owner has verified as correct, or is absent if the label owner hasn't verified
+any log entry and wishes to start monitoring from the leftmost distinguished log
+entry that exists. The `greatest_version` field contains the greatest version of
+the label that the label owner is aware of, if any.
 
 The Transparency Log verifies an `OwnerMonitorRequest` by following these steps:
 
@@ -2134,11 +2160,11 @@ The Transparency Log verifies an `OwnerMonitorRequest` by following these steps:
    `position`, that no `position` or `version` is duplicate, and that `position`
    always lies on the direct path of the first log entry to contain the
    associated version of the label.
-2. Verify that `start` is less than the size of the tree.
+2. Verify that `start` is either absent, or less than the size of the tree.
 3. Verify that `greatest_version` is either absent, or less than or equal to the
-   greatest version of the label. Verify that, if some version of the label
-   existed at `start`, that `greatest_version` is present and greater than or
-   equal to that version.
+   greatest version of the label. Verify that, if `start` is present and some
+   version of the label existed at `start`, that `greatest_version` is present
+   and greater than or equal to that version.
 
 In turn, the Transparency Log responds with an `OwnerMonitorResponse` structure:
 
