@@ -16,23 +16,23 @@ for distributing sensitive cryptographic information, such as public keys, in a
 way that reliably either prevents interference or detects that it occurred in a
 timely manner. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="key transparency" name="keyword">
 <meta content="draft-ietf-keytrans-protocol-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.7
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.11.7
+    platformdirs 4.12.2
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.3
+    wcwidth 0.9.1
 -->
 <link href="draft-ietf-keytrans-protocol.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1048,11 +1048,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Key Transparency Protocol</td>
-<td class="right">September 2026</td>
+<td class="right">October 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">McMillion &amp; Linker</td>
-<td class="center">Expires 20 March 2027</td>
+<td class="center">Expires 19 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1065,12 +1065,12 @@ svg {
 <dd class="internet-draft">draft-ietf-keytrans-protocol-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-09-16" class="published">16 September 2026</time>
+<time datetime="2026-10-16" class="published">16 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-03-20">20 March 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-19">19 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1128,7 +1128,7 @@ timely manner.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 20 March 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 19 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -2577,14 +2577,16 @@ inspected by the algorithm in <a href="#owner-algorithm" class="auto internal xr
             <p id="section-8.2-3.3.1">For each log entry in the computed list, from left to right:<a href="#section-8.2-3.3.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.2-3.3.2">
 <li id="section-8.2-3.3.2.1">
-                <p id="section-8.2-3.3.2.1.1">Check if a binary ladder from this log entry was already provided in the
-same query response. If so:<a href="#section-8.2-3.3.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-8.2-3.3.2.1.1">Check if this log entry had an entry in the original (unmodified)
+monitoring map, or if a binary ladder from this log entry has already been
+provided in the same query response. If so:<a href="#section-8.2-3.3.2.1.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.2-3.3.2.1.2">
 <li id="section-8.2-3.3.2.1.2.1">
-                    <p id="section-8.2-3.3.2.1.2.1.1">If the previously provided binary ladder had a greater target version
-than the current map entry, then this version of the label no longer
-needs to be monitored. Remove the position-version pair with the lesser
-version from the map and move on to the next map entry.<a href="#section-8.2-3.3.2.1.2.1.1" class="pilcrow">¶</a></p>
+                    <p id="section-8.2-3.3.2.1.2.1.1">If the original monitoring map entry had a greater associated version,
+or if the previously provided binary ladder had a greater target
+version, then this version of the label no longer needs to be
+monitored. Remove the position-version pair with the lesser version
+from the map and move on to the next map entry.<a href="#section-8.2-3.3.2.1.2.1.1" class="pilcrow">¶</a></p>
 </li>
                   <li id="section-8.2-3.3.2.1.2.2">
                     <p id="section-8.2-3.3.2.1.2.2.1">If it had a target version less than or equal to that of the current
@@ -2633,14 +2635,16 @@ on.<a href="#section-8.2-6" class="pilcrow">¶</a></p>
 <p id="section-8.3-1">Label owners initialize their state by providing the Transparency Log with a
 <strong>starting position</strong> corresponding to the log entry where they wish their
 ownership of the label to begin. This starting position <span class="bcp14">MUST</span> correspond to an
-unexpired distinguished log entry. The user then executes the following
-algorithm:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+unexpired distinguished log entry. Alternatively, label owners may omit the
+starting position to indicate that they wish to own the label from the start of
+the log's existence. The user then executes the following algorithm:<a href="#section-8.3-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-8.3-2">
 <li id="section-8.3-2.1">
             <p id="section-8.3-2.1.1">Compute the list of log entries to inspect: this list starts with the log
 entry at the requested starting position, followed by the log entries that
 are on the starting position's direct path and to its left, ending just
-before the first expired log entry.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
+before the first expired log entry. If no starting position was provided,
+this list is empty.<a href="#section-8.3-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-8.3-2.2">
             <p id="section-8.3-2.2.1">Obtain the greatest version of the label that existed as of each of these log
@@ -2668,61 +2672,71 @@ claimed greatest version of the label.<a href="#section-8.3-2.5.1" class="pilcro
 <p id="section-8.3-3">If any new versions of the label were created after the requested starting
 position, the label owner will need to process each of these individually as
 described in <a href="#updating-a-label" class="auto internal xref">Section 9</a>.<a href="#section-8.3-3" class="pilcrow">¶</a></p>
-<p id="section-8.3-4">Once the label owner has fully initialized their state, through the algorithm
+<p id="section-8.3-4">If no starting position was provided, the algorithm above inspects no log
+entries and only provides the VRF proof for version zero of the label. The label
+owner's state then reflects that no log entries have been verified and that no
+versions of the label are known. The label owner processes every existing
+version of the label, starting with the one created first, as described in
+<a href="#updating-a-label" class="auto internal xref">Section 9</a>. This includes versions that were created in log entry 0,
+which could not otherwise be verified, since any starting position would
+correspond to a log entry where the label already existed.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
+<p id="section-8.3-5">Once the label owner has fully initialized their state, through the algorithm
 above and by processing any remaining new versions, they can begin regular
 monitoring. The label owner advertises to the Transparency Log the greatest
 version of the label that they're aware of and the rightmost distinguished log
 entry that they've verified is correct. For a number of subsequent distinguished
 log entries, the Transparency Log provides a binary ladder proving that no new
-unexpected versions of the label exist. This is described below as a recursive
-algorithm, starting with the root log entry:<a href="#section-8.3-4" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-8.3-5">
-<li id="section-8.3-5.1">
-            <p id="section-8.3-5.1.1">If the current log entry is not distinguished, stop.<a href="#section-8.3-5.1.1" class="pilcrow">¶</a></p>
+unexpected versions of the label exist. If the label owner hasn't verified any
+distinguished log entry, the Transparency Log starts with the leftmost
+distinguished log entry that exists. This is described below as a recursive
+algorithm, starting with the root log entry:<a href="#section-8.3-5" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.3-6">
+<li id="section-8.3-6.1">
+            <p id="section-8.3-6.1.1">If the current log entry is not distinguished, stop.<a href="#section-8.3-6.1.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.3-5.2">
-            <p id="section-8.3-5.2.1">If the current log entry's index is less than or equal to that of the log
-entry advertised by the user:<a href="#section-8.3-5.2.1" class="pilcrow">¶</a></p>
-<ol start="1" type="1" class="normal type-1" id="section-8.3-5.2.2">
-<li id="section-8.3-5.2.2.1">
-                <p id="section-8.3-5.2.2.1.1">If the current log entry has a right child, recurse to the right child.<a href="#section-8.3-5.2.2.1.1" class="pilcrow">¶</a></p>
+          <li id="section-8.3-6.2">
+            <p id="section-8.3-6.2.1">If the user advertised a log entry, and the current log entry's index is less
+than or equal to that of the log entry advertised by the user:<a href="#section-8.3-6.2.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="section-8.3-6.2.2">
+<li id="section-8.3-6.2.2.1">
+                <p id="section-8.3-6.2.2.1.1">If the current log entry has a right child, recurse to the right child.<a href="#section-8.3-6.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
-              <li id="section-8.3-5.2.2.2">
-                <p id="section-8.3-5.2.2.2.1">Regardless of the outcome of step 1, stop.<a href="#section-8.3-5.2.2.2.1" class="pilcrow">¶</a></p>
+              <li id="section-8.3-6.2.2.2">
+                <p id="section-8.3-6.2.2.2.1">Regardless of the outcome of step 1, stop.<a href="#section-8.3-6.2.2.2.1" class="pilcrow">¶</a></p>
 </li>
             </ol>
 </li>
-          <li id="section-8.3-5.3">
-            <p id="section-8.3-5.3.1">If the current log entry has a left child, recurse to the left child.
-Afterwards, proceed to step 4.<a href="#section-8.3-5.3.1" class="pilcrow">¶</a></p>
+          <li id="section-8.3-6.3">
+            <p id="section-8.3-6.3.1">If the current log entry has a left child, recurse to the left child.
+Afterwards, proceed to step 4.<a href="#section-8.3-6.3.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.3-5.4">
-            <p id="section-8.3-5.4.1">If a stop condition has been reached, stop. From a user's perspective, the
+          <li id="section-8.3-6.4">
+            <p id="section-8.3-6.4.1">If a stop condition has been reached, stop. From a user's perspective, the
 only stop condition is having consumed all of the Transparency Log's
 response. The Transparency Log may stop at this point if the greatest version
 of the label present at this log entry is greater than the version advertised
-by the user, or if a maximum output size has been reached.<a href="#section-8.3-5.4.1" class="pilcrow">¶</a></p>
+by the user, or if a maximum output size has been reached.<a href="#section-8.3-6.4.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.3-5.5">
-            <p id="section-8.3-5.5.1">Obtain a search binary ladder from the current log entry where the target
+          <li id="section-8.3-6.5">
+            <p id="section-8.3-6.5.1">Obtain a search binary ladder from the current log entry where the target
 version is the greatest version of the label expected to exist at this point
 according to the label owner's local state, without omitting redundant
 lookups. Verify that the binary ladder terminates in a way that is consistent
-with the expected version being the greatest that exists.<a href="#section-8.3-5.5.1" class="pilcrow">¶</a></p>
+with the expected version being the greatest that exists.<a href="#section-8.3-6.5.1" class="pilcrow">¶</a></p>
 </li>
-          <li id="section-8.3-5.6">
-            <p id="section-8.3-5.6.1">If the current log entry has a right child, recurse to the right child.<a href="#section-8.3-5.6.1" class="pilcrow">¶</a></p>
+          <li id="section-8.3-6.6">
+            <p id="section-8.3-6.6.1">If the current log entry has a right child, recurse to the right child.<a href="#section-8.3-6.6.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="section-8.3-6">To avoid excessive load, the Transparency Log <span class="bcp14">SHOULD</span> limit the number of
+<p id="section-8.3-7">To avoid excessive load, the Transparency Log <span class="bcp14">SHOULD</span> limit the number of
 distinguished log entries that it provides binary ladders for in a single
 response. Users repeatedly query the Transparency Log until they detect that the
 above algorithm has either hit an unresolvable error or successfully reached the
-rightmost distinguished log entry.<a href="#section-8.3-6" class="pilcrow">¶</a></p>
-<p id="section-8.3-7">Since this algorithm checks only distinguished log entries for correctness,
+rightmost distinguished log entry.<a href="#section-8.3-7" class="pilcrow">¶</a></p>
+<p id="section-8.3-8">Since this algorithm checks only distinguished log entries for correctness,
 label owners use it in conjunction with the algorithm in <a href="#contact-algorithm" class="auto internal xref">Section 8.2</a>
 to ensure the correctness of updates that occur between distinguished log
-entries.<a href="#section-8.3-7" class="pilcrow">¶</a></p>
+entries.<a href="#section-8.3-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2782,26 +2796,27 @@ only the version zero.<a href="#section-9.1-2.4.2.3.1" class="pilcrow">¶</a></p
 <p id="section-9.1-3">To ensure that the new versions of the label were inserted correctly, the label
 owner considers the Transparency Log as it existed at two points in time: The
 first is the <strong>previous tree</strong>, which is defined as the log tree up to but
-excluding the log entry where the new versions were added. The second is the
-<strong>current tree</strong>, which is defined as the log tree as it is currently presented
-to the user, containing the new log entry and potentially other log entries to
-its right. Given this, the user executes the following algorithm:<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+excluding the log entry where the new versions were added.  If the new versions
+of the label were added in log entry 0, the previous tree is empty. The second
+is the <strong>current tree</strong>, which is defined as the log tree as it is currently
+presented to the user, containing the new log entry and potentially other log
+entries to its right. Given this, the user executes the following algorithm:<a href="#section-9.1-3" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.1-4">
 <li id="section-9.1-4.1">
-            <p id="section-9.1-4.1.1">Starting from the root log entry of the previous tree, proceed down the
-frontier of the previous tree and identify the first log entry that is not
-distinguished in the current tree. If there is no such log entry, skip to
-step 3.<a href="#section-9.1-4.1.1" class="pilcrow">¶</a></p>
+            <p id="section-9.1-4.1.1">If the previous tree is empty, skip to step 3. Otherwise, starting from the
+root log entry of the previous tree, proceed down the frontier of the
+previous tree and identify the first log entry that is not distinguished in
+the current tree. If there is no such log entry, skip to step 3.<a href="#section-9.1-4.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-9.1-4.2">
             <p id="section-9.1-4.2.1">Starting from the identified log entry, proceed down the remainder of the
 previous tree's frontier from left to right:<a href="#section-9.1-4.2.1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-9.1-4.2.2">
 <li id="section-9.1-4.2.2.1">
-                <p id="section-9.1-4.2.2.1.1">If a previous version of the label existed, and the current log entry's
-index is less than or equal to either the owner's starting position or the
-index of the log entry where the previous greatest version was inserted,
-skip inspecting this log entry.<a href="#section-9.1-4.2.2.1.1" class="pilcrow">¶</a></p>
+                <p id="section-9.1-4.2.2.1.1">If the current log entry's index is less than or equal to either the
+owner's starting position (if any) or the index of the log entry where the
+previous greatest version was inserted (if any), skip inspecting this log
+entry.<a href="#section-9.1-4.2.2.1.1" class="pilcrow">¶</a></p>
 </li>
               <li id="section-9.1-4.2.2.2">
                 <p id="section-9.1-4.2.2.2.1">Obtain a search binary ladder from the current log entry where the target
@@ -2929,7 +2944,7 @@ entries.<a href="#section-10.1-4" class="pilcrow">¶</a></p>
         <h3 id="name-detecting-forks">
 <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-detecting-forks" class="section-name selfRef">Detecting Forks</a>
         </h3>
-<p id="section-10.2-1">As discussed in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-09#section-3.3" class="relref">Section 3.3</a> of [<a href="#ARCH" class="cite xref">ARCH</a>]</span>, two of the primary ways that a user can
+<p id="section-10.2-1">As discussed in <span><a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-10#section-3.3" class="relref">Section 3.3</a> of [<a href="#ARCH" class="cite xref">ARCH</a>]</span>, two of the primary ways that a user can
 detect the existence of a fork is through either an anonymous channel, or some
 form of direct peer-to-peer communication. Both of these approaches rely on
 exchanging root values of the log tree in a way where the Transparency Log can't
@@ -3742,7 +3757,7 @@ following is provided:<a href="#section-12.3.5-1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-12.3.5-2.1">
               <p id="section-12.3.5-2.1.1">The timestamp of each log entry on the path from the root to the user's
-requested starting position.<a href="#section-12.3.5-2.1.1" class="pilcrow">¶</a></p>
+requested starting position, if one was provided.<a href="#section-12.3.5-2.1.1" class="pilcrow">¶</a></p>
 </li>
             <li class="normal" id="section-12.3.5-2.2">
               <p id="section-12.3.5-2.2.1">For each log entry in the list computed in the first algorithm of
@@ -3751,7 +3766,8 @@ requested starting position.<a href="#section-12.3.5-2.1.1" class="pilcrow">¶</
           </ul>
 <p id="section-12.3.5-3">The timestamps are provided to allow both the client and server to verify the
 precondition that the user's requested starting position is unexpired and
-distinguished.<a href="#section-12.3.5-3" class="pilcrow">¶</a></p>
+distinguished. If no starting position was provided, nothing is provided beyond
+the output of updating the user's view of the tree.<a href="#section-12.3.5-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="owner-monitoring">
@@ -3998,13 +4014,14 @@ struct {
   optional&lt;uint64&gt; last;
 
   opaque label&lt;0..2^8-1&gt;;
-  uint64 start;
+  optional&lt;uint64&gt; start;
 } OwnerInitRequest;
 </pre><a href="#section-13.3-2" class="pilcrow">¶</a>
 </div>
-<p id="section-13.3-3">The Transparency Log verifies that <code>start</code> identifies a log entry that is
-unexpired and distinguished. In turn, the Transparency Log responds with an
-<code>OwnerInitResponse</code> structure:<a href="#section-13.3-3" class="pilcrow">¶</a></p>
+<p id="section-13.3-3">If <code>start</code> is absent, the user wishes to own the label from the start of the
+log's existence. If <code>start</code> is present, the Transparency Log verifies that it
+identifies a log entry that is unexpired and distinguished. In turn, the
+Transparency Log responds with an <code>OwnerInitResponse</code> structure:<a href="#section-13.3-3" class="pilcrow">¶</a></p>
 <div class="lang-tls-presentation sourcecode" id="section-13.3-4">
 <pre>
 struct {
@@ -4022,8 +4039,9 @@ exists in each log entry computed in step 1 of the first algorithm in
 exist.<a href="#section-13.3-5" class="pilcrow">¶</a></p>
 <p id="section-13.3-6">The <code>binary_ladder</code> field contains one entry for each version computed in step 3
 of the first algorithm in <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>, in ascending order by version. If
-a version of the label exists, the commitment to the label's value at that
-version is provided in the <code>commitment</code> field of the <code>BinaryLadderStep</code>.<a href="#section-13.3-6" class="pilcrow">¶</a></p>
+a version of the label exists as of the starting position, the commitment to the
+label's value at that version is provided in the <code>commitment</code> field of the
+<code>BinaryLadderStep</code>.<a href="#section-13.3-6" class="pilcrow">¶</a></p>
 <p id="section-13.3-7">The <code>init</code> field contains the output of updating the user's view of the tree to
 match <code>TreeHead.tree_size</code> followed by executing the first algorithm in
 <a href="#owner-algorithm" class="auto internal xref">Section 8.3</a>.<a href="#section-13.3-7" class="pilcrow">¶</a></p>
@@ -4054,6 +4072,10 @@ proofs in <code>binary_ladder</code>.<a href="#section-13.3-9.2.1" class="pilcro
 described in <a href="#full-tree-head-verification" class="auto internal xref">Section 11.4</a>.<a href="#section-13.3-9.5.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
+<p id="section-13.3-10">Note that if <code>start</code> was absent in the request, the response <code>greatest_versions</code>
+will be empty and <code>binary_ladder</code> will contain only the VRF proof for version
+zero (with no commitment). All versions of the label are processed by the user
+through the algorithm in <a href="#updating-a-label" class="auto internal xref">Section 9</a>.<a href="#section-13.3-10" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="owner-monitoring-1">
@@ -4071,7 +4093,7 @@ struct {
 
   opaque label&lt;0..2^8-1&gt;;
   MonitorMapEntry entries&lt;0..2^8-1&gt;;
-  uint64 start;
+  optional&lt;uint64&gt; start;
   optional&lt;uint32&gt; greatest_version;
 } OwnerMonitorRequest;
 </pre><a href="#section-13.4-2" class="pilcrow">¶</a>
@@ -4079,8 +4101,10 @@ struct {
 <p id="section-13.4-3">The <code>entries</code> list contains the label owner's monitoring state for versions of
 the label that have not yet been proven to be included in a distinguished log entry. The
 <code>start</code> field contains the rightmost distinguished log entry that the label
-owner has verified as correct. The <code>greatest_version</code> field contains the
-greatest version of the label that the label owner is aware of, if any.<a href="#section-13.4-3" class="pilcrow">¶</a></p>
+owner has verified as correct, or is absent if the label owner hasn't verified
+any log entry and wishes to start monitoring from the leftmost distinguished log
+entry that exists. The <code>greatest_version</code> field contains the greatest version of
+the label that the label owner is aware of, if any.<a href="#section-13.4-3" class="pilcrow">¶</a></p>
 <p id="section-13.4-4">The Transparency Log verifies an <code>OwnerMonitorRequest</code> by following these steps:<a href="#section-13.4-4" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="section-13.4-5">
 <li id="section-13.4-5.1">
@@ -4090,13 +4114,13 @@ always lies on the direct path of the first log entry to contain the
 associated version of the label.<a href="#section-13.4-5.1.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-13.4-5.2">
-            <p id="section-13.4-5.2.1">Verify that <code>start</code> is less than the size of the tree.<a href="#section-13.4-5.2.1" class="pilcrow">¶</a></p>
+            <p id="section-13.4-5.2.1">Verify that <code>start</code> is either absent, or less than the size of the tree.<a href="#section-13.4-5.2.1" class="pilcrow">¶</a></p>
 </li>
           <li id="section-13.4-5.3">
             <p id="section-13.4-5.3.1">Verify that <code>greatest_version</code> is either absent, or less than or equal to the
-greatest version of the label. Verify that, if some version of the label
-existed at <code>start</code>, that <code>greatest_version</code> is present and greater than or
-equal to that version.<a href="#section-13.4-5.3.1" class="pilcrow">¶</a></p>
+greatest version of the label. Verify that, if <code>start</code> is present and some
+version of the label existed at <code>start</code>, that <code>greatest_version</code> is present
+and greater than or equal to that version.<a href="#section-13.4-5.3.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
 <p id="section-13.4-6">In turn, the Transparency Log responds with an <code>OwnerMonitorResponse</code> structure:<a href="#section-13.4-6" class="pilcrow">¶</a></p>
@@ -4994,7 +5018,7 @@ a particular KT DE, that KT DE <span class="bcp14">SHOULD</span> defer to the ju
 <dl class="references">
 <dt id="ARCH">[ARCH]</dt>
         <dd>
-<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-09</span>, <time datetime="2026-06-29" class="refDate">29 June 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-09">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-09</a>&gt;</span>. </dd>
+<span class="refAuthor">McMillion, B.</span>, <span class="refTitle">"Key Transparency Architecture"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-ietf-keytrans-architecture-10</span>, <time datetime="2026-10-07" class="refDate">7 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-10">https://datatracker.ietf.org/doc/html/draft-ietf-keytrans-architecture-10</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC2119">[RFC2119]</dt>
         <dd>
