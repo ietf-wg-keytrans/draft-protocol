@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 19 April 2027                                   16 October 2026
+Expires: 21 April 2027                                   18 October 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 19 April 2027.
+   This Internet-Draft will expire on 21 April 2027.
 
 Copyright Notice
 
@@ -1334,7 +1334,10 @@ Table of Contents
        new greatest version of the label for later verification with
        Section 8.3.  The label owner additionally inserts a new entry
        into their contact monitoring map, discussed in Section 8.2, that
-       maps the log entry to the new greatest version of the label.
+       maps the log entry to the new greatest version of the label.  Any
+       existing entries in the map for log entries that are in the
+       direct path of this one, to its right, and for a lesser version,
+       are removed.
 
    In essence, this algorithm has two phases.  The first phase is doing
    a greatest-version search in the previous tree.  This is necessary to
