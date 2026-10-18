@@ -1154,7 +1154,9 @@ entries to its right. Given this, the user executes the following algorithm:
    version of the label for later verification with {{owner-algorithm}}. The
    label owner additionally inserts a new entry into their contact monitoring
    map, discussed in {{contact-algorithm}}, that maps the log entry to the new
-   greatest version of the label.
+   greatest version of the label. Any existing entries in the map for log
+   entries that are in the direct path of this one, to its right, and for a
+   lesser or equal version, are removed.
 
 In essence, this algorithm has two phases. The first phase is doing a
 greatest-version search in the previous tree. This is necessary to prevent forms
