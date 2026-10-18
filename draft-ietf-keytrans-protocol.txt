@@ -1336,8 +1336,8 @@ Table of Contents
        into their contact monitoring map, discussed in Section 8.2, that
        maps the log entry to the new greatest version of the label.  Any
        existing entries in the map for log entries that are in the
-       direct path of this one, to its right, and for a lesser version,
-       are removed.
+       direct path of this one, to its right, and for a lesser or equal
+       version, are removed.
 
    In essence, this algorithm has two phases.  The first phase is doing
    a greatest-version search in the previous tree.  This is necessary to
