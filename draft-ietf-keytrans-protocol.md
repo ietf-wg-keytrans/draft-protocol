@@ -1151,9 +1151,12 @@ entries to its right. Given this, the user executes the following algorithm:
 4. If the log entry where the new versions were added is not distinguished in
    the current tree, obtain a `PrefixProof` from it with lookups corresponding
    to a search binary ladder where the target version is the new greatest
-   version of the label, omitting redundant lookups. Verify that all lookups
-   terminate in a way that is consistent with the new greatest version of the
-   label being the greatest that exists.
+   version of the label, omitting redundant lookups. Lookups that were omitted
+   in step 2.2, including those that would have occurred in log entries skipped
+   by step 2.1, are considered redundant here as well, even though they were not
+   provided in the same query response. Verify that all lookups terminate in a
+   way that is consistent with the new greatest version of the label being the
+   greatest that exists.
 
    Additionally, if there are any new versions of the label that were created in
    this log entry but that weren't included in the search binary ladder, obtain
