@@ -1002,7 +1002,9 @@ the log's existence. The user then executes the following algorithm:
    step 1 where the target version is the corresponding version given in step 2,
    or zero if no version was given, without omitting redundant lookups. Verify
    that each binary ladder terminates in a way that is consistent with the
-   claimed greatest version of the label.
+   claimed greatest version of the label. If no version was given, this means
+   verifying that the binary ladder consists of a single non-inclusion proof
+   for version zero.
 
 If any new versions of the label were created after the requested starting
 position, the label owner will need to process each of these individually as
@@ -1048,7 +1050,10 @@ algorithm, starting with the root log entry:
    version is the greatest version of the label expected to exist at this point
    according to the label owner's local state, without omitting redundant
    lookups. Verify that the binary ladder terminates in a way that is consistent
-   with the expected version being the greatest that exists.
+   with the expected version being the greatest that exists. If no version of
+   the label is expected to exist at this point, the target version is zero and
+   the user verifies that the binary ladder consists of a single non-inclusion
+   proof for version zero.
 
 6. If the current log entry has a right child, recurse to the right child.
 
@@ -1111,22 +1116,27 @@ entries to its right. Given this, the user executes the following algorithm:
 2. Starting from the identified log entry, proceed down the remainder of the
    previous tree's frontier from left to right:
 
-   1. If the current log entry's index is less than or equal to either the
-      owner's starting position (if any) or the index of the log entry where the
-      previous greatest version was inserted (if any), skip inspecting this log
-      entry.
+   1. If the current log entry's index is less than or equal to the index of
+      the log entry where the previous greatest version was inserted (if any),
+      skip inspecting this log entry.
 
    2. Obtain a search binary ladder from the current log entry where the target
-      version is the previous greatest version of the label that existed, or 0
+      version is the previous greatest version of the label that existed, or zero
       if no version of the label existed. Lookups that would be omitted in a
-      greatest-version search for the label are also omitted here. Note that
-      this means that lookups that would occur in log entries that were skipped
-      by step 2.1 will still be omitted as if the log entries had been
-      inspected.
+      greatest-version search of the previous tree are also omitted here.
+
+      Matching the ladder omission rules of a greatest-version search has two
+      important implementation considerations. First, it means that lookups that
+      would occur in log entries that were skipped by step 2.1 will still be
+      omitted as if the log entries had been inspected. Second, it means that
+      the possible expiration of any of the log entries on the previous tree's
+      frontier is not considered, as it would also not be considered in a
+      greatest-version search.
 
    3. Verify that the binary ladder terminates in a way that is consistent with
       the previous greatest version of the label being the greatest that
-      exists.
+      exists. If no version of the label existed, verify that the binary ladder
+      consists of a single non-inclusion proof for version zero.
 
 3. If the log entry where the new versions were added is distinguished in the
    current tree, and if there are any new versions of the label that would not
@@ -1779,6 +1789,12 @@ consumed from the queues so far:
   verify that the produced root hash matches their retained prefix tree root
   hash for that log entry, due to the fact that the log entry will not be
   covered by `inclusion`.
+  - Any time an element of `prefix_proofs` is consumed where the corresponding
+    log entry's timestamp is not known, either because it wasn't retained or
+    hasn't already been requested by a previous algorithm, the next element of
+    `timestamps` is consumed and remembered as belonging to that log entry. This
+    is the case even if the algorithm itself does not use the timestamp, because
+    a log entry's timestamp is needed to compute its leaf value.
 
 The subsections below state, for each algorithm, which timestamps and which
 `PrefixProof` structures are provided. The contents of the remaining two fields
