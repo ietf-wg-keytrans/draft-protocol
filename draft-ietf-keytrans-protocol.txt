@@ -5,7 +5,7 @@
 KEYTRANS Working Group                                      B. McMillion
 Internet-Draft                                                          
 Intended status: Standards Track                               F. Linker
-Expires: 24 April 2027                                   21 October 2026
+Expires: 16 May 2027                                    12 November 2026
 
 
                        Key Transparency Protocol
@@ -54,7 +54,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 24 April 2027.
+   This Internet-Draft will expire on 16 May 2027.
 
 Copyright Notice
 
@@ -2184,9 +2184,8 @@ Table of Contents
    tree_size of the last TreeHead.  This ensures that all operations
    performed by the user return consistent results.
 
-   Modifications to a user's state MUST only be persisted once the query
-   response has been fully verified.  Queries that fail full
-   verification MUST NOT modify the user's protocol state in any way.
+   A query response MUST NOT modify the user's state until and unless it
+   has been fully verified.
 
 13.1.  Search
 
@@ -3247,9 +3246,9 @@ Table of Contents
 
    [ARCH]     McMillion, B., "Key Transparency Architecture", Work in
               Progress, Internet-Draft, draft-ietf-keytrans-
-              architecture-10, 7 October 2026,
+              architecture-11, 1 November 2026,
               <https://datatracker.ietf.org/doc/html/draft-ietf-
-              keytrans-architecture-10>.
+              keytrans-architecture-11>.
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
