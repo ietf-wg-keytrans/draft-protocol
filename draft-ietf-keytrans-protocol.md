@@ -1949,9 +1949,8 @@ field of any subsequent query request with the `tree_size` of the last
 `TreeHead`. This ensures that all operations performed by the user return
 consistent results.
 
-Modifications to a user's state MUST NOT be persisted until the query response
-has been fully verified. Queries that fail full verification MUST NOT modify the
-user's protocol state in any way.
+A query response MUST NOT modify the user's state until and unless it
+has been fully verified.
 
 ## Search
 
